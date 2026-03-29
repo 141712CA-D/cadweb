@@ -84,7 +84,7 @@ vercel.json                 # Vercel Cron Job: /api/sync-waitlist runs daily at 
   - Return visit: skips animation, page appears instantly (`transition: none`)
   - "← Back to home" on success pages clears the flag so animation replays
 - `mounted` state gates IntroAnimation to prevent hydration mismatch (sessionStorage not available on server)
-- Footer: © year + nav links + `v1.4.0` centered in monospace dim text
+- Footer: © year + nav links + `v1.5.0` centered in monospace dim text
 
 ### Intro Animation (`IntroAnimation.tsx`)
 - Phases and timings:

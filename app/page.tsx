@@ -41,7 +41,7 @@ export default function Home() {
         <footer className="bg-black border-t border-white/5 py-6 px-6">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-white/20">© {new Date().getFullYear()} Project CADen. All rights reserved.</p>
-            <p className="text-xs text-white/15 font-mono sm:absolute sm:left-1/2 sm:-translate-x-1/2">v1.4.0</p>
+            <p className="text-xs text-white/15 font-mono sm:absolute sm:left-1/2 sm:-translate-x-1/2">v1.5.0</p>
             <div className="flex items-center gap-6">
               <a href="/about" className="text-xs text-white/25 hover:text-white/60 transition-colors">About</a>
               <a href="/contact" className="text-xs text-white/25 hover:text-white/60 transition-colors">Contact us</a>
