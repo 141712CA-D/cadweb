@@ -42,7 +42,7 @@ export default function Header() {
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
             href="/about"
-            className="hidden sm:block text-sm font-medium px-4 py-2 rounded-full border border-blue-500/30 text-white/60 hover:border-blue-400/50 hover:text-white transition-all duration-200"
+            className="text-sm font-medium px-4 py-2 rounded-full border border-blue-500/30 text-white/60 hover:border-blue-400/50 hover:text-white transition-all duration-200"
           >
             About Us
           </Link>

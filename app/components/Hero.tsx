@@ -96,22 +96,24 @@ export default function Hero() {
         <div className="animate-fade-up delay-600 mt-10">
           <Link
             href="/signup"
-            className="glow-button relative px-10 py-4 rounded-full bg-gradient-to-r from-blue-600 to-sky-400 text-white text-sm font-semibold hover:opacity-90 transition-opacity duration-200"
+            className="glow-button relative inline-flex items-center justify-center text-center px-10 py-4 rounded-full bg-gradient-to-r from-blue-600 to-sky-400 text-white text-sm font-semibold hover:opacity-90 transition-opacity duration-200 max-w-[220px] sm:max-w-none leading-snug"
           >
-            Join the waitlist
+            <span className="sm:hidden">Join the engineers waiting for launch</span>
+            <span className="hidden sm:inline">Join the dozens of engineers waiting for launch</span>
           </Link>
         </div>
 
         {/* Disclaimer */}
         <p className="animate-fade-up delay-800 mt-6 text-xs text-white/20 tracking-wide">
-          Built for engineers &nbsp;·&nbsp; Launching soon
+          <span className="sm:hidden">Built for everyone &nbsp;·&nbsp; Launching soon</span>
+          <span className="hidden sm:inline"><Link href="/about" className="hover:text-white/40 transition-colors">Built by Michigan Engineers</Link> &nbsp;·&nbsp; Designed for Everyone &nbsp;·&nbsp; Launching soon</span>
         </p>
 
         {/* Divider */}
         <div className="animate-fade-in delay-800 mt-16 w-full flex items-center gap-4">
-          <div className="flex-1 h-px bg-gradient-to-r from-transparent to-blue-500/20" />
-          <span className="text-xs text-white/15 tracking-widest uppercase font-mono">A glimpse</span>
-          <div className="flex-1 h-px bg-gradient-to-l from-transparent to-blue-500/20" />
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent to-blue-500/40" />
+          <span className="text-xs text-white/50 tracking-widest uppercase font-mono">A glimpse</span>
+          <div className="flex-1 h-px bg-gradient-to-l from-transparent to-blue-500/40" />
         </div>
 
         {/* Product preview window */}

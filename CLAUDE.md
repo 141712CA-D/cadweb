@@ -2,6 +2,12 @@
 
 Pre-launch marketing site for Project CADen, an AI-powered multi-agent CAD design tool for Onshape. Built with Next.js 16, Tailwind CSS v4, TypeScript.
 
+**Current version: v1.5.1**
+- Hero center CTA updated to "Join the dozens of engineers waiting for launch" (mobile: shorter variant)
+- "A glimpse" divider made more prominent
+- About Us link visible on mobile header
+- Footer disclaimer updated to "Built for everyone · Launching soon"
+
 ---
 
 ## Stack
