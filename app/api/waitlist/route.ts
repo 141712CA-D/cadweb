@@ -56,7 +56,11 @@ export async function POST(req: NextRequest) {
     if (missing(name, email, role, reason) || !EMAIL_RE.test(email))
       return NextResponse.json({ success: false, error: "Missing or invalid fields" }, { status: 400 });
     if (role === "Student" && missing(university))
-      return NextResponse.json({ success: false, error: "University required for students" }, { status: 400 });
+      return NextResponse.json({ success: false, error: "School required for students" }, { status: 400 });
+    if (role === "Instructor" && missing(university))
+      return NextResponse.json({ success: false, error: "Institution required for instructors" }, { status: 400 });
+    if (!["Student", "Instructor", "Freelancer", "Hobbyist"].includes(role))
+      return NextResponse.json({ success: false, error: "Invalid role" }, { status: 400 });
   } else if (type === "team") {
     const { repName, email, org, role, usage } = body;
     if (missing(repName, email, org, role, usage) || !EMAIL_RE.test(email))

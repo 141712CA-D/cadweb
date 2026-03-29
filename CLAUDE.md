@@ -2,11 +2,21 @@
 
 Pre-launch marketing site for Project CADen, an AI-powered multi-agent CAD design tool for Onshape. Built with Next.js 16, Tailwind CSS v4, TypeScript.
 
-**Current version: v1.5.1**
-- Hero center CTA updated to "Join the dozens of engineers waiting for launch" (mobile: shorter variant)
-- "A glimpse" divider made more prominent
-- About Us link visible on mobile header
-- Footer disclaimer updated to "Built for everyone · Launching soon"
+**Current version: v1.5.1.1**
+- Hero center CTA: desktop "Join the dozens of engineers waiting for launch", mobile "Join the engineers waiting for launch" with `max-w-[220px]` wrapping to two lines
+- Hero disclaimer: mobile "Built for everyone · Launching soon", desktop "Built by Michigan Engineers · Designed for Everyone · Launching soon" — "Built by Michigan Engineers" links to `/about`
+- "A glimpse" divider made more prominent — `text-white/50`, divider lines `blue-500/40`
+- About Us link now visible on mobile header (removed `hidden sm:block`)
+- About page: social links added — Andy has LinkedIn, Sandeep has LinkedIn + Website; icons on mobile, text labels on desktop
+- About page: cards are fully clickable (stretched link pattern, `absolute inset-0 z-10`) — Andy → LinkedIn, Sandeep → personal website; social buttons sit above at `z-20`
+- About page: Andy's card has `mt-6` offset and photo `objectPosition: center 15%`
+- `icons` map in `about/page.tsx` holds inline SVGs for LinkedIn and Website
+- React import added to `about/page.tsx` for `React.ReactNode` type
+- Waitlist + contact role dropdown: "Project Manager" replaced with "Freelancer"
+- Instructor role now shows "Where do you teach?" school field (same `university` DB column, no migration needed)
+- Student school field placeholder: "Where do you attend?"
+- API route validates school required for both Student and Instructor roles separately
+- Role allowlist validation added to API: `["Student", "Instructor", "Freelancer", "Hobbyist"]`
 
 ---
 
@@ -127,11 +137,18 @@ vercel.json                 # Vercel Cron Job: /api/sync-waitlist runs daily at 
 - Both: University of Michigan, Class of 2029, from New York
 - Mobile: cards stack, text centered, major on line 1 / university+class on line 2 (`sm:hidden` / `hidden sm:block`)
 - Images: `/AndyHeadshot.png`, `/SandeepHeashot.jpg` (note typo in filename — keep as-is)
-- No click behavior on cards (intentional, future feature)
+- Andy's photo: `objectPosition: center 15%` — shifted slightly down from top
+- Andy's card has `mt-6` to offset it lower toward Sandeep's card
+- Cards are clickable via stretched link pattern (`absolute inset-0 z-10`) — Andy → LinkedIn, Sandeep → personal website; works on mobile and desktop
+- Social buttons at `z-20` so they intercept their own taps above the card link
+- Social links: Andy has LinkedIn only; Sandeep has LinkedIn + Website
+- Mobile: social buttons show inline SVG icons (LinkedIn logo, globe); desktop: text labels
+- `icons` map at top of file holds SVGs keyed by label string (`"LinkedIn"`, `"Website"`)
+- `primaryHref` field on each team member drives the card click destination
 
 ### Waitlist (`/signup`)
 - Two tabs: Individual | Team / Organization
-- Individual fields: Name, Email, Role (Student/Instructor/Project Manager/Hobbyist), University (shown only if Role === "Student"), Why CADen
+- Individual fields: Name, Email, Role (Student/Instructor/Freelancer/Hobbyist), University/Institution/School (shown if Role === "Student" or "Instructor", with role-specific placeholder), Why CADen
 - Team fields: Rep Name, Email, Organization, Role (text input), Intended Usage
 - Cloudflare Turnstile widget — submit button disabled until token received
 - Four success states:
@@ -144,7 +161,7 @@ vercel.json                 # Vercel Cron Job: /api/sync-waitlist runs daily at 
 
 ### Contact (`/contact`)
 - Two tabs: Individual | Team / Organization (same tab pattern as waitlist)
-- Individual fields: Name, Email, Role (Student/Instructor/Project Manager/Hobbyist/Other), University (if Student), Subject, Message
+- Individual fields: Name, Email, Role (Student/Instructor/Freelancer/Hobbyist/Other), University (if Student), Subject, Message
 - Team fields: Rep Name, Email, Organization, Your Role (text input), Subject, Message
 - Same Turnstile setup as waitlist
 - On success: "Message received." state + spam notice

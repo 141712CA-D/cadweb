@@ -9,7 +9,7 @@ import type { TurnstileInstance } from "@marsidev/react-turnstile";
 type FormType = "individual" | "team";
 type Status = "idle" | "loading" | "success" | "welcome_back" | "duplicate" | "error";
 
-const INDIVIDUAL_ROLES = ["Student", "Instructor", "Project Manager", "Hobbyist"];
+const INDIVIDUAL_ROLES = ["Student", "Instructor", "Freelancer", "Hobbyist"];
 
 const inputClass = (error?: string) =>
   `w-full bg-white/[0.03] border ${error ? "border-red-500/60" : "border-white/10"} rounded-xl px-4 py-3 text-sm text-white font-sans placeholder:text-white/25 focus:outline-none focus:border-blue-500/50 focus:bg-white/[0.05] transition-all duration-200`;
@@ -50,7 +50,8 @@ export default function SignupPage() {
       if (!indName.trim())    e.indName   = "Name is required.";
       if (!indEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(indEmail)) e.indEmail = "Please enter a valid email address.";
       if (!indRole)           e.indRole   = "Please select a role.";
-      if (indRole === "Student" && !indUniversity.trim()) e.indUniversity = "University is required for students.";
+      if (indRole === "Student" && !indUniversity.trim()) e.indUniversity = "Please enter where you attend.";
+      if (indRole === "Instructor" && !indUniversity.trim()) e.indUniversity = "Please enter where you teach.";
       if (!indReason.trim())  e.indReason = "Please tell us why you want to use CADen.";
     } else {
       if (!teamRep.trim())    e.teamRep   = "Name is required.";
@@ -231,8 +232,16 @@ export default function SignupPage() {
                   </div>
                   {indRole === "Student" && (
                     <div>
-                      <label className={labelClass}>University</label>
-                      <input className={inputClass(errors.indUniversity)} placeholder="Your university or institution" value={indUniversity}
+                      <label className={labelClass}>University / Institution / School</label>
+                      <input className={inputClass(errors.indUniversity)} placeholder="Where do you attend?" value={indUniversity}
+                        onChange={(e) => { setIndUniversity(e.target.value); clearError("indUniversity"); }} />
+                      {errors.indUniversity && <p className={errorClass}>{errors.indUniversity}</p>}
+                    </div>
+                  )}
+                  {indRole === "Instructor" && (
+                    <div>
+                      <label className={labelClass}>University / Institution / School</label>
+                      <input className={inputClass(errors.indUniversity)} placeholder="Where do you teach?" value={indUniversity}
                         onChange={(e) => { setIndUniversity(e.target.value); clearError("indUniversity"); }} />
                       {errors.indUniversity && <p className={errorClass}>{errors.indUniversity}</p>}
                     </div>

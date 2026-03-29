@@ -9,7 +9,7 @@ import type { TurnstileInstance } from "@marsidev/react-turnstile";
 type FormType = "individual" | "team";
 type Status = "idle" | "loading" | "success" | "error";
 
-const ROLES = ["Student", "Instructor", "Project Manager", "Hobbyist", "Other"];
+const ROLES = ["Student", "Instructor", "Freelancer", "Hobbyist", "Other"];
 
 const inputClass = (error?: string) =>
   `w-full bg-white/[0.03] border ${error ? "border-red-500/60" : "border-white/10"} rounded-xl px-4 py-3 text-sm text-white font-sans placeholder:text-white/25 focus:outline-none focus:border-blue-500/50 focus:bg-white/[0.05] transition-all duration-200`;
