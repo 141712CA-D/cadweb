@@ -59,51 +59,94 @@ export default function AboutPage() {
           </h1>
         </div>
 
-        {/* Team cards */}
-        <div className="w-full max-w-5xl flex flex-col gap-8 sm:gap-12">
-          {team.map((member) => (
+        {/* Team cards + side bracket */}
+        <div className="w-full max-w-6xl flex flex-row items-stretch">
+
+          {/* Side bracket annotation — left side, pointing right toward cards */}
+          <div className="hidden xl:flex items-stretch pr-4 select-none pointer-events-none">
+            <div className="relative flex items-center w-4">
+              {/* Vertical line on the left edge */}
+              <div className="absolute left-0 top-8 bottom-8 w-px bg-white/[0.1]" />
+              {/* Top tick pointing right */}
+              <div className="absolute left-0 top-8 w-3 h-px bg-white/[0.1]" />
+              {/* Bottom tick pointing right */}
+              <div className="absolute left-0 bottom-8 w-3 h-px bg-white/[0.1]" />
+              {/* Midpoint label — text sits between line and cards */}
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                <div className="w-4 h-px bg-white/[0.1]" />
+                <span className="text-[10px] text-white/20 font-mono italic whitespace-nowrap -rotate-1">
+                  they were freshman year roommates btw
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Cards column */}
+          <div className="flex-1 flex flex-col gap-8 sm:gap-12 min-w-0">
+
+          {/* Andy's card */}
+          {[team[0]].map((member) => (
             <div
               key={member.name}
-              className={`flex flex-col ${member.imagePosition === "left" ? "lg:flex-row" : "lg:flex-row-reverse"} items-center gap-8 rounded-2xl border border-white/8 p-6 sm:p-10`}
+              className={`flex flex-col lg:flex-row items-center gap-8 rounded-2xl border border-white/8 p-6 sm:p-10`}
               style={{ background: "linear-gradient(145deg, rgba(37,99,235,0.05) 0%, rgba(0,0,0,0.6) 100%)", backdropFilter: "blur(12px)" }}
             >
-              {/* Photo */}
               <div className="flex-shrink-0">
-                <div
-                  className="relative w-44 h-44 sm:w-64 sm:h-64 rounded-2xl overflow-hidden border border-blue-500/20"
-                  style={{ boxShadow: "0 0 40px rgba(37,99,235,0.15)" }}
-                >
-                  <Image
-                    src={member.image}
-                    alt={member.name}
-                    fill
-                    className="object-cover object-top"
-                  />
+                <div className="relative w-44 h-44 sm:w-64 sm:h-64 rounded-2xl overflow-hidden border border-blue-500/20" style={{ boxShadow: "0 0 40px rgba(37,99,235,0.15)" }}>
+                  <Image src={member.image} alt={member.name} fill className="object-cover object-top" />
                 </div>
               </div>
-
-              {/* Text — always centered on mobile, left/right on desktop */}
-              <div className={`flex flex-col gap-4 items-center text-center ${member.imagePosition === "left" ? "lg:items-start lg:text-left" : "lg:items-end lg:text-right"}`}>
+              <div className="flex flex-col gap-4 items-center text-center lg:items-start lg:text-left">
                 <div>
                   <h2 className="text-2xl sm:text-3xl font-bold text-white">{member.name}</h2>
-                  {/* Mobile: two lines */}
                   <div className="sm:hidden mt-1 font-mono">
                     <p className="text-xs text-blue-400/80">{member.major}</p>
                     <p className="text-xs text-white/30 mt-0.5">{member.university} &nbsp;·&nbsp; Class of {member.classOf}</p>
                   </div>
-                  {/* Desktop: one line */}
                   <p className="hidden sm:block text-sm text-blue-400/80 mt-1 font-mono">
                     {member.major} &nbsp;·&nbsp; {member.university} &nbsp;·&nbsp; Class of {member.classOf}
                   </p>
                 </div>
                 <div className="w-12 h-px bg-gradient-to-r from-blue-500/40 to-sky-400/40" />
-                <p className="text-sm text-white/40 leading-relaxed max-w-lg">
-                  {member.bio}
-                </p>
+                <p className="text-sm text-white/40 leading-relaxed max-w-lg">{member.bio}</p>
               </div>
             </div>
           ))}
-        </div>
+
+
+          {/* Sandeep's card */}
+          {[team[1]].map((member) => (
+            <div
+              key={member.name}
+              className={`flex flex-col lg:flex-row-reverse items-center gap-8 rounded-2xl border border-white/8 p-6 sm:p-10`}
+              style={{ background: "linear-gradient(145deg, rgba(37,99,235,0.05) 0%, rgba(0,0,0,0.6) 100%)", backdropFilter: "blur(12px)" }}
+            >
+              <div className="flex-shrink-0">
+                <div className="relative w-44 h-44 sm:w-64 sm:h-64 rounded-2xl overflow-hidden border border-blue-500/20" style={{ boxShadow: "0 0 40px rgba(37,99,235,0.15)" }}>
+                  <Image src={member.image} alt={member.name} fill className="object-cover object-top" />
+                </div>
+              </div>
+              <div className="flex flex-col gap-4 items-center text-center lg:items-end lg:text-right">
+                <div>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-white">{member.name}</h2>
+                  <div className="sm:hidden mt-1 font-mono">
+                    <p className="text-xs text-blue-400/80">{member.major}</p>
+                    <p className="text-xs text-white/30 mt-0.5">{member.university} &nbsp;·&nbsp; Class of {member.classOf}</p>
+                  </div>
+                  <p className="hidden sm:block text-sm text-blue-400/80 mt-1 font-mono">
+                    {member.major} &nbsp;·&nbsp; {member.university} &nbsp;·&nbsp; Class of {member.classOf}
+                  </p>
+                </div>
+                <div className="w-12 h-px bg-gradient-to-r from-blue-500/40 to-sky-400/40" />
+                <p className="text-sm text-white/40 leading-relaxed max-w-lg">{member.bio}</p>
+              </div>
+            </div>
+          ))}
+
+          </div>{/* end cards column */}
+
+
+        </div>{/* end outer flex row */}
 
       </main>
 
