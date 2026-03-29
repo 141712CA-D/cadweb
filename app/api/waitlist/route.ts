@@ -102,6 +102,23 @@ export async function POST(req: NextRequest) {
     `;
   }
 
+  const userEmail = type === "individual" ? body.email : body.email;
+  const userName = type === "individual" ? body.name : body.repName;
+  const userConfirmHtml = `
+    <div style="font-family: monospace; background: #000; color: #e2e8f0; padding: 32px; border-radius: 12px; border: 1px solid rgba(37,99,235,0.3);">
+      <h2 style="color: #38bdf8; margin: 0 0 16px;">You&apos;re on the list, ${userName}.</h2>
+      <p style="color: #cbd5e1; line-height: 1.7; margin: 0 0 16px;">
+        Thank you for signing up for the Project CADen waitlist. We&apos;re working hard to bring AI-powered multi-agent CAD design to Onshape, and we&apos;ll notify you as soon as public testing becomes available.
+      </p>
+      <p style="color: #cbd5e1; line-height: 1.7; margin: 0 0 24px;">
+        Big things are coming. Stay tuned.
+      </p>
+      <p style="color: #64748b; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px; line-height: 1.6;">
+        If this is your first time receiving an email from <strong style="color: #94a3b8;">developers@projcaden.dev</strong>, please check your spam folder and unmark us as spam if applicable — we&apos;d hate for you to miss the launch.
+      </p>
+    </div>
+  `;
+
   try {
     await Promise.all([
       resend.emails.send({
@@ -109,6 +126,12 @@ export async function POST(req: NextRequest) {
         to: "developers@projcaden.dev",
         subject,
         html,
+      }),
+      resend.emails.send({
+        from: "Project CADen <developers@projcaden.dev>",
+        to: userEmail,
+        subject: "You're on the CADen waitlist",
+        html: userConfirmHtml,
       }),
       appendToSheet(sheetRow),
     ]);

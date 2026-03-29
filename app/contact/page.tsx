@@ -140,6 +140,7 @@ export default function ContactPage() {
             </div>
             <h2 className="text-xl font-bold text-white">Message received.</h2>
             <p className="text-sm text-white/40 max-w-xs leading-relaxed">We&apos;ll get back to you as soon as we can.</p>
+            <p className="text-xs text-white/20 max-w-xs leading-relaxed">If this is your first time receiving an email from developers@projcaden.dev, please unmark us as spam if applicable.</p>
             <button
               onClick={() => { sessionStorage.removeItem("introPlayed"); window.location.href = "/"; }}
               className="mt-4 text-xs text-blue-400/70 hover:text-blue-400 transition-colors"

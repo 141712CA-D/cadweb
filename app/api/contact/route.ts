@@ -78,13 +78,39 @@ export async function POST(req: NextRequest) {
     `;
   }
 
+  const userEmail = type === "individual" ? body.email : body.email;
+  const userName = type === "individual" ? body.name : body.repName;
+  const userConfirmHtml = `
+    <div style="font-family: monospace; background: #000; color: #e2e8f0; padding: 32px; border-radius: 12px; border: 1px solid rgba(37,99,235,0.3);">
+      <h2 style="color: #38bdf8; margin: 0 0 16px;">Message received, ${userName}.</h2>
+      <p style="color: #cbd5e1; line-height: 1.7; margin: 0 0 24px;">
+        We&apos;ve received your message and will get back to you as soon as possible. Your message is currently <strong style="color: #38bdf8;">pending reply</strong>.
+      </p>
+      <div style="border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+        <p style="color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 8px;">Your message</p>
+        <p style="color: #94a3b8; line-height: 1.6; margin: 0; white-space: pre-wrap;">${body.message ?? body.teamMessage}</p>
+      </div>
+      <p style="color: #64748b; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px; line-height: 1.6;">
+        If this is your first time receiving an email from <strong style="color: #94a3b8;">developers@projcaden.dev</strong>, please check your spam folder and unmark us as spam if applicable — we&apos;d hate for our reply to end up there.
+      </p>
+    </div>
+  `;
+
   try {
-    await resend.emails.send({
-      from: "Project CADen <developers@projcaden.dev>",
-      to: "developers@projcaden.dev",
-      subject: emailSubject,
-      html,
-    });
+    await Promise.all([
+      resend.emails.send({
+        from: "Project CADen <developers@projcaden.dev>",
+        to: "developers@projcaden.dev",
+        subject: emailSubject,
+        html,
+      }),
+      resend.emails.send({
+        from: "Project CADen <developers@projcaden.dev>",
+        to: userEmail,
+        subject: `Re: ${body.subject ?? body.teamSubject}`,
+        html: userConfirmHtml,
+      }),
+    ]);
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("Contact email error:", err);
