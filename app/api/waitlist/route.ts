@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { google } from "googleapis";
+import { sql } from "@/lib/db";
+import { syncWaitlist } from "@/lib/sync-waitlist";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -63,9 +65,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: "Invalid type" }, { status: 400 });
   }
 
+  // Dedup check — reject if email already registered
+  const userEmail: string = body.email.toLowerCase();
+  const existing = await sql`SELECT id FROM waitlist_entries WHERE email = ${userEmail}`;
+  if (existing.length > 0) {
+    return NextResponse.json({ success: false, error: "already_registered" }, { status: 409 });
+  }
+
   let subject: string;
   let html: string;
   let sheetRow: (string | undefined)[];
+  let dbInsert: Promise<unknown>;
   const timestamp = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
 
   if (type === "individual") {
@@ -84,6 +94,10 @@ export async function POST(req: NextRequest) {
         </table>
       </div>
     `;
+    dbInsert = sql`
+      INSERT INTO waitlist_entries (type, name, email, role, university, reason, organization, signed_up_at)
+      VALUES ('individual', ${name}, ${userEmail}, ${role}, ${university ?? null}, ${reason}, null, NOW())
+    `;
   } else {
     const { repName, email, org, role, usage } = body;
     subject = `[CADen Waitlist] Team — ${org}`;
@@ -100,21 +114,24 @@ export async function POST(req: NextRequest) {
         </table>
       </div>
     `;
+    dbInsert = sql`
+      INSERT INTO waitlist_entries (type, name, email, role, university, reason, organization, signed_up_at)
+      VALUES ('team', ${repName}, ${userEmail}, ${role}, null, ${usage}, ${org}, NOW())
+    `;
   }
 
-  const userEmail = type === "individual" ? body.email : body.email;
   const userName = type === "individual" ? body.name : body.repName;
   const userConfirmHtml = `
     <div style="font-family: monospace; background: #000; color: #e2e8f0; padding: 32px; border-radius: 12px; border: 1px solid rgba(37,99,235,0.3);">
-      <h2 style="color: #38bdf8; margin: 0 0 16px;">You&apos;re on the list, ${userName}.</h2>
+      <h2 style="color: #38bdf8; margin: 0 0 16px;">You're on the list, ${userName}.</h2>
       <p style="color: #cbd5e1; line-height: 1.7; margin: 0 0 16px;">
-        Thank you for signing up for the Project CADen waitlist. We&apos;re working hard to bring AI-powered multi-agent CAD design to Onshape, and we&apos;ll notify you as soon as public testing becomes available.
+        Thank you for signing up for the Project CADen waitlist. We're working hard to bring AI-powered multi-agent CAD design to Onshape, and we'll notify you as soon as public testing becomes available.
       </p>
       <p style="color: #cbd5e1; line-height: 1.7; margin: 0 0 24px;">
         Big things are coming. Stay tuned.
       </p>
       <p style="color: #64748b; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px; line-height: 1.6;">
-        If this is your first time receiving an email from <strong style="color: #94a3b8;">developers@projcaden.dev</strong>, please check your spam folder and unmark us as spam if applicable — we&apos;d hate for you to miss the launch.
+        If this is your first time receiving an email from <strong style="color: #94a3b8;">developers@projcaden.dev</strong>, please check your spam folder and unmark us as spam if applicable — we'd hate for you to miss the launch.
       </p>
     </div>
   `;
@@ -134,7 +151,13 @@ export async function POST(req: NextRequest) {
         html: userConfirmHtml,
       }),
       appendToSheet(sheetRow),
+      dbInsert,
     ]);
+
+    // Rebase DB from sheet after every signup — picks up any manual sheet edits
+    // (deletions, corrections) so removed users can re-register
+    await syncWaitlist();
+
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("Waitlist error:", err);

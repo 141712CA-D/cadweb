@@ -7,7 +7,7 @@ import { Turnstile } from "@marsidev/react-turnstile";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 
 type FormType = "individual" | "team";
-type Status = "idle" | "loading" | "success" | "error";
+type Status = "idle" | "loading" | "success" | "duplicate" | "error";
 
 const INDIVIDUAL_ROLES = ["Student", "Instructor", "Project Manager", "Hobbyist"];
 
@@ -83,6 +83,10 @@ export default function SignupPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...payload, captchaToken }),
       });
+      if (res.status === 409) {
+        setStatus("duplicate");
+        return;
+      }
       if (!res.ok) {
         turnstileRef.current?.reset();
         setCaptchaToken(null);
@@ -120,7 +124,23 @@ export default function SignupPage() {
           <Link href="/" className="text-xs text-white/25 hover:text-white/50 transition-colors">← Back</Link>
         </div>
 
-        {status === "success" ? (
+        {status === "duplicate" ? (
+          <div className="flex flex-col items-center text-center py-8 gap-4">
+            <div className="w-12 h-12 rounded-full bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center">
+              <svg className="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-white">Already registered.</h2>
+            <p className="text-sm text-white/40 max-w-xs leading-relaxed">This email is already on the waitlist. We&apos;ll be in touch when access opens up.</p>
+            <button
+              onClick={() => { sessionStorage.removeItem("introPlayed"); window.location.href = "/"; }}
+              className="mt-4 text-xs text-blue-400/70 hover:text-blue-400 transition-colors"
+            >
+              ← Back to home
+            </button>
+          </div>
+        ) : status === "success" ? (
           <div className="flex flex-col items-center text-center py-8 gap-4">
             <div className="w-12 h-12 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center">
               <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
