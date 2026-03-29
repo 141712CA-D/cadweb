@@ -68,12 +68,16 @@ export async function POST(req: NextRequest) {
   // Rebase DB from sheet first so manual deletions are reflected before checking
   await syncWaitlist();
 
-  // Dedup check — reject if email already registered
   const userEmail: string = body.email.toLowerCase();
-  const existing = await sql`SELECT id FROM waitlist_entries WHERE email = ${userEmail}`;
-  if (existing.length > 0) {
+  const existing = await sql`SELECT id, deleted FROM waitlist_entries WHERE email = ${userEmail}`;
+
+  // Active entry — already on the list
+  if (existing.length > 0 && !existing[0].deleted) {
     return NextResponse.json({ success: false, error: "already_registered" }, { status: 409 });
   }
+
+  // Soft-deleted entry — this is a returning user
+  const isReturning = existing.length > 0 && existing[0].deleted;
 
   let subject: string;
   let html: string;
@@ -98,8 +102,12 @@ export async function POST(req: NextRequest) {
       </div>
     `;
     dbInsert = sql`
-      INSERT INTO waitlist_entries (type, name, email, role, university, reason, organization, signed_up_at)
-      VALUES ('individual', ${name}, ${userEmail}, ${role}, ${university ?? null}, ${reason}, null, NOW())
+      INSERT INTO waitlist_entries (type, name, email, role, university, reason, organization, signed_up_at, deleted, deleted_at)
+      VALUES ('individual', ${name}, ${userEmail}, ${role}, ${university ?? null}, ${reason}, null, NOW(), FALSE, NULL)
+      ON CONFLICT (email) DO UPDATE SET
+        type = 'individual', name = ${name}, role = ${role},
+        university = ${university ?? null}, reason = ${reason}, organization = NULL,
+        signed_up_at = NOW(), deleted = FALSE, deleted_at = NULL
     `;
   } else {
     const { repName, email, org, role, usage } = body;
@@ -118,13 +126,30 @@ export async function POST(req: NextRequest) {
       </div>
     `;
     dbInsert = sql`
-      INSERT INTO waitlist_entries (type, name, email, role, university, reason, organization, signed_up_at)
-      VALUES ('team', ${repName}, ${userEmail}, ${role}, null, ${usage}, ${org}, NOW())
+      INSERT INTO waitlist_entries (type, name, email, role, university, reason, organization, signed_up_at, deleted, deleted_at)
+      VALUES ('team', ${repName}, ${userEmail}, ${role}, null, ${usage}, ${org}, NOW(), FALSE, NULL)
+      ON CONFLICT (email) DO UPDATE SET
+        type = 'team', name = ${repName}, role = ${role},
+        university = NULL, reason = ${usage}, organization = ${org},
+        signed_up_at = NOW(), deleted = FALSE, deleted_at = NULL
     `;
   }
 
   const userName = type === "individual" ? body.name : body.repName;
-  const userConfirmHtml = `
+  const userConfirmHtml = isReturning ? `
+    <div style="font-family: monospace; background: #000; color: #e2e8f0; padding: 32px; border-radius: 12px; border: 1px solid rgba(37,99,235,0.3);">
+      <h2 style="color: #38bdf8; margin: 0 0 16px;">Welcome back, ${userName}.</h2>
+      <p style="color: #cbd5e1; line-height: 1.7; margin: 0 0 16px;">
+        Good to see you again. You're back on the Project CADen waitlist — we'll notify you as soon as public testing becomes available.
+      </p>
+      <p style="color: #cbd5e1; line-height: 1.7; margin: 0 0 24px;">
+        Big things are coming. Stay tuned.
+      </p>
+      <p style="color: #64748b; font-size: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px; line-height: 1.6;">
+        If this email landed in spam, please unmark us as spam — we'd hate for you to miss the launch.
+      </p>
+    </div>
+  ` : `
     <div style="font-family: monospace; background: #000; color: #e2e8f0; padding: 32px; border-radius: 12px; border: 1px solid rgba(37,99,235,0.3);">
       <h2 style="color: #38bdf8; margin: 0 0 16px;">You're on the list, ${userName}.</h2>
       <p style="color: #cbd5e1; line-height: 1.7; margin: 0 0 16px;">
@@ -150,7 +175,7 @@ export async function POST(req: NextRequest) {
       resend.emails.send({
         from: "Project CADen <developers@projcaden.dev>",
         to: userEmail,
-        subject: "You're on the CADen waitlist",
+        subject: isReturning ? "Welcome back to the CADen waitlist" : "You're on the CADen waitlist",
         html: userConfirmHtml,
       }),
       appendToSheet(sheetRow),
@@ -160,7 +185,7 @@ export async function POST(req: NextRequest) {
     // Rebase again after signup to reflect the new entry in DB
     await syncWaitlist();
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, returning: isReturning ? true : false });
   } catch (err: unknown) {
     // Unique constraint violation — same email raced through simultaneously
     if (typeof err === "object" && err !== null && "code" in err && (err as { code: string }).code === "23505") {

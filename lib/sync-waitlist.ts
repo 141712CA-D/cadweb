@@ -28,7 +28,7 @@ export async function syncWaitlist(): Promise<{ synced: number }> {
 
     await sql`
       INSERT INTO waitlist_entries
-        (type, name, email, role, university, reason, organization, signed_up_at, synced_at)
+        (type, name, email, role, university, reason, organization, signed_up_at, synced_at, deleted, deleted_at)
       VALUES (
         ${(type ?? "individual").toLowerCase()},
         ${name ?? ""},
@@ -38,7 +38,9 @@ export async function syncWaitlist(): Promise<{ synced: number }> {
         ${reason ?? null},
         ${organization || null},
         ${timestamp ? new Date(timestamp) : new Date()},
-        NOW()
+        NOW(),
+        FALSE,
+        NULL
       )
       ON CONFLICT (email) DO UPDATE SET
         type         = EXCLUDED.type,
@@ -47,18 +49,20 @@ export async function syncWaitlist(): Promise<{ synced: number }> {
         university   = EXCLUDED.university,
         reason       = EXCLUDED.reason,
         organization = EXCLUDED.organization,
+        deleted      = FALSE,
+        deleted_at   = NULL,
         synced_at    = NOW()
     `;
   }
 
-  // Remove DB rows deleted from the sheet
+  // Soft-delete DB rows that were removed from the sheet
   if (sheetEmails.length > 0) {
-    const dbRows = await sql`SELECT email FROM waitlist_entries`;
+    const dbRows = await sql`SELECT email FROM waitlist_entries WHERE deleted = FALSE`;
     const toDelete = (dbRows as { email: string }[])
       .map((r) => r.email)
       .filter((e) => !sheetEmails.includes(e));
     for (const email of toDelete) {
-      await sql`DELETE FROM waitlist_entries WHERE email = ${email}`;
+      await sql`UPDATE waitlist_entries SET deleted = TRUE, deleted_at = NOW() WHERE email = ${email}`;
     }
   }
 

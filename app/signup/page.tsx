@@ -7,7 +7,7 @@ import { Turnstile } from "@marsidev/react-turnstile";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 
 type FormType = "individual" | "team";
-type Status = "idle" | "loading" | "success" | "duplicate" | "error";
+type Status = "idle" | "loading" | "success" | "welcome_back" | "duplicate" | "error";
 
 const INDIVIDUAL_ROLES = ["Student", "Instructor", "Project Manager", "Hobbyist"];
 
@@ -90,8 +90,11 @@ export default function SignupPage() {
       if (!res.ok) {
         turnstileRef.current?.reset();
         setCaptchaToken(null);
+        setStatus("error");
+        return;
       }
-      setStatus(res.ok ? "success" : "error");
+      const data = await res.json();
+      setStatus(data.returning ? "welcome_back" : "success");
     } catch {
       setStatus("error");
       turnstileRef.current?.reset();
@@ -124,7 +127,24 @@ export default function SignupPage() {
           <Link href="/" className="text-xs text-white/25 hover:text-white/50 transition-colors">← Back</Link>
         </div>
 
-        {status === "duplicate" ? (
+        {status === "welcome_back" ? (
+          <div className="flex flex-col items-center text-center py-8 gap-4">
+            <div className="w-12 h-12 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center">
+              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-white">Welcome back to the list.</h2>
+            <p className="text-sm text-white/40 max-w-xs leading-relaxed">Good to see you again. You&apos;re back on the waitlist — we&apos;ll be in touch when access opens up.</p>
+            <p className="text-xs text-white/20 max-w-xs leading-relaxed">If this is your first time receiving an email from developers@projcaden.dev, please unmark us as spam if applicable.</p>
+            <button
+              onClick={() => { sessionStorage.removeItem("introPlayed"); window.location.href = "/"; }}
+              className="mt-4 text-xs text-blue-400/70 hover:text-blue-400 transition-colors"
+            >
+              ← Back to home
+            </button>
+          </div>
+        ) : status === "duplicate" ? (
           <div className="flex flex-col items-center text-center py-8 gap-4">
             <div className="w-12 h-12 rounded-full bg-yellow-500/10 border border-yellow-500/30 flex items-center justify-center">
               <svg className="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
