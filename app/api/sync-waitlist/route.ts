@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { syncWaitlist } from "@/lib/sync-waitlist";
 
 function isAuthorized(req: NextRequest): boolean {
-  // Vercel Cron: GET with Authorization: Bearer <CRON_SECRET>
   const authHeader = req.headers.get("authorization");
+  // Vercel Cron sends Authorization: Bearer <CRON_SECRET>
   if (authHeader === `Bearer ${process.env.CRON_SECRET}`) return true;
-
-  // Manual trigger: POST with x-sync-secret header
+  // Fallback: accept SYNC_SECRET as bearer token too (covers missing CRON_SECRET)
+  if (authHeader === `Bearer ${process.env.SYNC_SECRET}`) return true;
+  // Manual trigger via x-sync-secret header
   if (req.headers.get("x-sync-secret") === process.env.SYNC_SECRET) return true;
 
   return false;
