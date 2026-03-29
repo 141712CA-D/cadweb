@@ -65,6 +65,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: "Invalid type" }, { status: 400 });
   }
 
+  // Rebase DB from sheet first so manual deletions are reflected before checking
+  await syncWaitlist();
+
   // Dedup check — reject if email already registered
   const userEmail: string = body.email.toLowerCase();
   const existing = await sql`SELECT id FROM waitlist_entries WHERE email = ${userEmail}`;
@@ -154,12 +157,15 @@ export async function POST(req: NextRequest) {
       dbInsert,
     ]);
 
-    // Rebase DB from sheet after every signup — picks up any manual sheet edits
-    // (deletions, corrections) so removed users can re-register
+    // Rebase again after signup to reflect the new entry in DB
     await syncWaitlist();
 
     return NextResponse.json({ success: true });
-  } catch (err) {
+  } catch (err: unknown) {
+    // Unique constraint violation — same email raced through simultaneously
+    if (typeof err === "object" && err !== null && "code" in err && (err as { code: string }).code === "23505") {
+      return NextResponse.json({ success: false, error: "already_registered" }, { status: 409 });
+    }
     console.error("Waitlist error:", err);
     return NextResponse.json({ success: false }, { status: 500 });
   }
