@@ -32,8 +32,7 @@ export default function Home() {
         className="flex flex-col min-h-screen bg-black"
         style={{
           opacity: introComplete ? 1 : 0,
-          transform: introComplete ? "translateY(0)" : "translateY(12px)",
-          transition: skipIntro ? "none" : "opacity 0.8s ease, transform 0.8s ease",
+          transition: skipIntro ? "none" : "opacity 0.15s ease",
         }}
       >
         <Header />

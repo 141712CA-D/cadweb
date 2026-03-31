@@ -80,7 +80,7 @@ export default function Hero() {
           <span className="gradient-text">Think anything.</span>
           <br />
           <span className="text-white/90">
-            <span className="sm:hidden">Let AI<br />build it.</span>
+            <span className="sm:hidden" aria-hidden="true">Let AI<br />build it.</span>
             <span className="hidden sm:inline">Let AI build it.</span>
           </span>
         </h1>
