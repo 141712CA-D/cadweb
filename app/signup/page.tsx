@@ -205,13 +205,13 @@ export default function SignupPage() {
                 <>
                   <div>
                     <label className={labelClass}>Name</label>
-                    <input className={inputClass(errors.indName)} placeholder="Your full name" value={indName}
+                    <input className={inputClass(errors.indName)} placeholder="Your full name" value={indName} maxLength={80}
                       onChange={(e) => { setIndName(e.target.value); clearError("indName"); }} />
                     {errors.indName && <p className={errorClass}>{errors.indName}</p>}
                   </div>
                   <div>
                     <label className={labelClass}>Email</label>
-                    <input type="email" className={inputClass(errors.indEmail)} placeholder="you@example.com" value={indEmail}
+                    <input type="email" className={inputClass(errors.indEmail)} placeholder="you@example.com" value={indEmail} maxLength={254}
                       onChange={(e) => { setIndEmail(e.target.value); clearError("indEmail"); }} />
                     {errors.indEmail && <p className={errorClass}>{errors.indEmail}</p>}
                   </div>
@@ -233,7 +233,7 @@ export default function SignupPage() {
                   {indRole === "Student" && (
                     <div>
                       <label className={labelClass}>University / Institution / School</label>
-                      <input className={inputClass(errors.indUniversity)} placeholder="Where do you attend?" value={indUniversity}
+                      <input className={inputClass(errors.indUniversity)} placeholder="Where do you attend?" value={indUniversity} maxLength={120}
                         onChange={(e) => { setIndUniversity(e.target.value); clearError("indUniversity"); }} />
                       {errors.indUniversity && <p className={errorClass}>{errors.indUniversity}</p>}
                     </div>
@@ -241,49 +241,55 @@ export default function SignupPage() {
                   {indRole === "Instructor" && (
                     <div>
                       <label className={labelClass}>University / Institution / School</label>
-                      <input className={inputClass(errors.indUniversity)} placeholder="Where do you teach?" value={indUniversity}
+                      <input className={inputClass(errors.indUniversity)} placeholder="Where do you teach?" value={indUniversity} maxLength={120}
                         onChange={(e) => { setIndUniversity(e.target.value); clearError("indUniversity"); }} />
                       {errors.indUniversity && <p className={errorClass}>{errors.indUniversity}</p>}
                     </div>
                   )}
                   <div>
                     <label className={labelClass}>Why do you want to use CADen?</label>
-                    <textarea className={inputClass(errors.indReason) + " resize-none"} rows={4} placeholder="Tell us about your use case..." value={indReason}
+                    <textarea className={inputClass(errors.indReason) + " resize-none"} rows={4} placeholder="Tell us about your use case..." value={indReason} maxLength={1000}
                       onChange={(e) => { setIndReason(e.target.value); clearError("indReason"); }} />
-                    {errors.indReason && <p className={errorClass}>{errors.indReason}</p>}
+                    <div className="flex justify-between items-center mt-1">
+                      {errors.indReason ? <p className={errorClass}>{errors.indReason}</p> : <span />}
+                      <span className={`text-xs ${indReason.length >= 1000 ? "text-red-400/70" : indReason.length > 800 ? "text-amber-400/60" : "text-white/20"}`}>{indReason.length} / 1000</span>
+                    </div>
                   </div>
                 </>
               ) : (
                 <>
                   <div>
                     <label className={labelClass}>Rep Name</label>
-                    <input className={inputClass(errors.teamRep)} placeholder="Your full name" value={teamRep}
+                    <input className={inputClass(errors.teamRep)} placeholder="Your full name" value={teamRep} maxLength={80}
                       onChange={(e) => { setTeamRep(e.target.value); clearError("teamRep"); }} />
                     {errors.teamRep && <p className={errorClass}>{errors.teamRep}</p>}
                   </div>
                   <div>
                     <label className={labelClass}>Email</label>
-                    <input type="email" className={inputClass(errors.teamEmail)} placeholder="you@company.com" value={teamEmail}
+                    <input type="email" className={inputClass(errors.teamEmail)} placeholder="you@company.com" value={teamEmail} maxLength={254}
                       onChange={(e) => { setTeamEmail(e.target.value); clearError("teamEmail"); }} />
                     {errors.teamEmail && <p className={errorClass}>{errors.teamEmail}</p>}
                   </div>
                   <div>
                     <label className={labelClass}>Organization</label>
-                    <input className={inputClass(errors.teamOrg)} placeholder="Company or institution name" value={teamOrg}
+                    <input className={inputClass(errors.teamOrg)} placeholder="Company or institution name" value={teamOrg} maxLength={120}
                       onChange={(e) => { setTeamOrg(e.target.value); clearError("teamOrg"); }} />
                     {errors.teamOrg && <p className={errorClass}>{errors.teamOrg}</p>}
                   </div>
                   <div>
                     <label className={labelClass}>Your Role</label>
-                    <input className={inputClass(errors.teamRole)} placeholder="e.g. Engineering Lead, CTO, Department Head" value={teamRole}
+                    <input className={inputClass(errors.teamRole)} placeholder="e.g. Engineering Lead, CTO, Department Head" value={teamRole} maxLength={80}
                       onChange={(e) => { setTeamRole(e.target.value); clearError("teamRole"); }} />
                     {errors.teamRole && <p className={errorClass}>{errors.teamRole}</p>}
                   </div>
                   <div>
                     <label className={labelClass}>Intended Usage</label>
-                    <textarea className={inputClass(errors.teamUsage) + " resize-none"} rows={4} placeholder="How would your team use CADen? What problems are you solving?" value={teamUsage}
+                    <textarea className={inputClass(errors.teamUsage) + " resize-none"} rows={4} placeholder="How would your team use CADen? What problems are you solving?" value={teamUsage} maxLength={1000}
                       onChange={(e) => { setTeamUsage(e.target.value); clearError("teamUsage"); }} />
-                    {errors.teamUsage && <p className={errorClass}>{errors.teamUsage}</p>}
+                    <div className="flex justify-between items-center mt-1">
+                      {errors.teamUsage ? <p className={errorClass}>{errors.teamUsage}</p> : <span />}
+                      <span className={`text-xs ${teamUsage.length >= 1000 ? "text-red-400/70" : teamUsage.length > 800 ? "text-amber-400/60" : "text-white/20"}`}>{teamUsage.length} / 1000</span>
+                    </div>
                   </div>
                 </>
               )}

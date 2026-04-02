@@ -7,7 +7,7 @@ import { Turnstile } from "@marsidev/react-turnstile";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 
 type FormType = "individual" | "team";
-type Status = "idle" | "loading" | "success" | "error";
+type Status = "idle" | "loading" | "success" | "cooldown" | "error";
 
 const ROLES = ["Student", "Instructor", "Freelancer", "Hobbyist", "Other"];
 
@@ -27,6 +27,7 @@ const selectStyle = (hasValue: boolean) => ({
 export default function ContactPage() {
   const [type, setType] = useState<FormType>("individual");
   const [status, setStatus] = useState<Status>("idle");
+  const [cooldownMins, setCooldownMins] = useState(0);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const turnstileRef = useRef<TurnstileInstance>(null);
@@ -94,6 +95,14 @@ export default function ContactPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...payload, captchaToken }),
       });
+      if (res.status === 429) {
+        const data = await res.json();
+        setCooldownMins(Math.ceil((data.retryAfter ?? 3600) / 60));
+        setStatus("cooldown");
+        turnstileRef.current?.reset();
+        setCaptchaToken(null);
+        return;
+      }
       if (!res.ok) {
         turnstileRef.current?.reset();
         setCaptchaToken(null);
@@ -131,7 +140,25 @@ export default function ContactPage() {
           <Link href="/" className="text-xs text-white/25 hover:text-white/50 transition-colors">← Back</Link>
         </div>
 
-        {status === "success" ? (
+        {status === "cooldown" ? (
+          <div className="flex flex-col items-center text-center py-8 gap-4">
+            <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">
+              <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-white">Slow down.</h2>
+            <p className="text-sm text-white/40 max-w-xs leading-relaxed">
+              You already sent a message recently. Try again in about {cooldownMins} minute{cooldownMins !== 1 ? "s" : ""}.
+            </p>
+            <button
+              onClick={() => setStatus("idle")}
+              className="mt-4 text-xs text-blue-400/70 hover:text-blue-400 transition-colors"
+            >
+              ← Go back
+            </button>
+          </div>
+        ) : status === "success" ? (
           <div className="flex flex-col items-center text-center py-8 gap-4">
             <div className="w-12 h-12 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center">
               <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -175,13 +202,13 @@ export default function ContactPage() {
                 <>
                   <div>
                     <label className={labelClass}>Name</label>
-                    <input className={inputClass(errors.name)} placeholder="Your full name" value={name}
+                    <input className={inputClass(errors.name)} placeholder="Your full name" value={name} maxLength={80}
                       onChange={(e) => { setName(e.target.value); clearError("name"); }} />
                     {errors.name && <p className={errorClass}>{errors.name}</p>}
                   </div>
                   <div>
                     <label className={labelClass}>Email</label>
-                    <input type="email" className={inputClass(errors.email)} placeholder="you@example.com" value={email}
+                    <input type="email" className={inputClass(errors.email)} placeholder="you@example.com" value={email} maxLength={254}
                       onChange={(e) => { setEmail(e.target.value); clearError("email"); }} />
                     {errors.email && <p className={errorClass}>{errors.email}</p>}
                   </div>
@@ -198,61 +225,67 @@ export default function ContactPage() {
                   {role === "Student" && (
                     <div>
                       <label className={labelClass}>University</label>
-                      <input className={inputClass(errors.university)} placeholder="Your university or institution" value={university}
+                      <input className={inputClass(errors.university)} placeholder="Your university or institution" value={university} maxLength={120}
                         onChange={(e) => { setUniversity(e.target.value); clearError("university"); }} />
                       {errors.university && <p className={errorClass}>{errors.university}</p>}
                     </div>
                   )}
                   <div>
                     <label className={labelClass}>Subject</label>
-                    <input className={inputClass(errors.subject)} placeholder="What's this about?" value={subject}
+                    <input className={inputClass(errors.subject)} placeholder="What's this about?" value={subject} maxLength={120}
                       onChange={(e) => { setSubject(e.target.value); clearError("subject"); }} />
                     {errors.subject && <p className={errorClass}>{errors.subject}</p>}
                   </div>
                   <div>
                     <label className={labelClass}>Message</label>
-                    <textarea className={inputClass(errors.message) + " resize-none"} rows={5} placeholder="What's on your mind?" value={message}
+                    <textarea className={inputClass(errors.message) + " resize-none"} rows={5} placeholder="What's on your mind?" value={message} maxLength={2000}
                       onChange={(e) => { setMessage(e.target.value); clearError("message"); }} />
-                    {errors.message && <p className={errorClass}>{errors.message}</p>}
+                    <div className="flex justify-between items-center mt-1">
+                      {errors.message ? <p className={errorClass}>{errors.message}</p> : <span />}
+                      <span className={`text-xs ${message.length >= 2000 ? "text-red-400/70" : message.length > 1600 ? "text-amber-400/60" : "text-white/20"}`}>{message.length} / 2000</span>
+                    </div>
                   </div>
                 </>
               ) : (
                 <>
                   <div>
                     <label className={labelClass}>Rep Name</label>
-                    <input className={inputClass(errors.teamRep)} placeholder="Your full name" value={teamRep}
+                    <input className={inputClass(errors.teamRep)} placeholder="Your full name" value={teamRep} maxLength={80}
                       onChange={(e) => { setTeamRep(e.target.value); clearError("teamRep"); }} />
                     {errors.teamRep && <p className={errorClass}>{errors.teamRep}</p>}
                   </div>
                   <div>
                     <label className={labelClass}>Email</label>
-                    <input type="email" className={inputClass(errors.teamEmail)} placeholder="you@company.com" value={teamEmail}
+                    <input type="email" className={inputClass(errors.teamEmail)} placeholder="you@company.com" value={teamEmail} maxLength={254}
                       onChange={(e) => { setTeamEmail(e.target.value); clearError("teamEmail"); }} />
                     {errors.teamEmail && <p className={errorClass}>{errors.teamEmail}</p>}
                   </div>
                   <div>
                     <label className={labelClass}>Organization</label>
-                    <input className={inputClass(errors.teamOrg)} placeholder="Company or institution name" value={teamOrg}
+                    <input className={inputClass(errors.teamOrg)} placeholder="Company or institution name" value={teamOrg} maxLength={120}
                       onChange={(e) => { setTeamOrg(e.target.value); clearError("teamOrg"); }} />
                     {errors.teamOrg && <p className={errorClass}>{errors.teamOrg}</p>}
                   </div>
                   <div>
                     <label className={labelClass}>Your Role</label>
-                    <input className={inputClass(errors.teamRole)} placeholder="e.g. Engineering Lead, CTO, Department Head" value={teamRole}
+                    <input className={inputClass(errors.teamRole)} placeholder="e.g. Engineering Lead, CTO, Department Head" value={teamRole} maxLength={80}
                       onChange={(e) => { setTeamRole(e.target.value); clearError("teamRole"); }} />
                     {errors.teamRole && <p className={errorClass}>{errors.teamRole}</p>}
                   </div>
                   <div>
                     <label className={labelClass}>Subject</label>
-                    <input className={inputClass(errors.teamSubject)} placeholder="What's this about?" value={teamSubject}
+                    <input className={inputClass(errors.teamSubject)} placeholder="What's this about?" value={teamSubject} maxLength={120}
                       onChange={(e) => { setTeamSubject(e.target.value); clearError("teamSubject"); }} />
                     {errors.teamSubject && <p className={errorClass}>{errors.teamSubject}</p>}
                   </div>
                   <div>
                     <label className={labelClass}>Message</label>
-                    <textarea className={inputClass(errors.teamMessage) + " resize-none"} rows={5} placeholder="What's on your mind?" value={teamMessage}
+                    <textarea className={inputClass(errors.teamMessage) + " resize-none"} rows={5} placeholder="What's on your mind?" value={teamMessage} maxLength={2000}
                       onChange={(e) => { setTeamMessage(e.target.value); clearError("teamMessage"); }} />
-                    {errors.teamMessage && <p className={errorClass}>{errors.teamMessage}</p>}
+                    <div className="flex justify-between items-center mt-1">
+                      {errors.teamMessage ? <p className={errorClass}>{errors.teamMessage}</p> : <span />}
+                      <span className={`text-xs ${teamMessage.length >= 2000 ? "text-red-400/70" : teamMessage.length > 1600 ? "text-amber-400/60" : "text-white/20"}`}>{teamMessage.length} / 2000</span>
+                    </div>
                   </div>
                 </>
               )}

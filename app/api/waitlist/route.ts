@@ -20,7 +20,7 @@ async function appendToSheet(row: (string | undefined)[]) {
   await sheets.spreadsheets.values.append({
     spreadsheetId: process.env.GOOGLE_SHEET_ID,
     range: "Sheet1!A:H",
-    valueInputOption: "USER_ENTERED",
+    valueInputOption: "RAW",
     requestBody: {
       values: [row],
     },
@@ -43,6 +43,16 @@ function missing(...vals: unknown[]) {
   return vals.some((v) => !v || (typeof v === "string" && !v.trim()));
 }
 
+function esc(str: string | undefined | null): string {
+  if (!str) return "";
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+}
+
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const { type, captchaToken } = body;
@@ -55,6 +65,10 @@ export async function POST(req: NextRequest) {
     const { name, email, role, university, reason } = body;
     if (missing(name, email, role, reason) || !EMAIL_RE.test(email))
       return NextResponse.json({ success: false, error: "Missing or invalid fields" }, { status: 400 });
+    if (typeof name === "string" && name.length > 80) return NextResponse.json({ success: false, error: "Name too long" }, { status: 400 });
+    if (typeof email === "string" && email.length > 254) return NextResponse.json({ success: false, error: "Email too long" }, { status: 400 });
+    if (typeof university === "string" && university.length > 120) return NextResponse.json({ success: false, error: "School name too long" }, { status: 400 });
+    if (typeof reason === "string" && reason.length > 1000) return NextResponse.json({ success: false, error: "Reason too long" }, { status: 400 });
     if (role === "Student" && missing(university))
       return NextResponse.json({ success: false, error: "School required for students" }, { status: 400 });
     if (role === "Instructor" && missing(university))
@@ -65,6 +79,11 @@ export async function POST(req: NextRequest) {
     const { repName, email, org, role, usage } = body;
     if (missing(repName, email, org, role, usage) || !EMAIL_RE.test(email))
       return NextResponse.json({ success: false, error: "Missing or invalid fields" }, { status: 400 });
+    if (typeof repName === "string" && repName.length > 80) return NextResponse.json({ success: false, error: "Name too long" }, { status: 400 });
+    if (typeof email === "string" && email.length > 254) return NextResponse.json({ success: false, error: "Email too long" }, { status: 400 });
+    if (typeof org === "string" && org.length > 120) return NextResponse.json({ success: false, error: "Organization name too long" }, { status: 400 });
+    if (typeof role === "string" && role.length > 80) return NextResponse.json({ success: false, error: "Role too long" }, { status: 400 });
+    if (typeof usage === "string" && usage.length > 1000) return NextResponse.json({ success: false, error: "Usage description too long" }, { status: 400 });
   } else {
     return NextResponse.json({ success: false, error: "Invalid type" }, { status: 400 });
   }
@@ -97,11 +116,11 @@ export async function POST(req: NextRequest) {
       <div style="font-family: monospace; background: #000; color: #e2e8f0; padding: 32px; border-radius: 12px; border: 1px solid rgba(37,99,235,0.3);">
         <h2 style="color: #38bdf8; margin: 0 0 24px;">New Individual Waitlist Signup</h2>
         <table style="width: 100%; border-collapse: collapse;">
-          <tr><td style="color: #94a3b8; padding: 8px 0; width: 140px;">Name</td><td style="color: #f1f5f9;">${name}</td></tr>
-          <tr><td style="color: #94a3b8; padding: 8px 0;">Email</td><td style="color: #38bdf8;"><a href="mailto:${email}" style="color: #38bdf8;">${email}</a></td></tr>
-          <tr><td style="color: #94a3b8; padding: 8px 0;">Role</td><td style="color: #f1f5f9;">${role}</td></tr>
-          ${university ? `<tr><td style="color: #94a3b8; padding: 8px 0;">University</td><td style="color: #f1f5f9;">${university}</td></tr>` : ""}
-          <tr><td style="color: #94a3b8; padding: 8px 0; vertical-align: top;">Why CADen</td><td style="color: #f1f5f9; line-height: 1.6;">${reason}</td></tr>
+          <tr><td style="color: #94a3b8; padding: 8px 0; width: 140px;">Name</td><td style="color: #f1f5f9;">${esc(name)}</td></tr>
+          <tr><td style="color: #94a3b8; padding: 8px 0;">Email</td><td style="color: #38bdf8;"><a href="mailto:${esc(email)}" style="color: #38bdf8;">${esc(email)}</a></td></tr>
+          <tr><td style="color: #94a3b8; padding: 8px 0;">Role</td><td style="color: #f1f5f9;">${esc(role)}</td></tr>
+          ${university ? `<tr><td style="color: #94a3b8; padding: 8px 0;">University</td><td style="color: #f1f5f9;">${esc(university)}</td></tr>` : ""}
+          <tr><td style="color: #94a3b8; padding: 8px 0; vertical-align: top;">Why CADen</td><td style="color: #f1f5f9; line-height: 1.6;">${esc(reason)}</td></tr>
         </table>
       </div>
     `;
@@ -121,11 +140,11 @@ export async function POST(req: NextRequest) {
       <div style="font-family: monospace; background: #000; color: #e2e8f0; padding: 32px; border-radius: 12px; border: 1px solid rgba(37,99,235,0.3);">
         <h2 style="color: #38bdf8; margin: 0 0 24px;">New Team / Organization Waitlist Signup</h2>
         <table style="width: 100%; border-collapse: collapse;">
-          <tr><td style="color: #94a3b8; padding: 8px 0; width: 140px;">Rep Name</td><td style="color: #f1f5f9;">${repName}</td></tr>
-          <tr><td style="color: #94a3b8; padding: 8px 0;">Email</td><td style="color: #38bdf8;"><a href="mailto:${email}" style="color: #38bdf8;">${email}</a></td></tr>
-          <tr><td style="color: #94a3b8; padding: 8px 0;">Organization</td><td style="color: #f1f5f9;">${org}</td></tr>
-          <tr><td style="color: #94a3b8; padding: 8px 0;">Role</td><td style="color: #f1f5f9;">${role}</td></tr>
-          <tr><td style="color: #94a3b8; padding: 8px 0; vertical-align: top;">Intended Usage</td><td style="color: #f1f5f9; line-height: 1.6;">${usage}</td></tr>
+          <tr><td style="color: #94a3b8; padding: 8px 0; width: 140px;">Rep Name</td><td style="color: #f1f5f9;">${esc(repName)}</td></tr>
+          <tr><td style="color: #94a3b8; padding: 8px 0;">Email</td><td style="color: #38bdf8;"><a href="mailto:${esc(email)}" style="color: #38bdf8;">${esc(email)}</a></td></tr>
+          <tr><td style="color: #94a3b8; padding: 8px 0;">Organization</td><td style="color: #f1f5f9;">${esc(org)}</td></tr>
+          <tr><td style="color: #94a3b8; padding: 8px 0;">Role</td><td style="color: #f1f5f9;">${esc(role)}</td></tr>
+          <tr><td style="color: #94a3b8; padding: 8px 0; vertical-align: top;">Intended Usage</td><td style="color: #f1f5f9; line-height: 1.6;">${esc(usage)}</td></tr>
         </table>
       </div>
     `;

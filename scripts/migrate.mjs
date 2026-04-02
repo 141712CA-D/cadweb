@@ -25,4 +25,16 @@ await sql`
 await sql`ALTER TABLE waitlist_entries ADD COLUMN IF NOT EXISTS deleted BOOLEAN NOT NULL DEFAULT FALSE`;
 await sql`ALTER TABLE waitlist_entries ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ`;
 
+await sql`DROP TABLE IF EXISTS contact_cooldowns`;
+
+await sql`
+  CREATE TABLE IF NOT EXISTS contact_rate_limits (
+    key          TEXT        NOT NULL,
+    kind         TEXT        NOT NULL,
+    window_start TIMESTAMPTZ NOT NULL,
+    count        INT         NOT NULL DEFAULT 1,
+    PRIMARY KEY (key, kind)
+  )
+`;
+
 console.log("Migration complete.");
