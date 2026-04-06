@@ -131,9 +131,11 @@ export default function ContactPage() {
         style={{ background: "linear-gradient(145deg, rgba(37,99,235,0.06) 0%, rgba(0,0,0,0.8) 100%)", backdropFilter: "blur(20px)" }}
       >
         <div className="flex items-center justify-between mb-8">
-          <Link href="/" className="flex items-center gap-2.5">
-            <Image src="/logo copy.png" alt="Project CADen" width={28} height={28} style={{ width: 28, height: "auto" }} />
-            <span className="text-white/60 text-sm font-medium">
+          <Link href="/" className="flex items-center gap-0">
+            <div className="flex-shrink-0" style={{ width: 56, height: 56 }}>
+              <Image src="/logo.svg" alt="Project CADen" width={56} height={56} style={{ width: 56, height: "auto" }} />
+            </div>
+            <span className="-ml-4 text-white/60 text-sm font-medium whitespace-nowrap">
               Project <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-sky-400">CADen</span>
             </span>
           </Link>

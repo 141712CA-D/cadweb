@@ -69,49 +69,54 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
       />
 
       {/* Content */}
-      <div className="relative flex flex-col items-center gap-5 select-none">
+      <div className="relative flex flex-col items-center gap-5 select-none -mt-32">
 
-        {/* Logo — fades in */}
-        <div
-          style={{
-            opacity: risen ? 1 : 0,
-            transform: risen ? "translateY(0)" : "translateY(24px)",
-            transition: "opacity 0.7s ease, transform 0.9s cubic-bezier(0.16,1,0.3,1)",
-            filter: "drop-shadow(0 0 24px rgba(37,99,235,0.7)) drop-shadow(0 0 60px rgba(14,165,233,0.3))",
-          }}
-        >
-          <Image
-            src="/logo copy.png"
-            alt="Project CADen"
-            width={80}
-            height={80}
-            loading="eager"
-            style={{ width: 80, height: "auto" }}
-          />
-        </div>
+        {/* Logo left, title right */}
+        <div className="flex flex-col items-center gap-0">
 
-        {/* Title — rises from below */}
-        <div
-          className="font-bold tracking-tight"
-          style={{
-            fontSize: "clamp(2.5rem, 8vw, 5rem)",
-            opacity: risen ? 1 : 0,
-            transform: risen ? "translateY(0)" : "translateY(48px)",
-            transition: "opacity 0.7s ease, transform 1s cubic-bezier(0.16,1,0.3,1)",
-          }}
-        >
-          <span className="text-white/90">Project </span>
-          <span
+          {/* Logo */}
+          <div
+            className="flex-shrink-0"
             style={{
-              background: "linear-gradient(135deg, #60a5fa 0%, #38bdf8 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-              filter: "drop-shadow(0 0 20px rgba(37,99,235,0.6))",
+              opacity: risen ? 1 : 0,
+              transform: risen ? "translateY(0)" : "translateY(24px)",
+              transition: "opacity 0.7s ease, transform 0.9s cubic-bezier(0.16,1,0.3,1)",
+              filter: "drop-shadow(0 0 24px rgba(37,99,235,0.7)) drop-shadow(0 0 60px rgba(14,165,233,0.3))",
             }}
           >
-            CADen
-          </span>
+            <Image
+              src="/logo.svg"
+              alt=""
+              width={220}
+              height={220}
+              loading="eager"
+              style={{ width: 220, height: "auto" }}
+            />
+          </div>
+
+          {/* Title */}
+          <div
+            className="font-bold tracking-tight whitespace-nowrap -mt-20"
+            style={{
+              fontSize: "clamp(2.5rem, 8vw, 5rem)",
+              opacity: risen ? 1 : 0,
+              transform: risen ? "translateY(0)" : "translateY(48px)",
+              transition: "opacity 0.7s ease, transform 1s cubic-bezier(0.16,1,0.3,1)",
+            }}
+          >
+            <span className="text-white/90">Project </span>
+            <span
+              style={{
+                background: "linear-gradient(135deg, #60a5fa 0%, #38bdf8 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                filter: "drop-shadow(0 0 20px rgba(37,99,235,0.6))",
+              }}
+            >
+              CADen
+            </span>
+          </div>
         </div>
 
         {/* Tagline — fades in after title settles */}

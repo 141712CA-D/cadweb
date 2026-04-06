@@ -33,16 +33,18 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <Image
-            src="/logo copy.png"
-            alt="Project CADen"
-            width={32}
-            height={32}
-            className="drop-shadow-[0_0_8px_rgba(37,99,235,0.6)]"
-            style={{ width: 32, height: "auto" }}
-          />
-          <span className="text-white font-semibold text-base sm:text-lg tracking-tight">
+        <Link href="/" className="flex items-center gap-0">
+          <div className="flex-shrink-0" style={{ width: 64, height: 64 }}>
+            <Image
+              src="/logo.svg"
+              alt="Project CADen"
+              width={64}
+              height={64}
+              className="drop-shadow-[0_0_8px_rgba(37,99,235,0.6)]"
+              style={{ width: 64, height: "auto" }}
+            />
+          </div>
+          <span className="-ml-2 text-white font-semibold text-base sm:text-lg tracking-tight whitespace-nowrap">
             Project <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-sky-400">CADen</span>
           </span>
         </Link>
