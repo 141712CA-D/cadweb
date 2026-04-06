@@ -34,17 +34,16 @@ export default function Header() {
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-0">
-          <div className="flex-shrink-0" style={{ width: 64, height: 64 }}>
+          <div className="flex-shrink-0 w-4 h-4 sm:w-8 sm:h-8">
             <Image
               src="/logo.svg"
               alt="Project CADen"
               width={64}
               height={64}
-              className="drop-shadow-[0_0_8px_rgba(37,99,235,0.6)]"
-              style={{ width: 64, height: "auto" }}
+              className="drop-shadow-[0_0_8px_rgba(37,99,235,0.6)] w-full h-auto"
             />
           </div>
-          <span className="-ml-2 text-white font-semibold text-base sm:text-lg tracking-tight whitespace-nowrap">
+          <span className="text-white font-semibold text-base sm:text-lg tracking-tight whitespace-nowrap">
             Project <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-sky-400">CADen</span>
           </span>
         </Link>

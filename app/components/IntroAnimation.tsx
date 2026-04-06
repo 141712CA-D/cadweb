@@ -90,7 +90,7 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
               width={220}
               height={220}
               loading="eager"
-              style={{ width: 220, height: "auto" }}
+              style={{ width: "clamp(60px, 15vw, 110px)", height: "auto" }}
             />
           </div>
 
