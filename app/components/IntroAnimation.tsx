@@ -96,7 +96,7 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
 
           {/* Title */}
           <div
-            className="font-bold tracking-tight whitespace-nowrap -mt-20"
+            className="font-bold tracking-tight whitespace-nowrap mt-2 sm:-mt-6"
             style={{
               fontSize: "clamp(2.5rem, 8vw, 5rem)",
               opacity: risen ? 1 : 0,

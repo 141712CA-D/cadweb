@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -34,15 +33,13 @@ export default function Header() {
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-0">
-          <div className="flex-shrink-0 w-4 h-4 sm:w-8 sm:h-8">
-            <Image
-              src="/logo.svg"
-              alt="Project CADen"
-              width={64}
-              height={64}
-              className="drop-shadow-[0_0_8px_rgba(37,99,235,0.6)] w-full h-auto"
-            />
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/logo.svg"
+            alt="Project CADen"
+            style={{ width: 32, height: 32, display: "block", flexShrink: 0 }}
+            className="drop-shadow-[0_0_8px_rgba(37,99,235,0.6)]"
+          />
           <span className="text-white font-semibold text-base sm:text-lg tracking-tight whitespace-nowrap">
             Project <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-sky-400">CADen</span>
           </span>
