@@ -187,8 +187,110 @@ export default function OverviewPage() {
             </div>
           </div>
 
-          {/* ── CTA ── */}
-          <div className="mt-14 flex flex-col items-center gap-4 text-center">
+        </div>
+
+        {/* ── Vision section ── */}
+        <div className="w-full max-w-3xl flex flex-col items-center mt-24 sm:mt-32">
+
+          <div className="text-center mb-12 sm:mb-16">
+            <p className="text-xs text-white/30 tracking-widest uppercase font-mono mb-4">Where we&apos;re headed</p>
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight">
+              <span className="gradient-text">Beyond Onshape.</span>
+              <br />
+              <span className="text-white/90">Every CAD tool, one platform.</span>
+            </h2>
+            <p className="mt-6 text-white/35 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
+              CADen isn&apos;t just a prompt-to-model tool. It&apos;s the bridge between every major CAD environment.
+            </p>
+          </div>
+
+          {/* Translation card */}
+          <div
+            className="w-full rounded-2xl border border-blue-500/20 p-6 sm:p-8 mb-4"
+            style={{
+              background: "linear-gradient(145deg, rgba(37,99,235,0.09) 0%, rgba(0,0,0,0.65) 100%)",
+              backdropFilter: "blur(16px)",
+              boxShadow: "0 0 60px rgba(37,99,235,0.10)",
+            }}
+          >
+            <div className="flex items-start gap-4 mb-5">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center border border-blue-500/30 flex-shrink-0"
+                style={{ background: "rgba(37,99,235,0.15)" }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-[10px] text-blue-400/60 tracking-widest uppercase font-mono mb-1">Cross-Platform</p>
+                <h3 className="text-base sm:text-lg font-bold text-white/90">Universal CAD Translation</h3>
+                <p className="text-xs sm:text-sm text-white/35 mt-1.5 leading-relaxed">
+                  Working in SolidWorks? Fusion 360? CATIA? CADen reads your model and rebuilds it — natively — in any other environment. No manual re-modeling. No lost constraints.
+                </p>
+              </div>
+            </div>
+
+            {/* Translation flow diagram */}
+            <div className="flex items-center justify-center gap-2 sm:gap-3 flex-wrap mt-4">
+              {["SolidWorks", "Fusion 360", "CATIA", "FreeCAD"].map((sw) => (
+                <div
+                  key={sw}
+                  className="px-3 py-1.5 rounded-full text-xs font-medium text-white/60 border border-white/10"
+                  style={{ background: "rgba(255,255,255,0.04)" }}
+                >
+                  {sw}
+                </div>
+              ))}
+              <div className="flex items-center gap-1 text-blue-400/60">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                </svg>
+              </div>
+              <div
+                className="px-3 py-1.5 rounded-full text-xs font-semibold text-blue-300 border border-blue-500/40"
+                style={{ background: "rgba(37,99,235,0.15)" }}
+              >
+                Any target platform
+              </div>
+            </div>
+          </div>
+
+          {/* Onshape integration card */}
+          <div
+            className="w-full rounded-2xl border border-sky-500/20 p-6 sm:p-8"
+            style={{
+              background: "linear-gradient(145deg, rgba(14,165,233,0.09) 0%, rgba(0,0,0,0.65) 100%)",
+              backdropFilter: "blur(16px)",
+              boxShadow: "0 0 60px rgba(14,165,233,0.08)",
+            }}
+          >
+            <div className="flex items-start gap-4">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center border border-sky-500/30 flex-shrink-0"
+                style={{ background: "rgba(14,165,233,0.15)" }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-[10px] text-sky-400/60 tracking-widest uppercase font-mono mb-1">Phase 1 — Coming Soon</p>
+                <h3 className="text-base sm:text-lg font-bold text-white/90">Onshape Native Integration</h3>
+                <p className="text-xs sm:text-sm text-white/35 mt-1.5 leading-relaxed">
+                  Our first integration runs directly inside Onshape. Describe a part, drop in a drawing, and a multi-agent pipeline builds the full parametric model in your document — sketch, extrude, fillet, and all.
+                </p>
+                <p className="text-xs sm:text-sm text-white/35 mt-2 leading-relaxed">
+                  Users coming from SolidWorks or any other tool can import their work into CADen and pick up right where they left off — in Onshape.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* ── CTA ── */}
+        <div className="mt-14 flex flex-col items-center gap-4 text-center">
             <p className="text-white/25 text-sm">Want early access?</p>
             <Link
               href="/signup"
@@ -198,7 +300,6 @@ export default function OverviewPage() {
             </Link>
           </div>
 
-        </div>
       </main>
 
       {/* Footer */}
