@@ -49,10 +49,10 @@ export default function OverviewPage() {
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight">
             <span className="gradient-text">The Vision</span>
             <br />
-            <span className="text-white/90">for CADen.</span>
+            <span className="text-white/90">for Parametra.</span>
           </h1>
           <p className="mt-6 text-white/35 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-            Type what you need or hand us a drawing. CADen handles the rest.
+            Type what you need or hand us a drawing. Parametra handles the rest.
           </p>
         </div>
 
@@ -126,7 +126,7 @@ export default function OverviewPage() {
           >
             <div className="text-center mb-5 sm:mb-6">
               <p className="text-[10px] text-blue-400/60 tracking-widest uppercase font-mono mb-1">Under the hood</p>
-              <h2 className="text-base sm:text-xl font-bold text-white/90">The CADen Pipeline</h2>
+              <h2 className="text-base sm:text-xl font-bold text-white/90">The Parametra Pipeline</h2>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -200,7 +200,7 @@ export default function OverviewPage() {
               <span className="text-white/90">Every CAD tool, one platform.</span>
             </h2>
             <p className="mt-6 text-white/35 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-              CADen isn&apos;t just a prompt-to-model tool. It&apos;s the bridge between every major CAD environment.
+              Parametra isn&apos;t just a prompt-to-model tool. It&apos;s the bridge between every major CAD environment.
             </p>
           </div>
 
@@ -226,7 +226,7 @@ export default function OverviewPage() {
                 <p className="text-[10px] text-blue-400/60 tracking-widest uppercase font-mono mb-1">Cross-Platform</p>
                 <h3 className="text-base sm:text-lg font-bold text-white/90">Universal CAD Translation</h3>
                 <p className="text-xs sm:text-sm text-white/35 mt-1.5 leading-relaxed">
-                  Working in SolidWorks? Fusion 360? CATIA? CADen reads your model and rebuilds it — natively — in any other environment. No manual re-modeling. No lost constraints.
+                  Working in SolidWorks? Fusion 360? CATIA? Parametra reads your model and rebuilds it — natively — in any other environment. No manual re-modeling. No lost constraints.
                 </p>
               </div>
             </div>
@@ -281,7 +281,7 @@ export default function OverviewPage() {
                   Our first integration runs directly inside Onshape. Describe a part, drop in a drawing, and a multi-agent pipeline builds the full parametric model in your document — sketch, extrude, fillet, and all.
                 </p>
                 <p className="text-xs sm:text-sm text-white/35 mt-2 leading-relaxed">
-                  Users coming from SolidWorks or any other tool can import their work into CADen and pick up right where they left off — in Onshape.
+                  Users coming from SolidWorks or any other tool can import their work into Parametra and pick up right where they left off — in Onshape.
                 </p>
               </div>
             </div>
@@ -305,7 +305,7 @@ export default function OverviewPage() {
       {/* Footer */}
       <footer className="relative z-10 bg-black border-t border-white/5 py-6 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-white/20">© 2026 Project CADen. All rights reserved.</p>
+          <p className="text-xs text-white/20">© 2026 Parametra.ai. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <Link href="/contact" className="text-xs text-white/25 hover:text-white/60 transition-colors">Contact us</Link>
             <Link href="/signup" className="text-xs text-white/25 hover:text-white/60 transition-colors">Join waitlist</Link>

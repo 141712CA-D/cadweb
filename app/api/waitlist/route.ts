@@ -163,7 +163,7 @@ export async function POST(req: NextRequest) {
     <div style="font-family: monospace; background: #000; color: #e2e8f0; padding: 32px; border-radius: 12px; border: 1px solid rgba(37,99,235,0.3);">
       <h2 style="color: #38bdf8; margin: 0 0 16px;">Welcome back, ${userName}.</h2>
       <p style="color: #cbd5e1; line-height: 1.7; margin: 0 0 16px;">
-        Good to see you again. You're back on the Project CADen waitlist — we'll notify you as soon as public testing becomes available.
+        Good to see you again. You're back on the Parametra.ai waitlist — we'll notify you as soon as public testing becomes available.
       </p>
       <p style="color: #cbd5e1; line-height: 1.7; margin: 0 0 24px;">
         Big things are coming. Stay tuned.
@@ -176,7 +176,7 @@ export async function POST(req: NextRequest) {
     <div style="font-family: monospace; background: #000; color: #e2e8f0; padding: 32px; border-radius: 12px; border: 1px solid rgba(37,99,235,0.3);">
       <h2 style="color: #38bdf8; margin: 0 0 16px;">You're on the list, ${userName}.</h2>
       <p style="color: #cbd5e1; line-height: 1.7; margin: 0 0 16px;">
-        Thank you for signing up for the Project CADen waitlist. We're working hard to bring AI-powered multi-agent CAD design to Onshape, and we'll notify you as soon as public testing becomes available.
+        Thank you for signing up for the Parametra.ai waitlist. We're working hard to bring AI-powered multi-agent CAD design to Onshape, and we'll notify you as soon as public testing becomes available.
       </p>
       <p style="color: #cbd5e1; line-height: 1.7; margin: 0 0 24px;">
         Big things are coming. Stay tuned.
@@ -190,13 +190,13 @@ export async function POST(req: NextRequest) {
   try {
     await Promise.all([
       resend.emails.send({
-        from: "Project CADen <developers@projcaden.dev>",
+        from: "Parametra.ai <developers@projcaden.dev>",
         to: "developers@projcaden.dev",
         subject,
         html,
       }),
       resend.emails.send({
-        from: "Project CADen <developers@projcaden.dev>",
+        from: "Parametra.ai <developers@projcaden.dev>",
         to: userEmail,
         subject: isReturning ? "Welcome back to the CADen waitlist" : "You're on the CADen waitlist",
         html: userConfirmHtml,

@@ -104,7 +104,7 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
               transition: "opacity 0.7s ease, transform 1s cubic-bezier(0.16,1,0.3,1)",
             }}
           >
-            <span className="text-white/90">Project </span>
+            <span className="text-white/90">Parametra</span>
             <span
               style={{
                 background: "linear-gradient(135deg, #60a5fa 0%, #38bdf8 100%)",
@@ -114,7 +114,7 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
                 filter: "drop-shadow(0 0 20px rgba(37,99,235,0.6))",
               }}
             >
-              CADen
+              .ai
             </span>
           </div>
         </div>

@@ -133,10 +133,10 @@ export default function ContactPage() {
         <div className="flex items-center justify-between mb-8">
           <Link href="/" className="flex items-center gap-0">
             <div className="flex-shrink-0 w-4 h-4 sm:w-7 sm:h-7">
-              <Image src="/logo.svg" alt="Project CADen" width={56} height={56} className="w-full h-auto" />
+              <Image src="/logo.svg" alt="Parametra.ai" width={56} height={56} className="w-full h-auto" />
             </div>
             <span className="text-white/60 text-sm font-medium whitespace-nowrap">
-              Project <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-sky-400">CADen</span>
+              Parametra<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-sky-400">.ai</span>
             </span>
           </Link>
           <Link href="/" className="text-xs text-white/25 hover:text-white/50 transition-colors">← Back</Link>

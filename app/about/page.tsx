@@ -26,7 +26,7 @@ const team = [
     major: "Mechanical Engineering",
     university: "University of Michigan",
     classOf: "2029",
-    bio: "Andrew is a CAD enthusiast from New York with a passion for turning ideas into real, engineered designs. A robotics warrior at heart, he competed at the FIRST Worlds Robotics Competition in high school — where precision design and fast iteration weren't optional. That drive is exactly what he's bringing to Project CADen.",
+    bio: "Andrew is a CAD enthusiast from New York with a passion for turning ideas into real, engineered designs. A robotics warrior at heart, he competed at the FIRST Worlds Robotics Competition in high school — where precision design and fast iteration weren't optional. That drive is exactly what he's bringing to Parametra.ai.",
     primaryHref: "https://www.linkedin.com/in/andrew-yang-1205b8383/",
     socials: [
       { label: "LinkedIn", href: "https://www.linkedin.com/in/andrew-yang-1205b8383/" },
@@ -39,7 +39,7 @@ const team = [
     major: "Computer Engineering",
     university: "University of Michigan",
     classOf: "2029",
-    bio: "Sandeep is a builder from New York at the intersection of AI/ML and hardware, with a deep focus on embedded systems applications. Before Michigan, he was deep in academic research — working in Biomedical Engineering and earning a finalist spot at the Regeneron Science Talent Search, one of the most prestigious science competitions in the country. He brings that same research-driven rigor to building the intelligence behind Project CADen.",
+    bio: "Sandeep is a builder from New York at the intersection of AI/ML and hardware, with a deep focus on embedded systems applications. Before Michigan, he was deep in academic research — working in Biomedical Engineering and earning a finalist spot at the Regeneron Science Talent Search, one of the most prestigious science competitions in the country. He brings that same research-driven rigor to building the intelligence behind Parametra.ai.",
     primaryHref: "https://sandeepsawhney.dev/",
     socials: [
       { label: "LinkedIn", href: "https://www.linkedin.com/in/sandeep-sawhney-894b12301/" },
@@ -79,7 +79,7 @@ export default function AboutPage() {
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight">
             <span className="gradient-text">Meet the brains</span>
             <br />
-            <span className="text-white/90">behind Project CADen.</span>
+            <span className="text-white/90">behind Parametra.ai</span>
           </h1>
         </div>
 
@@ -207,7 +207,7 @@ export default function AboutPage() {
       {/* Footer */}
       <footer className="relative z-10 bg-black border-t border-white/5 py-6 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-white/20">© 2026 Project CADen. All rights reserved.</p>
+          <p className="text-xs text-white/20">© 2026 Parametra.ai. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <Link href="/contact" className="text-xs text-white/25 hover:text-white/60 transition-colors">Contact us</Link>
             <Link href="/signup" className="text-xs text-white/25 hover:text-white/60 transition-colors">Join waitlist</Link>

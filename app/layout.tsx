@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Project CADen — AI-Powered CAD Design",
+  title: "Parametra.ai — AI-Powered CAD Design",
   description: "AI agents that design and build your CAD models in Onshape from a single prompt.",
   icons: {
     icon: [

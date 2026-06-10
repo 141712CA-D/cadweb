@@ -36,12 +36,12 @@ export default function Header() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo.svg"
-            alt="Project CADen"
+            alt="Parametra.ai"
             style={{ width: 32, height: 32, display: "block", flexShrink: 0 }}
             className="drop-shadow-[0_0_8px_rgba(37,99,235,0.6)]"
           />
           <span className="text-white font-semibold text-base sm:text-lg tracking-tight whitespace-nowrap">
-            Project <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-sky-400">CADen</span>
+            Parametra<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-sky-400">.ai</span>
           </span>
         </Link>
 

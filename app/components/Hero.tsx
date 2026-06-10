@@ -87,7 +87,7 @@ export default function Hero() {
 
         {/* Subheadline */}
         <p className="animate-fade-up delay-400 mt-8 max-w-xl text-lg sm:text-xl text-white/40 leading-relaxed">
-          Project CADen is the one stop AI agent for CAD design.
+          Parametra.ai is the one stop AI agent for CAD design.
           <br />
           One prompt, endless designs.
         </p>
@@ -126,14 +126,14 @@ export default function Hero() {
             <span className="flex-shrink-0 w-3 h-3 rounded-full bg-yellow-500/60" />
             <span className="flex-shrink-0 w-3 h-3 rounded-full bg-green-500/60" />
             <span className="ml-2 text-xs text-white/20 font-mono">
-              <span className="hidden sm:inline">project-caden — multi-agent design session · sketch agent [1/4]</span>
-              <span className="sm:hidden">project-caden · sketch agent [1/4]</span>
+              <span className="hidden sm:inline">parametra — multi-agent design session · sketch agent [1/4]</span>
+              <span className="sm:hidden">parametra · sketch agent [1/4]</span>
             </span>
           </div>
           <div className="p-4 sm:p-8 font-mono text-xs leading-relaxed overflow-x-auto">
             <div className="flex flex-col gap-1 text-left w-full">
 
-              <p className="text-white/30 mb-2">$ caden generate --prompt <span className="text-white/50">&quot;load-bearing bracket with 4 M6 mounting holes, 25mm center bore, chamfered corners, 6mm wall thickness&quot;</span> --plane Top</p>
+              <p className="text-white/30 mb-2">$ parametra generate --prompt <span className="text-white/50">&quot;load-bearing bracket with 4 M6 mounting holes, 25mm center bore, chamfered corners, 6mm wall thickness&quot;</span> --plane Top</p>
 
               <p className="text-blue-400/70 mt-1">[agent] Parsing design intent...</p>
               <p className="text-white/20">&nbsp;&nbsp;↳ entities detected: rectangle, circle ×5, chamfer ×4</p>

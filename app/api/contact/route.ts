@@ -101,7 +101,7 @@ export async function POST(req: NextRequest) {
 
   if (type === "team") {
     const { repName, email, org, role } = body;
-    emailSubject = `[CADen Contact — Team] ${subject} — ${repName} (${org})`;
+    emailSubject = `[Parametra Contact — Team] ${subject} — ${repName} (${org})`;
     html = `
       <div style="font-family: monospace; background: #000; color: #e2e8f0; padding: 32px; border-radius: 12px; border: 1px solid rgba(37,99,235,0.3);">
         <h2 style="color: #38bdf8; margin: 0 0 8px;">New Team Contact Message</h2>
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
     `;
   } else {
     const { name, email, role, university } = body;
-    emailSubject = `[CADen Contact] ${subject} — ${name}`;
+    emailSubject = `[Parametra Contact] ${subject} — ${name}`;
     html = `
       <div style="font-family: monospace; background: #000; color: #e2e8f0; padding: 32px; border-radius: 12px; border: 1px solid rgba(37,99,235,0.3);">
         <h2 style="color: #38bdf8; margin: 0 0 24px;">New Contact Message</h2>
@@ -155,13 +155,13 @@ export async function POST(req: NextRequest) {
   try {
     await Promise.all([
       resend.emails.send({
-        from: "Project CADen <developers@projcaden.dev>",
+        from: "Parametra.ai <developers@projcaden.dev>",
         to: "developers@projcaden.dev",
         subject: emailSubject,
         html,
       }),
       resend.emails.send({
-        from: "Project CADen <developers@projcaden.dev>",
+        from: "Parametra.ai <developers@projcaden.dev>",
         to: userEmail,
         subject: `Re: ${body.subject ?? body.teamSubject}`,
         html: userConfirmHtml,
