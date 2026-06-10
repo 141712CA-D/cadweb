@@ -12,10 +12,14 @@ export default function Home() {
   const [skipIntro, setSkipIntro] = useState(false);
 
   useEffect(() => {
-    const played = sessionStorage.getItem("introPlayed") === "true";
-    setSkipIntro(played);
-    setIntroComplete(played);
-    setMounted(true);
+    const initIntro = () => {
+      const played = sessionStorage.getItem("introPlayed") === "true";
+      setSkipIntro(played);
+      setIntroComplete(played);
+      setMounted(true);
+    };
+
+    initIntro();
   }, []);
 
   function handleIntroDone() {

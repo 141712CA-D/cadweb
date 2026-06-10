@@ -2,10 +2,16 @@
 
 Pre-launch marketing site for Parametra.ai, an AI-powered multi-agent CAD design tool for Onshape. Built with Next.js 16, Tailwind CSS v4, TypeScript.
 
-**Current version: v1.5.2**
-- Hero center CTA: desktop "Join the dozens of engineers waiting for launch", mobile "Join the engineers waiting for launch" with `max-w-[220px]` wrapping to two lines
-- Hero disclaimer: mobile "Built for everyone · Launching soon", desktop "Built by Michigan Engineers · Designed for Everyone · Launching soon" — "Built by Michigan Engineers" links to `/about`
-- "A glimpse" divider made more prominent — `text-white/50`, divider lines `blue-500/40`
+**Current version: v1.6.0**
+- Hero redesigned: badge removed, subtitle is "Built by Engineers · For Everyone · Releasing Soon"
+- Hero right panel: animated crossfade between `/OnshapeRaw.png` and `/OnshapeDemo.png` every 3.2s (900ms fade), status bar overlay shows current phase
+- Hero right panel: description paragraph sits above the image card
+- Hero prompt box: label "TEST PROMPT", typewriter animation cycles 4 prompts — main prompt holds 5000ms, others 2200ms; 36ms/char typing, 14ms/char erasing; invisible spacer locks box height on mobile
+- Hero background gradients: both top AND bottom use blue-600 `rgba(37,99,235,...)` (previously top was sky, bottom was emerald)
+- "Scroll the demo" button removed; scroll nudge (font-mono "scroll" + bouncing chevron) fades in after 4s idle, disappears when `scrollY > 60`
+- Bottom feature cards ("Native workflow", "Editable output", "Prompt to iteration") removed
+- New **platform tree** scroll section added after terminal demo (see Hero section below)
+- `cursor-blink` keyframe + class added to `globals.css` (step-end, 1s)
 - About Us link now visible on mobile header (removed `hidden sm:block`)
 - About page: social links added — Andy has LinkedIn, Sandeep has LinkedIn + Website; icons on mobile, text labels on desktop
 - About page: cards are fully clickable (stretched link pattern, `absolute inset-0 z-10`) — Andy → LinkedIn, Sandeep → personal website; social buttons sit above at `z-20`
@@ -117,13 +123,32 @@ vercel.json                 # Vercel Cron Job: /api/sync-waitlist runs daily at 
 - Color palette: blue (`rgba(37,99,235,...)`) and sky (`rgba(14,165,233,...)`)
 
 ### Hero (`Hero.tsx`)
-- Ambient glow orbs (animated via `orb-1/2/3` CSS classes)
-- Floating particles (10 items, CSS custom properties `--duration` and `--delay`)
-- Terminal demo window showing multi-agent session (`sketch agent [1/4]` → extrusion → fillet → edit agents)
-  - Terminal title bar: dots use `flex-shrink-0` so they never compress on mobile
-  - Mobile title: `project-caden · sketch agent [1/4]` — desktop: full string
-- Three-pillar row: "Describe it" / "Agents go to work" / "A complete model in Onshape"
-- Double CTA: "Join the waitlist" (top + bottom repeat)
+Hero has three scroll zones:
+
+**1 — Initial viewport (above fold)**
+- Left column: h1 tagline, subtitle "Built by Engineers · For Everyone · Releasing Soon", TEST PROMPT box with typewriter, "Join the waitlist" CTA
+- TEST PROMPT typewriter: `typingPrompts` array of 4 prompts, driven by `typingPhase` / `charPos` / `promptIdx` state + `useEffect` chain; invisible spacer prevents mobile reflow
+- Right column: description paragraph + image card (`OnshapeRaw.png` / `OnshapeDemo.png` crossfade via `demoView` state toggled every 3200ms by `setInterval`; status bar overlay inside image)
+- Scroll nudge: `showNudge` state — `setTimeout(4000)` shows it, scroll listener hides it at `scrollY > 60`; renders as `fixed bottom-8` chevron
+
+**2 — Pinned terminal demo** (`#generation-demo`, `ref={demoRef}`, `min-h-[500vh]`)
+- 4 stages (`stages` array): Prompt intake → Sketch solver → Feature build → Ready in Onshape
+- `activeIndex` driven by scroll progress through `demoRef` height
+- Desktop: `TerminalAccumulator` — terminals accumulate in a 2×2 grid as you scroll
+- Mobile: `TerminalSwap` — one terminal visible at a time, fades in/out
+- Stage dots use per-stage `accent` color class
+
+**3 — Platform tree section** (`ref={treeRef}`, `min-h-[600vh]`)
+- 6 stages (`platformStages`): Generated in Onshape → Persisted in Fusion 360 → Persisted in SolidWorks → Fusion 360 · Simulation → SolidWorks · Simulation → One prompt. Every tool.
+- `platformIndex` driven by scroll progress through `treeRef` height
+- `PlatformTree` component:
+  - Root: Onshape card (always visible), `[done]` line turns emerald at stage 5
+  - Trunk → crossbar (`mx-[25%]`) → drops → 2-column grid with Fusion 360 (stage 1) and SolidWorks (stage 2) branch cards
+  - `LeafList` component below each branch: vertical trunk with left-border rail + horizontal tick connectors to leaf cards
+  - Fusion 360 leaves (stage 3): `[cam]`, `[gen-design]`, `[static-fea]`, `[thermal]`, `[event-sim]`
+  - SolidWorks leaves (stage 4): `[config]`, `[static-sim]`, `[flow-sim]`, `[drop-test]`, `[motion]`
+- Mobile stability: section header `h2` + `p` use invisible-spacer pattern; entire `PlatformTree` is wrapped in `relative` with an invisible `activeIndex=5` copy below and the real tree `absolute inset-0` on top — prevents any reflow/jump as tree builds
+- Background gradients: both top and bottom radial gradients use `rgba(37,99,235,...)` (blue-600)
 
 ### Header (`Header.tsx`)
 - Fixed at `top-8` (below the 32px DevBanner at `top-0`, `z-[60]`)
@@ -284,13 +309,14 @@ function missing(...vals: unknown[]) {
 ## Styling Notes
 
 - **Color palette**: Black base (`#000`), blue-600 (`rgba(37,99,235,...)`) and sky-400 (`rgba(14,165,233,...)`)
-- **No violet/cyan** — was replaced with blue/sky throughout
+- **No violet/cyan** — was replaced with blue/sky throughout (violet is used only in PlatformTree for SolidWorks node color)
 - **`gradient-text`**: `linear-gradient(135deg, #ffffff 0%, #93c5fd 40%, #38bdf8 100%)`
 - **`glow-button`**: animated box-shadow pulse in blue
 - **`badge-shimmer`**: sweeping gradient animation on hero badge
 - **`grid-bg`**: subtle white grid lines with pulsing opacity
 - **`header-glass`**: `rgba(0,0,0,0.6)` + `backdrop-filter: blur(16px)`
 - **`particle`**: uses CSS custom properties `--duration` and `--delay` for per-particle timing
+- **`cursor-blink`**: `step-end` animation at 1s — used for typewriter cursor in hero prompt box
 - All keyframes defined in `globals.css`
 
 ---
