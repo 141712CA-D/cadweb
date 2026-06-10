@@ -2,7 +2,7 @@
 
 Pre-launch marketing site for Project CADen, an AI-powered multi-agent CAD design tool for Onshape. Built with Next.js 16, Tailwind CSS v4, TypeScript.
 
-**Current version: v1.5.1.1**
+**Current version: v1.5.2**
 - Hero center CTA: desktop "Join the dozens of engineers waiting for launch", mobile "Join the engineers waiting for launch" with `max-w-[220px]` wrapping to two lines
 - Hero disclaimer: mobile "Built for everyone · Launching soon", desktop "Built by Michigan Engineers · Designed for Everyone · Launching soon" — "Built by Michigan Engineers" links to `/about`
 - "A glimpse" divider made more prominent — `text-white/50`, divider lines `blue-500/40`
@@ -105,15 +105,15 @@ vercel.json                 # Vercel Cron Job: /api/sync-waitlist runs daily at 
 ### Intro Animation (`IntroAnimation.tsx`)
 - Phases and timings:
   ```
-  PHASE_SCANLINE  = 300ms   scan line sweeps
-  PHASE_TYPING    = 900ms   typewriter starts ("Project CADen", 13 chars × 70ms = ~1810ms done)
-  PHASE_BURST     = 1900ms  radial burst ring
-  PHASE_EXIT      = 2300ms  overlay fades out, scroll unlocked, pointer-events disabled
-  PHASE_UNMOUNT   = 3000ms  component removed from DOM, onDone() called
+  PHASE_RISE    = 80ms    logo + title rise from bottom
+  PHASE_TEXT    = 350ms   tagline fades in
+  PHASE_REVEAL  = 800ms   call onDone so page is ready underneath
+  PHASE_SLIDE   = 900ms   overlay slides up (curtain reveal)
+  PHASE_UNMOUNT = 1650ms  remove from DOM
   ```
-- Locks `document.body.style.overflow = "hidden"` on mount, restores at PHASE_EXIT
-- Sets `pointerEvents: "none"` at PHASE_EXIT so content behind is immediately interactive
-- `document.body.focus()` called at PHASE_EXIT for scroll restoration
+- Locks `document.body.style.overflow = "hidden"` on mount, restores at PHASE_REVEAL
+- `document.body.focus()` called at PHASE_REVEAL for scroll restoration
+- Logo and title in a `flex-col items-center gap-0` container; title uses `mt-2 sm:-mt-6` — small positive gap on mobile, slight overlap on desktop (do NOT use large negative margins, it causes the logo to clip into the title on mobile)
 - Color palette: blue (`rgba(37,99,235,...)`) and sky (`rgba(14,165,233,...)`)
 
 ### Hero (`Hero.tsx`)
@@ -129,7 +129,7 @@ vercel.json                 # Vercel Cron Job: /api/sync-waitlist runs daily at 
 - Fixed at `top-8` (below the 32px DevBanner at `top-0`, `z-[60]`)
 - Scrolled state adds `header-glass` (backdrop blur) + border
 - Mobile: "About Us" hidden (`hidden sm:block`), "Join the waitlist" shortens to "Waitlist"
-- Logo: `/logo copy.png` from public (note the space in filename)
+- Logo: plain `<img>` tag (NOT Next.js `<Image>`) with `style={{ width: 32, height: 32, display: "block" }}` — Next.js Image caused vertical displacement bugs with the SVG
 
 ### About (`/about`)
 - Andrew Yang — Mechanical Engineering, image left / text right on desktop
@@ -145,6 +145,13 @@ vercel.json                 # Vercel Cron Job: /api/sync-waitlist runs daily at 
 - Mobile: social buttons show inline SVG icons (LinkedIn logo, globe); desktop: text labels
 - `icons` map at top of file holds SVGs keyed by label string (`"LinkedIn"`, `"Website"`)
 - `primaryHref` field on each team member drives the card click destination
+
+### Overview (`/overview`)
+- Two sections:
+  1. **The Vision for CADen** — pipeline flow tree (ASME Drawing + Direct Prompt → CADen Pipeline → Onshape model)
+  2. **Beyond Onshape** — two cards:
+     - Universal CAD Translation: SolidWorks / Fusion 360 / CATIA / FreeCAD → any target platform
+     - Onshape Native Integration: prompt-to-CAD in Onshape (labeled "Phase 1 — Coming Soon", NOT live yet)
 
 ### Waitlist (`/signup`)
 - Two tabs: Individual | Team / Organization
@@ -291,7 +298,7 @@ function missing(...vals: unknown[]) {
 ## Known Quirks
 
 - `SandeepHeashot.jpg` — filename typo (missing 'd'), keep as-is
-- `logo copy.png` — active logo in `/public` (space in name), referenced everywhere as `"/logo copy.png"`
+- Logo is `/public/logo.svg` — referenced as `"/logo.svg"` via plain `<img>` tag in Header and Next.js `<Image>` in IntroAnimation
 - `GOOGLE_PRIVATE_KEY` in `.env.local` has `\n` escaped as `\\n` — code does `.replace(/\\n/g, "\n")` to restore newlines at runtime
 - Resend client in `contact/route.ts` initialized **inside** the handler; in `waitlist/route.ts` initialized at module level — both work, keep as-is
 - `tabIndex={-1}` on `<body>` in `layout.tsx` — makes body programmatically focusable for scroll restoration after intro animation completes
