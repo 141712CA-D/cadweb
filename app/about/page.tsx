@@ -79,7 +79,7 @@ export default function AboutPage() {
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight">
             <span className="gradient-text">Meet the brains</span>
             <br />
-            <span className="text-white/90">behind Parametra.ai _ TEST</span>
+            <span className="text-white/90">behind Parametra.ai</span>
           </h1>
         </div>
 
