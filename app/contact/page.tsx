@@ -116,6 +116,7 @@ export default function ContactPage() {
   }
 
   return (
+    <>
     <div className="relative min-h-screen bg-black flex flex-col items-center justify-center px-6 py-20 overflow-hidden">
 
       <div className="grid-bg absolute inset-0 pointer-events-none" />
@@ -317,5 +318,18 @@ export default function ContactPage() {
         )}
       </div>
     </div>
+    <footer className="bg-black border-t border-white/5 py-6 px-6">
+      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p className="text-xs text-white/20">© {new Date().getFullYear()} Parametra.ai. All rights reserved.</p>
+        <div className="flex items-center gap-6">
+          <Link href="/how-it-works" className="text-xs text-white/25 hover:text-white/60 transition-colors">How it works</Link>
+          <Link href="/about" className="text-xs text-white/25 hover:text-white/60 transition-colors">About</Link>
+          <Link href="/signup" className="text-xs text-white/25 hover:text-white/60 transition-colors">Join waitlist</Link>
+          <Link href="/terms" className="text-xs text-white/25 hover:text-white/60 transition-colors">Terms</Link>
+          <Link href="/privacy-policy" className="text-xs text-white/25 hover:text-white/60 transition-colors">Privacy</Link>
+        </div>
+      </div>
+    </footer>
+    </>
   );
 }
