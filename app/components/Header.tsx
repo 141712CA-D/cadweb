@@ -50,10 +50,10 @@ export default function Header() {
 
           {/* Desktop nav links */}
           <Link
-            href="/overview"
+            href="/how-it-works"
             className="hidden sm:block text-sm font-medium px-4 py-2 rounded-full border border-blue-500/30 text-white/60 hover:border-blue-400/50 hover:text-white transition-all duration-200"
           >
-            Overview
+            How it works
           </Link>
           <Link
             href="/about"
@@ -99,11 +99,11 @@ export default function Header() {
                 style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(20px)" }}
               >
                 <Link
-                  href="/overview"
+                  href="/how-it-works"
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center gap-3 px-4 py-3 text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors"
                 >
-                  Overview
+                  How it works
                 </Link>
                 <div className="h-px bg-white/5 mx-4" />
                 <Link
