@@ -126,6 +126,7 @@ export default function PrivacyPolicyPage() {
             <Link href="/contact" className="text-xs text-white/25 hover:text-white/60 transition-colors">Contact us</Link>
             <Link href="/signup" className="text-xs text-white/25 hover:text-white/60 transition-colors">Join waitlist</Link>
             <Link href="/terms" className="text-xs text-white/25 hover:text-white/60 transition-colors">Terms</Link>
+            <Link href="/privacy-policy" className="text-xs text-white/25 hover:text-white/60 transition-colors">Privacy</Link>
           </div>
         </div>
       </footer>
