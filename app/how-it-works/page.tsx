@@ -21,7 +21,7 @@ const processingSteps = [
   },
 ];
 
-export default function OverviewPage() {
+export default function HowItWorksPage() {
   return (
     <div className="relative min-h-screen bg-black flex flex-col overflow-hidden">
 
@@ -291,24 +291,26 @@ export default function OverviewPage() {
 
         {/* ── CTA ── */}
         <div className="mt-14 flex flex-col items-center gap-4 text-center">
-            <p className="text-white/25 text-sm">Want early access?</p>
-            <Link
-              href="/signup"
-              className="glow-button px-8 py-3.5 rounded-full bg-gradient-to-r from-blue-600 to-sky-400 text-white text-sm font-semibold hover:opacity-90 transition-opacity duration-200"
-            >
-              Join the waitlist
-            </Link>
-          </div>
+          <p className="text-white/25 text-sm">Want early access?</p>
+          <Link
+            href="/signup"
+            className="glow-button px-8 py-3.5 rounded-full bg-gradient-to-r from-blue-600 to-sky-400 text-white text-sm font-semibold hover:opacity-90 transition-opacity duration-200"
+          >
+            Join the waitlist
+          </Link>
+        </div>
 
       </main>
 
       {/* Footer */}
       <footer className="relative z-10 bg-black border-t border-white/5 py-6 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-white/20">© 2026 Parametra.ai. All rights reserved.</p>
+          <p className="text-xs text-white/20">© {new Date().getFullYear()} Parametra.ai. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <Link href="/contact" className="text-xs text-white/25 hover:text-white/60 transition-colors">Contact us</Link>
             <Link href="/signup" className="text-xs text-white/25 hover:text-white/60 transition-colors">Join waitlist</Link>
+            <Link href="/terms" className="text-xs text-white/25 hover:text-white/60 transition-colors">Terms</Link>
+            <Link href="/privacy-policy" className="text-xs text-white/25 hover:text-white/60 transition-colors">Privacy</Link>
           </div>
         </div>
       </footer>
