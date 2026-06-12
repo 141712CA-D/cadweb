@@ -63,13 +63,15 @@ export default function AboutPage() {
   const [activeIndex, setActiveIndex] = useState(-1);
   const [showNudge, setShowNudge] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const activeIndexRef = useRef(-1);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
     const onScroll = () => {
-      const idx = Math.round(container.scrollTop / window.innerHeight) - 1;
-      setActiveIndex(Math.max(-1, Math.min(team.length, idx)));
+      const idx = Math.max(-1, Math.min(team.length, Math.round(container.scrollTop / window.innerHeight) - 1));
+      setActiveIndex(idx);
+      activeIndexRef.current = idx;
       if (container.scrollTop > 60) setShowNudge(false);
     };
     container.addEventListener("scroll", onScroll, { passive: true });
@@ -79,6 +81,23 @@ export default function AboutPage() {
   useEffect(() => {
     const t = setTimeout(() => setShowNudge(true), 2000);
     return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+      e.preventDefault();
+      const next = e.key === "ArrowDown"
+        ? activeIndexRef.current + 1
+        : activeIndexRef.current - 1;
+      const clamped = Math.max(-1, Math.min(team.length, next));
+      containerRef.current?.scrollTo({
+        top: Math.max(0, (clamped + 1) * window.innerHeight),
+        behavior: "smooth",
+      });
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
   const scrollToMember = (i: number) => {
@@ -114,20 +133,14 @@ export default function AboutPage() {
       >
         {team.map((member, i) => (
           <React.Fragment key={member.name}>
-            <button onClick={() => scrollToMember(i)} className="flex items-center gap-3 py-1 cursor-pointer">
+            <button onClick={() => scrollToMember(i)} className="py-1 cursor-pointer">
               <div
-                className="w-2 h-2 rounded-full transition-all duration-500 flex-shrink-0"
+                className="w-2 h-2 rounded-full transition-all duration-500"
                 style={{
                   background: activeIndex === i ? "rgba(96,165,250,1)" : "rgba(255,255,255,0.15)",
                   boxShadow: activeIndex === i ? "0 0 8px rgba(37,99,235,0.8)" : "none",
                 }}
               />
-              <span
-                className="text-xs font-mono transition-all duration-500 whitespace-nowrap"
-                style={{ color: activeIndex === i ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.15)" }}
-              >
-                {member.name.split(" ")[0]}
-              </span>
             </button>
             {i < team.length - 1 && (
               <div className="w-px ml-[3px]" style={{ height: "32px", background: "rgba(255,255,255,0.08)" }} />
@@ -190,55 +203,33 @@ export default function AboutPage() {
         <div style={{ position: "absolute", top: "200vh", height: "1px", width: "100%", ...snap }} />
 
         {/* Sticky card display */}
-        <div className="sticky top-0 h-screen flex items-center justify-center px-4 sm:px-20">
+        <div className="sticky top-0 h-screen flex items-center justify-center px-4 sm:px-20" style={{ overflow: "visible" }}>
 
-          {/*
-            Fixed-height container. Cards are absolutely stacked inside.
-            Height matches the card content. overflow:visible shows peeking cards below.
-          */}
-          <div
-            className="relative w-full max-w-4xl"
-            style={{ height: "clamp(260px, 32vh, 300px)", overflow: "visible" }}
-          >
+          <div className="relative w-full max-w-4xl h-[550px] sm:h-[450px] pb-16">
             {team.map((member, cardIndex) => {
               const diff = cardIndex - deckIndex;
 
               let cardStyle: React.CSSProperties;
               if (diff < 0) {
-                // Already shown — exit upward
                 cardStyle = { transform: "translateY(-110%)", opacity: 0, zIndex: 0, pointerEvents: "none" };
               } else if (diff === 0) {
-                // Front card
-                cardStyle = {
-                  transform: "translateY(0%)",
-                  opacity: 1,
-                  zIndex: 30,
-                  boxShadow: "0 16px 48px rgba(0,0,0,0.6)",
-                };
+                cardStyle = { transform: "translateY(0px) scale(1)", transformOrigin: "top center", opacity: 1, zIndex: 30, boxShadow: "0 16px 48px rgba(0,0,0,0.6)" };
               } else if (diff === 1) {
-                // One behind — just top edge visible below front card
-                cardStyle = {
-                  transform: "translateY(calc(100% - 10px))",
-                  opacity: 1,
-                  zIndex: 20,
-                };
+                cardStyle = { transform: "translateY(30px) scale(0.95)", transformOrigin: "top center", opacity: 1, zIndex: 20 };
+              } else if (diff === 2) {
+                cardStyle = { transform: "translateY(60px) scale(0.90)", transformOrigin: "top center", opacity: 1, zIndex: 10 };
               } else {
-                // Two behind — even less visible
-                cardStyle = {
-                  transform: "translateY(calc(100% - 4px))",
-                  opacity: 1,
-                  zIndex: 10,
-                };
+                cardStyle = { transform: "translateY(90px) scale(0.85)", transformOrigin: "top center", opacity: 0, zIndex: 0 };
               }
 
               return (
                 <div
                   key={member.name}
-                  className="absolute top-0 left-0 right-0 transition-all duration-700 ease-in-out"
+                  className="absolute inset-0 transition-all duration-700 ease-in-out"
                   style={cardStyle}
                 >
                   <div
-                    className="w-full rounded-2xl border border-white/8 p-5 sm:p-8 flex flex-col sm:flex-row items-center gap-5 sm:gap-10"
+                    className="w-full h-[450px] sm:h-[380px] rounded-2xl border border-white/8 p-5 sm:p-8 flex flex-col sm:flex-row items-center gap-5 sm:gap-10"
                     style={{
                       background: "linear-gradient(145deg, rgba(37,99,235,0.07) 0%, rgba(0,0,0,0.88) 100%)",
                       backdropFilter: "blur(20px)",
@@ -268,7 +259,7 @@ export default function AboutPage() {
                     </div>
 
                     {/* Text */}
-                    <div className="flex flex-col gap-3 items-center text-center sm:items-start sm:text-left flex-1 min-w-0">
+                    <div className="flex flex-col gap-3 items-center text-center sm:items-start sm:text-left flex-1 min-w-0 overflow-y-auto pr-2">
                       <div>
                         <p className="text-xs text-blue-400/60 tracking-widest uppercase font-mono mb-1.5">{member.role}</p>
                         <h2 className="text-xl sm:text-3xl font-bold text-white">{member.name}</h2>
