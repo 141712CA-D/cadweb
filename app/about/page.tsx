@@ -205,7 +205,7 @@ export default function AboutPage() {
         {/* Sticky card display */}
         <div className="sticky top-0 h-screen flex items-center justify-center px-4 sm:px-20" style={{ overflow: "visible" }}>
 
-          <div className="relative w-full max-w-4xl h-[550px] sm:h-[450px] pb-16">
+          <div className="relative w-full max-w-4xl h-[650px] sm:h-[450px] pb-16">
             {team.map((member, cardIndex) => {
               const diff = cardIndex - deckIndex;
 
@@ -229,7 +229,7 @@ export default function AboutPage() {
                   style={cardStyle}
                 >
                   <div
-                    className="w-full h-[450px] sm:h-[380px] rounded-2xl border border-white/8 p-5 sm:p-8 flex flex-col sm:flex-row items-center gap-5 sm:gap-10"
+                    className="w-full h-[520px] sm:h-[380px] rounded-2xl border border-white/8 p-5 sm:p-8 flex flex-col sm:flex-row items-center gap-5 sm:gap-10"
                     style={{
                       background: "linear-gradient(145deg, rgba(37,99,235,0.07) 0%, rgba(0,0,0,0.88) 100%)",
                       backdropFilter: "blur(20px)",
@@ -259,7 +259,7 @@ export default function AboutPage() {
                     </div>
 
                     {/* Text */}
-                    <div className="flex flex-col gap-3 items-center text-center sm:items-start sm:text-left flex-1 min-w-0 overflow-y-auto pr-2">
+                    <div className="flex flex-col gap-3 items-center text-center sm:items-start sm:text-left flex-1 min-w-0">
                       <div>
                         <p className="text-xs text-blue-400/60 tracking-widest uppercase font-mono mb-1.5">{member.role}</p>
                         <h2 className="text-xl sm:text-3xl font-bold text-white">{member.name}</h2>
