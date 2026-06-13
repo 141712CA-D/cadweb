@@ -33,7 +33,7 @@ export default function Home() {
       {mounted && !skipIntro && <IntroAnimation onDone={handleIntroDone} />}
 
       <main
-        className="flex flex-col min-h-screen bg-black"
+        className="flex flex-col min-h-screen bg-[#F5F0E8]"
         style={{
           opacity: introComplete ? 1 : 0,
           transition: skipIntro ? "none" : "opacity 0.15s ease",
@@ -41,17 +41,17 @@ export default function Home() {
       >
         <Header />
         <Hero />
-        <footer className="bg-black border-t border-white/5 py-6 px-6">
+        <footer className="bg-[#F5F0E8] border-t border-slate-300 py-6 px-6">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-white/20">© {new Date().getFullYear()} Parametra.ai. All rights reserved.</p>
-            <p className="text-xs text-white/15 font-mono sm:absolute sm:left-1/2 sm:-translate-x-1/2">v1.5.1.1</p>
-            <div className="flex items-center gap-6">
-              <a href="/how-it-works" className="text-xs text-white/25 hover:text-white/60 transition-colors">How it works</a>
-              <a href="/about" className="text-xs text-white/25 hover:text-white/60 transition-colors">About</a>
-              <a href="/contact" className="text-xs text-white/25 hover:text-white/60 transition-colors">Contact us</a>
-              <a href="/signup" className="text-xs text-white/25 hover:text-white/60 transition-colors">Join waitlist</a>
-              <a href="/terms" className="text-xs text-white/25 hover:text-white/60 transition-colors">Terms</a>
-              <a href="/privacy-policy" className="text-xs text-white/25 hover:text-white/60 transition-colors">Privacy</a>
+            <p className="text-xs text-slate-700">© {new Date().getFullYear()} Parametra. All rights reserved.</p>
+            <p className="text-xs text-slate-600 font-mono sm:absolute sm:left-1/2 sm:-translate-x-1/2">v1.5.1.1</p>
+            <div className="grid grid-cols-3 gap-x-6 gap-y-3 sm:flex sm:items-center sm:gap-6">
+              <a href="/how-it-works" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">How it works</a>
+              <a href="/about" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">About</a>
+              <a href="/contact" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Contact us</a>
+              <a href="/signup" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Join waitlist</a>
+              <a href="/terms" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Terms</a>
+              <a href="/privacy-policy" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Privacy</a>
             </div>
           </div>
         </footer>
