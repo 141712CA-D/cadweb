@@ -4,18 +4,18 @@ import Header from "../components/Header";
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+    <div className="min-h-screen bg-[#F5F0E8] text-[#1E293B] flex flex-col">
       <DevBanner />
       <Header />
 
       <main className="flex-1 max-w-3xl mx-auto px-6 py-32 sm:py-40 w-full">
         <h1 className="text-3xl sm:text-4xl font-bold mb-2 gradient-text">Privacy Policy</h1>
-        <p className="text-xs text-white/30 mb-12">Last updated: June 2026</p>
+        <p className="text-xs text-[#1E293B]/30 mb-12">Last updated: June 2026</p>
 
-        <div className="space-y-10 text-sm text-white/60 leading-relaxed">
+        <div className="space-y-10 text-sm text-[#1E293B]/60 leading-relaxed">
 
           <section>
-            <h2 className="text-base font-semibold text-white/80 mb-3">1. Information We Collect</h2>
+            <h2 className="text-base font-semibold text-[#1E293B]/80 mb-3">1. Information We Collect</h2>
             <p>When you join our waitlist or contact us, we collect:</p>
             <ul className="list-disc list-inside mt-2 space-y-1">
               <li>Name and email address</li>
@@ -30,7 +30,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-white/80 mb-3">2. How We Use Your Information</h2>
+            <h2 className="text-base font-semibold text-[#1E293B]/80 mb-3">2. How We Use Your Information</h2>
             <p>We use the information we collect to:</p>
             <ul className="list-disc list-inside mt-2 space-y-1">
               <li>Manage and communicate about waitlist access</li>
@@ -41,7 +41,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-white/80 mb-3">3. Data Storage</h2>
+            <h2 className="text-base font-semibold text-[#1E293B]/80 mb-3">3. Data Storage</h2>
             <p>
               Waitlist data is stored in a Neon Serverless Postgres database and synced to Google Sheets.
               Both are hosted in the United States. We take reasonable technical measures to protect your data,
@@ -50,14 +50,14 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-white/80 mb-3">4. Third-Party Services</h2>
+            <h2 className="text-base font-semibold text-[#1E293B]/80 mb-3">4. Third-Party Services</h2>
             <p>We use the following third-party services which may process your data:</p>
             <ul className="list-disc list-inside mt-2 space-y-1">
-              <li><strong className="text-white/70">Resend</strong> — transactional email delivery</li>
-              <li><strong className="text-white/70">Google Sheets / Google Cloud</strong> — waitlist storage and sync</li>
-              <li><strong className="text-white/70">Neon</strong> — serverless Postgres database</li>
-              <li><strong className="text-white/70">Cloudflare Turnstile</strong> — bot protection on forms</li>
-              <li><strong className="text-white/70">Vercel</strong> — hosting and analytics</li>
+              <li><strong className="text-[#1E293B]/70">Resend</strong> — transactional email delivery</li>
+              <li><strong className="text-[#1E293B]/70">Google Sheets / Google Cloud</strong> — waitlist storage and sync</li>
+              <li><strong className="text-[#1E293B]/70">Neon</strong> — serverless Postgres database</li>
+              <li><strong className="text-[#1E293B]/70">Cloudflare Turnstile</strong> — bot protection on forms</li>
+              <li><strong className="text-[#1E293B]/70">Vercel</strong> — hosting and analytics</li>
             </ul>
             <p className="mt-3">
               Each third party has its own privacy policy governing their data handling.
@@ -65,7 +65,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-white/80 mb-3">5. Data Sharing</h2>
+            <h2 className="text-base font-semibold text-[#1E293B]/80 mb-3">5. Data Sharing</h2>
             <p>
               We do not sell or rent your personal data to any third party. We do not share your information
               with advertisers. We may disclose data if required by law or to protect our legal rights.
@@ -73,7 +73,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-white/80 mb-3">6. Your Rights</h2>
+            <h2 className="text-base font-semibold text-[#1E293B]/80 mb-3">6. Your Rights</h2>
             <p>
               You may request deletion of your personal data at any time by contacting us. We will remove your
               information from our systems within a reasonable time frame. Note that removing your data will
@@ -82,7 +82,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-white/80 mb-3">7. Cookies</h2>
+            <h2 className="text-base font-semibold text-[#1E293B]/80 mb-3">7. Cookies</h2>
             <p>
               We do not use tracking cookies. Session-level storage (e.g., to remember whether the intro
               animation has played) stays in your browser and is never transmitted to our servers.
@@ -90,7 +90,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-white/80 mb-3">8. Children&apos;s Privacy</h2>
+            <h2 className="text-base font-semibold text-[#1E293B]/80 mb-3">8. Children&apos;s Privacy</h2>
             <p>
               The Service is not directed to children under 13. We do not knowingly collect personal
               information from anyone under 13. If you believe we have inadvertently collected such data,
@@ -99,7 +99,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-white/80 mb-3">9. Changes to This Policy</h2>
+            <h2 className="text-base font-semibold text-[#1E293B]/80 mb-3">9. Changes to This Policy</h2>
             <p>
               We may update this Privacy Policy from time to time. We will post the new policy on this page
               with an updated date. Your continued use of the Service after changes constitutes acceptance.
@@ -107,26 +107,26 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-white/80 mb-3">10. Contact</h2>
+            <h2 className="text-base font-semibold text-[#1E293B]/80 mb-3">10. Contact</h2>
             <p>
               For privacy-related requests or questions, please reach out via the{" "}
-              <Link href="/contact" className="text-blue-400 hover:text-blue-300 transition-colors">contact page</Link>.
+              <Link href="/contact" className="text-indigo-500 hover:text-indigo-600 transition-colors">contact page</Link>.
             </p>
           </section>
 
         </div>
       </main>
 
-      <footer className="bg-black border-t border-white/5 py-6 px-6">
+      <footer className="bg-[#F5F0E8] border-t border-slate-300 py-6 px-6">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-white/20">© {new Date().getFullYear()} Parametra.ai. All rights reserved.</p>
-          <div className="flex items-center gap-6">
-            <Link href="/how-it-works" className="text-xs text-white/25 hover:text-white/60 transition-colors">How it works</Link>
-            <Link href="/about" className="text-xs text-white/25 hover:text-white/60 transition-colors">About</Link>
-            <Link href="/contact" className="text-xs text-white/25 hover:text-white/60 transition-colors">Contact us</Link>
-            <Link href="/signup" className="text-xs text-white/25 hover:text-white/60 transition-colors">Join waitlist</Link>
-            <Link href="/terms" className="text-xs text-white/25 hover:text-white/60 transition-colors">Terms</Link>
-            <Link href="/privacy-policy" className="text-xs text-white/25 hover:text-white/60 transition-colors">Privacy</Link>
+          <p className="text-xs text-slate-700">© {new Date().getFullYear()} Parametra. All rights reserved.</p>
+          <div className="grid grid-cols-3 gap-x-6 gap-y-3 sm:flex sm:items-center sm:gap-6">
+            <Link href="/how-it-works" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">How it works</Link>
+            <Link href="/about" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">About</Link>
+            <Link href="/contact" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Contact us</Link>
+            <Link href="/signup" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Join waitlist</Link>
+            <Link href="/terms" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Terms</Link>
+            <Link href="/privacy-policy" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Privacy</Link>
           </div>
         </div>
       </footer>

@@ -13,7 +13,6 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close menu on route change / outside tap
   useEffect(() => {
     if (!menuOpen) return;
     const close = () => setMenuOpen(false);
@@ -25,7 +24,7 @@ export default function Header() {
     <header
       className={`fixed top-8 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "header-glass border-b border-white/10"
+          ? "header-glass border-b border-slate-200"
           : "bg-transparent border-b border-transparent"
       }`}
     >
@@ -36,12 +35,11 @@ export default function Header() {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/logo.svg"
-            alt="Parametra.ai"
-            style={{ width: 32, height: 32, display: "block", flexShrink: 0 }}
-            className="drop-shadow-[0_0_8px_rgba(37,99,235,0.6)]"
+            alt="Parametra"
+            style={{ width: 32, height: 32, display: "block", flexShrink: 0, filter: "brightness(0)" }}
           />
-          <span className="text-white font-semibold text-base sm:text-lg tracking-tight whitespace-nowrap">
-            Parametra<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-sky-400">.ai</span>
+          <span className="text-slate-900 font-semibold text-base sm:text-lg tracking-tight whitespace-nowrap">
+            Parametra
           </span>
         </Link>
 
@@ -51,13 +49,13 @@ export default function Header() {
           {/* Desktop nav links */}
           <Link
             href="/how-it-works"
-            className="hidden sm:block text-sm font-medium px-4 py-2 rounded-full border border-blue-500/30 text-white/60 hover:border-blue-400/50 hover:text-white transition-all duration-200"
+            className="hidden sm:block text-sm font-medium px-4 py-2 rounded-full border border-slate-300 bg-white/60 text-slate-600 hover:border-blue-500 hover:bg-white hover:text-slate-900 transition-all duration-200"
           >
             How it works
           </Link>
           <Link
             href="/about"
-            className="hidden sm:block text-sm font-medium px-4 py-2 rounded-full border border-blue-500/30 text-white/60 hover:border-blue-400/50 hover:text-white transition-all duration-200"
+            className="hidden sm:block text-sm font-medium px-4 py-2 rounded-full border border-slate-300 bg-white/60 text-slate-600 hover:border-blue-500 hover:bg-white hover:text-slate-900 transition-all duration-200"
           >
             About Us
           </Link>
@@ -65,7 +63,7 @@ export default function Header() {
           {/* Waitlist button */}
           <Link
             href="/signup"
-            className="text-xs sm:text-sm font-medium px-4 sm:px-5 py-2 rounded-full bg-gradient-to-r from-blue-600 to-sky-400 text-white hover:opacity-90 transition-opacity duration-200 shadow-lg shadow-blue-600/25 whitespace-nowrap"
+            className="text-xs sm:text-sm font-medium px-4 sm:px-5 py-2 rounded-full bg-slate-900 text-[#F5F0E8] hover:bg-slate-700 transition-all duration-200 shadow-sm whitespace-nowrap"
           >
             <span className="sm:hidden">Waitlist</span>
             <span className="hidden sm:inline">Join the waitlist</span>
@@ -75,7 +73,7 @@ export default function Header() {
           <div className="relative sm:hidden" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => setMenuOpen((v) => !v)}
-              className="flex flex-col justify-center items-center w-9 h-9 rounded-full border border-blue-500/30 text-white/60 hover:border-blue-400/50 hover:text-white transition-all duration-200 gap-1.5"
+              className="flex flex-col justify-center items-center w-9 h-9 rounded-full border border-slate-300 bg-white/60 text-slate-600 hover:border-blue-500 hover:bg-white hover:text-slate-900 transition-all duration-200 gap-1.5"
               aria-label="Menu"
             >
               <span
@@ -95,21 +93,21 @@ export default function Header() {
             {/* Dropdown */}
             {menuOpen && (
               <div
-                className="absolute right-0 top-12 w-44 rounded-2xl border border-white/10 overflow-hidden"
-                style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(20px)" }}
+                className="absolute right-0 top-12 w-44 rounded-2xl border border-slate-200 overflow-hidden"
+                style={{ background: "rgba(245,240,232,0.97)", backdropFilter: "blur(20px)" }}
               >
                 <Link
                   href="/how-it-works"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors"
                 >
                   How it works
                 </Link>
-                <div className="h-px bg-white/5 mx-4" />
+                <div className="h-px bg-slate-100 mx-4" />
                 <Link
                   href="/about"
                   onClick={() => setMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 text-sm text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors"
                 >
                   About Us
                 </Link>
