@@ -12,14 +12,14 @@ type Status = "idle" | "loading" | "success" | "cooldown" | "error";
 const ROLES = ["Student", "Instructor", "Freelancer", "Hobbyist", "Other"];
 
 const inputClass = (error?: string) =>
-  `w-full bg-white/[0.03] border ${error ? "border-red-500/60" : "border-white/10"} rounded-xl px-4 py-3 text-sm text-white font-sans placeholder:text-white/25 focus:outline-none focus:border-blue-500/50 focus:bg-white/[0.05] transition-all duration-200`;
+  `w-full bg-white border ${error ? "border-red-400" : "border-slate-200"} rounded-xl px-4 py-3 text-sm text-slate-900 font-sans placeholder:text-slate-300 focus:outline-none focus:border-blue-400 focus:bg-white transition-all duration-200`;
 
-const labelClass = "block text-xs text-white/40 font-medium tracking-wide mb-2 uppercase";
-const errorClass = "text-xs text-red-400/80 mt-1.5";
+const labelClass = "block text-xs text-slate-500 font-medium tracking-wide mb-2 uppercase";
+const errorClass = "text-xs text-red-500 mt-1.5";
 
 const selectStyle = (hasValue: boolean) => ({
-  color: hasValue ? "rgba(255,255,255,1)" : "rgba(255,255,255,0.25)",
-  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
+  color: hasValue ? "rgb(15,23,42)" : "rgb(203,213,225)",
+  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgb(100,116,139)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
   backgroundRepeat: "no-repeat" as const,
   backgroundPosition: "right 14px center",
 });
@@ -117,73 +117,70 @@ export default function ContactPage() {
 
   return (
     <>
-    <div className="relative min-h-screen bg-black flex flex-col items-center justify-center px-6 py-20 overflow-hidden">
+    <div className="relative min-h-screen bg-[#F5F0E8] flex flex-col items-center justify-center px-6 py-20 overflow-hidden">
 
       <div className="grid-bg absolute inset-0 pointer-events-none" />
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="orb-1 absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(37,99,235,0.18) 0%, transparent 70%)", filter: "blur(40px)" }} />
+          style={{ background: "radial-gradient(circle, rgba(199,226,255,0.5) 0%, transparent 70%)", filter: "blur(40px)" }} />
         <div className="orb-2 absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(14,165,233,0.12) 0%, transparent 70%)", filter: "blur(40px)" }} />
+          style={{ background: "radial-gradient(circle, rgba(199,226,255,0.35) 0%, transparent 70%)", filter: "blur(40px)" }} />
       </div>
 
-      <div
-        className="relative z-10 w-full max-w-lg rounded-2xl border border-white/10 p-8 sm:p-10"
-        style={{ background: "linear-gradient(145deg, rgba(37,99,235,0.06) 0%, rgba(0,0,0,0.8) 100%)", backdropFilter: "blur(20px)" }}
-      >
+      <div className="relative z-10 w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-8 sm:p-10 shadow-sm">
         <div className="flex items-center justify-between mb-8">
           <Link href="/" className="flex items-center gap-0">
             <div className="flex-shrink-0 w-4 h-4 sm:w-7 sm:h-7">
-              <Image src="/logo.svg" alt="Parametra.ai" width={56} height={56} className="w-full h-auto" />
+              <Image src="/logo.svg" alt="Parametra" width={56} height={56} className="w-full h-auto" />
             </div>
-            <span className="text-white/60 text-sm font-medium whitespace-nowrap">
-              Parametra<span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-sky-400">.ai</span>
+            <span className="text-slate-500 text-sm font-medium whitespace-nowrap">
+              Parametra
             </span>
           </Link>
-          <Link href="/" className="text-xs text-white/25 hover:text-white/50 transition-colors">← Back</Link>
+          <Link href="/" className="text-xs text-slate-400 hover:text-slate-600 transition-colors">← Back</Link>
         </div>
 
         {status === "cooldown" ? (
           <div className="flex flex-col items-center text-center py-8 gap-4">
-            <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">
-              <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center">
+              <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-white">Slow down.</h2>
-            <p className="text-sm text-white/40 max-w-xs leading-relaxed">
+            <h2 className="text-xl font-bold text-slate-900">Slow down.</h2>
+            <p className="text-sm text-slate-500 max-w-xs leading-relaxed">
               You already sent a message recently. Try again in about {cooldownMins} minute{cooldownMins !== 1 ? "s" : ""}.
             </p>
             <button
               onClick={() => setStatus("idle")}
-              className="mt-4 text-xs text-blue-400/70 hover:text-blue-400 transition-colors"
+              className="mt-4 text-xs text-blue-600 hover:text-blue-700 transition-colors"
             >
               ← Go back
             </button>
           </div>
         ) : status === "success" ? (
           <div className="flex flex-col items-center text-center py-8 gap-4">
-            <div className="w-12 h-12 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center">
-              <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center">
+              <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-xl font-bold text-white">Message received.</h2>
-            <p className="text-sm text-white/40 max-w-xs leading-relaxed">We&apos;ll get back to you as soon as we can.</p>
-            <p className="text-xs text-white/20 max-w-xs leading-relaxed">If this is your first time receiving an email from developers@projcaden.dev, please unmark us as spam if applicable.</p>
+            <h2 className="text-xl font-bold text-slate-900">Message received.</h2>
+            <p className="text-sm text-slate-500 max-w-xs leading-relaxed">We&apos;ll get back to you as soon as we can.</p>
+            <p className="text-xs text-slate-400 max-w-xs leading-relaxed">If this is your first time receiving an email from developers@projcaden.dev, please unmark us as spam if applicable.</p>
             <button
               onClick={() => { sessionStorage.removeItem("introPlayed"); window.location.href = "/"; }}
-              className="mt-4 text-xs text-blue-400/70 hover:text-blue-400 transition-colors"
+              className="mt-4 text-xs text-blue-600 hover:text-blue-700 transition-colors"
             >
               ← Back to home
             </button>
           </div>
         ) : (
           <>
-            <h1 className="text-2xl font-bold text-white mb-1">Get in touch</h1>
-            <p className="text-sm text-white/30 mb-8">Have a question or want to learn more? We&apos;d love to hear from you.</p>
+            <h1 className="text-2xl font-bold text-slate-900 mb-1">Get in touch</h1>
+            <p className="text-sm text-slate-500 mb-8">Have a question or want to learn more? We&apos;d love to hear from you.</p>
 
-            <div className="flex gap-2 mb-8 p-1 rounded-xl bg-white/[0.03] border border-white/8">
+            <div className="flex gap-2 mb-8 p-1 rounded-xl bg-slate-100 border border-slate-200">
               {(["individual", "team"] as FormType[]).map((t) => (
                 <button
                   key={t}
@@ -191,8 +188,8 @@ export default function ContactPage() {
                   onClick={() => { setType(t); setErrors({}); }}
                   className={`flex-1 py-2 rounded-lg text-xs font-medium tracking-wide transition-all duration-200 ${
                     type === t
-                      ? "bg-gradient-to-r from-blue-600 to-sky-500 text-white shadow-lg shadow-blue-600/20"
-                      : "text-white/35 hover:text-white/60"
+                      ? "bg-slate-900 text-white shadow-sm"
+                      : "text-slate-500 hover:text-slate-700"
                   }`}
                 >
                   {t === "individual" ? "Individual" : "Team / Organization"}
@@ -220,8 +217,8 @@ export default function ContactPage() {
                     <select className={inputClass(errors.role) + " cursor-pointer appearance-none pr-10"} value={role}
                       style={selectStyle(!!role)}
                       onChange={(e) => { setRole(e.target.value); setUniversity(""); clearError("role"); }}>
-                      <option value="" disabled style={{ background: "#000" }}>Select your role</option>
-                      {ROLES.map((r) => <option key={r} value={r} style={{ background: "#000" }}>{r}</option>)}
+                      <option value="" disabled style={{ background: "#F5F0E8" }}>Select your role</option>
+                      {ROLES.map((r) => <option key={r} value={r} style={{ background: "#F5F0E8" }}>{r}</option>)}
                     </select>
                     {errors.role && <p className={errorClass}>{errors.role}</p>}
                   </div>
@@ -245,7 +242,7 @@ export default function ContactPage() {
                       onChange={(e) => { setMessage(e.target.value); clearError("message"); }} />
                     <div className="flex justify-between items-center mt-1">
                       {errors.message ? <p className={errorClass}>{errors.message}</p> : <span />}
-                      <span className={`text-xs ${message.length >= 2000 ? "text-red-400/70" : message.length > 1600 ? "text-amber-400/60" : "text-white/20"}`}>{message.length} / 2000</span>
+                      <span className={`text-xs ${message.length >= 2000 ? "text-red-500" : message.length > 1600 ? "text-amber-500" : "text-slate-300"}`}>{message.length} / 2000</span>
                     </div>
                   </div>
                 </>
@@ -287,7 +284,7 @@ export default function ContactPage() {
                       onChange={(e) => { setTeamMessage(e.target.value); clearError("teamMessage"); }} />
                     <div className="flex justify-between items-center mt-1">
                       {errors.teamMessage ? <p className={errorClass}>{errors.teamMessage}</p> : <span />}
-                      <span className={`text-xs ${teamMessage.length >= 2000 ? "text-red-400/70" : teamMessage.length > 1600 ? "text-amber-400/60" : "text-white/20"}`}>{teamMessage.length} / 2000</span>
+                      <span className={`text-xs ${teamMessage.length >= 2000 ? "text-red-500" : teamMessage.length > 1600 ? "text-amber-500" : "text-slate-300"}`}>{teamMessage.length} / 2000</span>
                     </div>
                   </div>
                 </>
@@ -298,7 +295,7 @@ export default function ContactPage() {
                 siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
                 onSuccess={(token) => { setCaptchaToken(token); clearError("captcha"); }}
                 onExpire={() => setCaptchaToken(null)}
-                options={{ theme: "dark" }}
+                options={{ theme: "light" }}
               />
               {errors.captcha && <p className={errorClass}>{errors.captcha}</p>}
 
@@ -309,7 +306,7 @@ export default function ContactPage() {
               <button
                 type="submit"
                 disabled={status === "loading" || !captchaToken}
-                className="mt-2 w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-400 text-white text-sm font-semibold hover:opacity-90 transition-opacity duration-200 disabled:opacity-50 disabled:cursor-not-allowed glow-button"
+                className="mt-2 w-full py-3.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {status === "loading" ? "Sending..." : "Send message"}
               </button>
@@ -318,15 +315,15 @@ export default function ContactPage() {
         )}
       </div>
     </div>
-    <footer className="bg-black border-t border-white/5 py-6 px-6">
+    <footer className="bg-[#F5F0E8] border-t border-slate-300 py-6 px-6">
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-        <p className="text-xs text-white/20">© {new Date().getFullYear()} Parametra.ai. All rights reserved.</p>
-        <div className="flex items-center gap-6">
-          <Link href="/how-it-works" className="text-xs text-white/25 hover:text-white/60 transition-colors">How it works</Link>
-          <Link href="/about" className="text-xs text-white/25 hover:text-white/60 transition-colors">About</Link>
-          <Link href="/signup" className="text-xs text-white/25 hover:text-white/60 transition-colors">Join waitlist</Link>
-          <Link href="/terms" className="text-xs text-white/25 hover:text-white/60 transition-colors">Terms</Link>
-          <Link href="/privacy-policy" className="text-xs text-white/25 hover:text-white/60 transition-colors">Privacy</Link>
+        <p className="text-xs text-slate-700">© {new Date().getFullYear()} Parametra. All rights reserved.</p>
+        <div className="grid grid-cols-3 gap-x-6 gap-y-3 sm:flex sm:items-center sm:gap-6">
+          <Link href="/how-it-works" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">How it works</Link>
+          <Link href="/about" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">About</Link>
+          <Link href="/signup" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Join waitlist</Link>
+          <Link href="/terms" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Terms</Link>
+          <Link href="/privacy-policy" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Privacy</Link>
         </div>
       </div>
     </footer>

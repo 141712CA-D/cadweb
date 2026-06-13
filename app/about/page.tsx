@@ -118,10 +118,13 @@ export default function AboutPage() {
       <div className="grid-bg fixed inset-0 pointer-events-none z-0" />
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         <div className="orb-1 absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(37,99,235,0.15) 0%, transparent 70%)", filter: "blur(40px)" }} />
+          style={{ background: "radial-gradient(circle, rgba(199,226,255,0.5) 0%, transparent 70%)", filter: "blur(40px)" }} />
         <div className="orb-2 absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(14,165,233,0.10) 0%, transparent 70%)", filter: "blur(40px)" }} />
+          style={{ background: "radial-gradient(circle, rgba(199,226,255,0.35) 0%, transparent 70%)", filter: "blur(40px)" }} />
       </div>
+
+      {/* Page background */}
+      <div className="fixed inset-0 bg-[#F5F0E8] -z-10" />
 
       <DevBanner />
       <Header />
@@ -135,15 +138,11 @@ export default function AboutPage() {
           <React.Fragment key={member.name}>
             <button onClick={() => scrollToMember(i)} className="py-1 cursor-pointer">
               <div
-                className="w-2 h-2 rounded-full transition-all duration-500"
-                style={{
-                  background: activeIndex === i ? "rgba(96,165,250,1)" : "rgba(255,255,255,0.15)",
-                  boxShadow: activeIndex === i ? "0 0 8px rgba(37,99,235,0.8)" : "none",
-                }}
+                className={`w-2 h-2 rounded-full transition-all duration-500 ${activeIndex === i ? "bg-blue-600" : "bg-slate-300"}`}
               />
             </button>
             {i < team.length - 1 && (
-              <div className="w-px ml-[3px]" style={{ height: "32px", background: "rgba(255,255,255,0.08)" }} />
+              <div className="w-px ml-[3px] bg-slate-200" style={{ height: "32px" }} />
             )}
           </React.Fragment>
         ))}
@@ -158,11 +157,8 @@ export default function AboutPage() {
           <button
             key={i}
             onClick={() => scrollToMember(i)}
-            className="h-1.5 rounded-full transition-all duration-500"
-            style={{
-              width: activeIndex === i ? "16px" : "6px",
-              background: activeIndex === i ? "rgba(96,165,250,1)" : "rgba(255,255,255,0.2)",
-            }}
+            className={`h-1.5 rounded-full transition-all duration-500 ${activeIndex === i ? "bg-blue-600" : "bg-slate-300"}`}
+            style={{ width: activeIndex === i ? "16px" : "6px" }}
           />
         ))}
       </div>
@@ -170,11 +166,11 @@ export default function AboutPage() {
       {/* ── Section 1: Heading ── */}
       <div className="h-screen flex items-center justify-center relative z-10" style={snap}>
         <div className="text-center px-4">
-          <p className="text-xs text-white/30 tracking-widest uppercase font-mono mb-4">The team</p>
+          <p className="text-xs text-slate-500 tracking-widest uppercase font-mono mb-4">The team</p>
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight">
             <span className="gradient-text">Meet the brains</span>
             <br />
-            <span className="text-white/90">behind Parametra.ai</span>
+            <span className="text-slate-800">behind Parametra.</span>
           </h1>
         </div>
 
@@ -183,8 +179,8 @@ export default function AboutPage() {
             showNudge ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3 pointer-events-none"
           }`}
         >
-          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/35">scroll</span>
-          <svg className="h-4 w-4 animate-bounce text-white/30" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-slate-400">scroll</span>
+          <svg className="h-4 w-4 animate-bounce text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
         </div>
@@ -203,7 +199,7 @@ export default function AboutPage() {
         <div style={{ position: "absolute", top: "200vh", height: "1px", width: "100%", ...snap }} />
 
         {/* Sticky card display */}
-        <div className="sticky top-0 h-screen flex items-center justify-center px-4 sm:px-20" style={{ overflow: "visible" }}>
+        <div className="sticky top-0 h-screen flex items-center justify-center px-4 sm:px-20 pt-24 sm:pt-0" style={{ overflow: "visible" }}>
 
           <div className="relative w-full max-w-4xl h-[650px] sm:h-[450px] pb-16">
             {team.map((member, cardIndex) => {
@@ -213,7 +209,7 @@ export default function AboutPage() {
               if (diff < 0) {
                 cardStyle = { transform: "translateY(-110%)", opacity: 0, zIndex: 0, pointerEvents: "none" };
               } else if (diff === 0) {
-                cardStyle = { transform: "translateY(0px) scale(1)", transformOrigin: "top center", opacity: 1, zIndex: 30, boxShadow: "0 16px 48px rgba(0,0,0,0.6)" };
+                cardStyle = { transform: "translateY(0px) scale(1)", transformOrigin: "top center", opacity: 1, zIndex: 30 };
               } else if (diff === 1) {
                 cardStyle = { transform: "translateY(30px) scale(0.95)", transformOrigin: "top center", opacity: 1, zIndex: 20 };
               } else if (diff === 2) {
@@ -229,16 +225,16 @@ export default function AboutPage() {
                   style={cardStyle}
                 >
                   <div
-                    className="w-full h-[520px] sm:h-[380px] rounded-2xl border border-white/8 p-5 sm:p-8 flex flex-col sm:flex-row items-center gap-5 sm:gap-10"
-                    style={{
-                      background: "linear-gradient(145deg, rgba(37,99,235,0.07) 0%, rgba(0,0,0,0.88) 100%)",
-                      backdropFilter: "blur(20px)",
-                    }}
+                    className={`w-full h-[520px] sm:h-[380px] rounded-2xl border p-5 sm:p-8 flex flex-col sm:flex-row items-center gap-5 sm:gap-10 ${
+                      diff === 0
+                        ? "bg-white border-slate-200"
+                        : "bg-white border-slate-200/60"
+                    }`}
                   >
                     {/* Photo */}
                     <div
-                      className="relative w-32 h-36 sm:w-44 sm:h-52 rounded-xl overflow-hidden border border-blue-500/20 flex-shrink-0"
-                      style={{ boxShadow: "0 0 40px rgba(37,99,235,0.15)" }}
+                      className="relative w-32 h-36 sm:w-44 sm:h-52 rounded-xl overflow-hidden border border-indigo-300/50 flex-shrink-0"
+                      style={{ boxShadow: "0 0 30px rgba(199,226,255,0.5)" }}
                     >
                       {member.image ? (
                         <Image
@@ -250,8 +246,8 @@ export default function AboutPage() {
                         />
                       ) : (
                         <div
-                          className="w-full h-full flex items-center justify-center text-3xl font-bold text-blue-300"
-                          style={{ background: "linear-gradient(145deg, rgba(37,99,235,0.3) 0%, rgba(14,165,233,0.2) 100%)" }}
+                          className="w-full h-full flex items-center justify-center text-3xl font-bold text-indigo-500"
+                          style={{ background: "linear-gradient(145deg, rgba(199,226,255,0.4) 0%, rgba(199,226,255,0.2) 100%)" }}
                         >
                           {member.name.split(" ").map((n) => n[0]).join("")}
                         </div>
@@ -261,12 +257,12 @@ export default function AboutPage() {
                     {/* Text */}
                     <div className="flex flex-col gap-3 items-center text-center sm:items-start sm:text-left flex-1 min-w-0">
                       <div>
-                        <p className="text-xs text-blue-400/60 tracking-widest uppercase font-mono mb-1.5">{member.role}</p>
-                        <h2 className="text-xl sm:text-3xl font-bold text-white">{member.name}</h2>
-                        <p className="text-xs text-white/30 mt-1 font-mono">{member.major} &nbsp;·&nbsp; {member.university}</p>
+                        <p className="text-xs text-blue-600 font-semibold tracking-widest uppercase font-mono mb-1.5">{member.role}</p>
+                        <h2 className="text-xl sm:text-3xl font-bold text-slate-900">{member.name}</h2>
+                        <p className="text-xs text-slate-500 mt-1 font-mono">{member.major} &nbsp;·&nbsp; {member.university}</p>
                       </div>
-                      <div className="w-10 h-px bg-gradient-to-r from-blue-500/40 to-sky-400/40" />
-                      <p className="text-sm text-white/40 leading-relaxed max-w-md">{member.bio}</p>
+                      <div className="w-10 h-px bg-gradient-to-r from-blue-600 to-sky-400" />
+                      <p className="text-sm text-slate-600 leading-relaxed max-w-md">{member.bio}</p>
                       <div className="flex items-center gap-3">
                         {member.socials.map((s) => (
                           <Link
@@ -274,7 +270,7 @@ export default function AboutPage() {
                             href={s.href}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-xs font-mono text-blue-400/60 hover:text-blue-400 border border-blue-500/20 hover:border-blue-500/50 px-3 py-1.5 rounded-full transition-all duration-200"
+                            className="inline-flex items-center gap-2 text-xs font-mono text-slate-500 border border-slate-200 hover:text-blue-600 hover:border-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-full transition-all duration-200"
                           >
                             <span className="sm:hidden">{icons[s.label]}</span>
                             <span className="hidden sm:inline">{s.label}</span>
@@ -295,14 +291,14 @@ export default function AboutPage() {
         <div className="flex-1 flex items-center justify-center px-4 sm:px-6 py-16">
           <div className="w-full max-w-2xl">
             <div className="text-center mb-8">
-              <p className="text-xs text-white/30 tracking-widest uppercase font-mono mb-4">Our mission</p>
+              <p className="text-xs text-slate-500 tracking-widest uppercase font-mono mb-4">Our mission</p>
               <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight">
                 <span className="gradient-text">Why we built</span>
                 <br />
-                <span className="text-white/90">Parametra.</span>
+                <span className="text-slate-800">Parametra.</span>
               </h2>
             </div>
-            <div className="space-y-4 text-sm sm:text-base text-white/40 leading-relaxed">
+            <div className="space-y-4 text-sm sm:text-base text-slate-600 leading-relaxed">
               <p>
                 Most engineers learn the same lesson early: having a great idea is the easy part. Turning it into a real model — one that&apos;s parameterized, constrained, and ready to manufacture — is where the time goes. Hours in tutorials. Days rebuilding sketches from scratch. Weeks learning software that changes with every version.
               </p>
@@ -316,14 +312,14 @@ export default function AboutPage() {
           </div>
         </div>
 
-        <footer className="bg-black border-t border-white/5 py-6 px-4 sm:px-6">
+        <footer className="bg-[#F5F0E8] border-t border-slate-300 py-6 px-4 sm:px-6">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-white/20">© {new Date().getFullYear()} Parametra.ai. All rights reserved.</p>
-            <div className="flex items-center gap-6">
-              <Link href="/contact" className="text-xs text-white/25 hover:text-white/60 transition-colors">Contact us</Link>
-              <Link href="/signup" className="text-xs text-white/25 hover:text-white/60 transition-colors">Join waitlist</Link>
-              <Link href="/terms" className="text-xs text-white/25 hover:text-white/60 transition-colors">Terms</Link>
-              <Link href="/privacy-policy" className="text-xs text-white/25 hover:text-white/60 transition-colors">Privacy</Link>
+            <p className="text-xs text-slate-700">© {new Date().getFullYear()} Parametra. All rights reserved.</p>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:flex sm:items-center sm:gap-6">
+              <Link href="/contact" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Contact us</Link>
+              <Link href="/signup" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Join waitlist</Link>
+              <Link href="/terms" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Terms</Link>
+              <Link href="/privacy-policy" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Privacy</Link>
             </div>
           </div>
         </footer>

@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
-const PHASE_RISE    = 80;    // logo + title rise from bottom
-const PHASE_TEXT    = 350;   // tagline fades in
-const PHASE_REVEAL  = 800;   // call onDone so page is ready underneath
-const PHASE_SLIDE   = 900;   // overlay slides up (curtain reveal)
-const PHASE_UNMOUNT = 1650;  // remove from DOM
+const PHASE_RISE    = 80;
+const PHASE_TEXT    = 350;
+const PHASE_REVEAL  = 800;
+const PHASE_SLIDE   = 900;
+const PHASE_UNMOUNT = 1650;
 
 export default function IntroAnimation({ onDone }: { onDone: () => void }) {
   const [phase, setPhase] = useState<"idle" | "rise" | "text" | "slide">("idle");
@@ -20,7 +20,6 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
     const t1 = setTimeout(() => setPhase("rise"),  PHASE_RISE);
     const t2 = setTimeout(() => { setPhase("text"); setTaglineShown(true); }, PHASE_TEXT);
     const t3 = setTimeout(() => {
-      // Make page content visible underneath before slide starts
       document.body.style.overflow = "";
       document.body.focus();
       onDone();
@@ -37,7 +36,7 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
 
   return (
     <div
-      className="fixed inset-0 z-[999] flex items-center justify-center bg-black"
+      className="fixed inset-0 z-[999] flex items-center justify-center bg-[#F5F0E8]"
       style={{
         transform: phase === "slide" ? "translateY(-100%)" : "translateY(0)",
         transition: phase === "slide" ? "transform 0.75s cubic-bezier(0.76, 0, 0.24, 1)" : "none",
@@ -49,7 +48,7 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)",
+            "linear-gradient(rgba(30,41,59,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(30,41,59,0.05) 1px, transparent 1px)",
           backgroundSize: "60px 60px",
         }}
       />
@@ -61,7 +60,7 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
           width: 600, height: 600,
           top: "50%", left: "50%",
           transform: "translate(-50%, -50%)",
-          background: "radial-gradient(circle, rgba(37,99,235,0.15) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(199,226,255,0.6) 0%, transparent 70%)",
           filter: "blur(40px)",
           opacity: risen ? 1 : 0,
           transition: "opacity 1s ease",
@@ -71,7 +70,6 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
       {/* Content */}
       <div className="relative flex flex-col items-center gap-5 select-none -mt-32">
 
-        {/* Logo left, title right */}
         <div className="flex flex-col items-center gap-0">
 
           {/* Logo */}
@@ -81,7 +79,6 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
               opacity: risen ? 1 : 0,
               transform: risen ? "translateY(0)" : "translateY(24px)",
               transition: "opacity 0.7s ease, transform 0.9s cubic-bezier(0.16,1,0.3,1)",
-              filter: "drop-shadow(0 0 24px rgba(37,99,235,0.7)) drop-shadow(0 0 60px rgba(14,165,233,0.3))",
             }}
           >
             <Image
@@ -90,7 +87,7 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
               width={220}
               height={220}
               loading="eager"
-              style={{ width: "clamp(60px, 15vw, 110px)", height: "auto" }}
+              style={{ width: "clamp(60px, 15vw, 110px)", height: "auto", filter: "brightness(0)" }}
             />
           </div>
 
@@ -104,26 +101,15 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
               transition: "opacity 0.7s ease, transform 1s cubic-bezier(0.16,1,0.3,1)",
             }}
           >
-            <span className="text-white/90">Parametra</span>
-            <span
-              style={{
-                background: "linear-gradient(135deg, #60a5fa 0%, #38bdf8 100%)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-                filter: "drop-shadow(0 0 20px rgba(37,99,235,0.6))",
-              }}
-            >
-              .ai
-            </span>
+            <span className="text-[#1E293B]">Parametra</span>
           </div>
         </div>
 
-        {/* Tagline — fades in after title settles */}
+        {/* Tagline */}
         <p
           className="text-sm tracking-widest uppercase font-medium"
           style={{
-            color: "rgba(255,255,255,0.3)",
+            color: "rgba(30,41,59,0.4)",
             opacity: taglineShown ? 1 : 0,
             transform: taglineShown ? "translateY(0)" : "translateY(10px)",
             transition: "opacity 0.6s ease, transform 0.6s ease",
