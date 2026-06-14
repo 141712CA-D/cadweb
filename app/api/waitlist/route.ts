@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
 
   if (type === "individual") {
     const { name, email, role, university, reason } = body;
-    subject = `[CADen Waitlist] Individual — ${name}`;
+    subject = `[Parametra Waitlist] Individual — ${name}`;
     sheetRow = [timestamp, "Individual", name, email, role, university ?? "", reason, ""];
     html = `
       <div style="font-family: monospace; background: #000; color: #e2e8f0; padding: 32px; border-radius: 12px; border: 1px solid rgba(37,99,235,0.3);">
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
           <tr><td style="color: #94a3b8; padding: 8px 0;">Email</td><td style="color: #38bdf8;"><a href="mailto:${esc(email)}" style="color: #38bdf8;">${esc(email)}</a></td></tr>
           <tr><td style="color: #94a3b8; padding: 8px 0;">Role</td><td style="color: #f1f5f9;">${esc(role)}</td></tr>
           ${university ? `<tr><td style="color: #94a3b8; padding: 8px 0;">University</td><td style="color: #f1f5f9;">${esc(university)}</td></tr>` : ""}
-          <tr><td style="color: #94a3b8; padding: 8px 0; vertical-align: top;">Why CADen</td><td style="color: #f1f5f9; line-height: 1.6;">${esc(reason)}</td></tr>
+          <tr><td style="color: #94a3b8; padding: 8px 0; vertical-align: top;">Why Parametra</td><td style="color: #f1f5f9; line-height: 1.6;">${esc(reason)}</td></tr>
         </table>
       </div>
     `;
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
     `;
   } else {
     const { repName, email, org, role, usage } = body;
-    subject = `[CADen Waitlist] Team — ${org}`;
+    subject = `[Parametra Waitlist] Team — ${org}`;
     sheetRow = [timestamp, "Team", repName, email, role, "", usage, org];
     html = `
       <div style="font-family: monospace; background: #000; color: #e2e8f0; padding: 32px; border-radius: 12px; border: 1px solid rgba(37,99,235,0.3);">
@@ -198,7 +198,7 @@ export async function POST(req: NextRequest) {
       resend.emails.send({
         from: "Parametra.ai <developers@projcaden.dev>",
         to: userEmail,
-        subject: isReturning ? "Welcome back to the CADen waitlist" : "You're on the CADen waitlist",
+        subject: isReturning ? "Welcome back to the Parametra waitlist" : "You're on the Parametra waitlist",
         html: userConfirmHtml,
       }),
       appendToSheet(sheetRow),

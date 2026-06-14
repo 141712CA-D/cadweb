@@ -51,7 +51,7 @@ export default function SignupPage() {
       if (!indRole)           e.indRole   = "Please select a role.";
       if (indRole === "Student" && !indUniversity.trim()) e.indUniversity = "Please enter where you attend.";
       if (indRole === "Instructor" && !indUniversity.trim()) e.indUniversity = "Please enter where you teach.";
-      if (!indReason.trim())  e.indReason = "Please tell us why you want to use CADen.";
+      if (!indReason.trim())  e.indReason = "Please tell us why you want to use Parametra.";
     } else {
       if (!teamRep.trim())    e.teamRep   = "Name is required.";
       if (!teamEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(teamEmail)) e.teamEmail = "Please enter a valid email address.";
@@ -245,7 +245,7 @@ export default function SignupPage() {
                     </div>
                   )}
                   <div>
-                    <label className={labelClass}>Why do you want to use CADen?</label>
+                    <label className={labelClass}>Why do you want to use Parametra?</label>
                     <textarea className={inputClass(errors.indReason) + " resize-none"} rows={4} placeholder="Tell us about your use case..." value={indReason} maxLength={1000}
                       onChange={(e) => { setIndReason(e.target.value); clearError("indReason"); }} />
                     <div className="flex justify-between items-center mt-1">
@@ -282,7 +282,7 @@ export default function SignupPage() {
                   </div>
                   <div>
                     <label className={labelClass}>Intended Usage</label>
-                    <textarea className={inputClass(errors.teamUsage) + " resize-none"} rows={4} placeholder="How would your team use CADen? What problems are you solving?" value={teamUsage} maxLength={1000}
+                    <textarea className={inputClass(errors.teamUsage) + " resize-none"} rows={4} placeholder="How would your team use Parametra? What problems are you solving?" value={teamUsage} maxLength={1000}
                       onChange={(e) => { setTeamUsage(e.target.value); clearError("teamUsage"); }} />
                     <div className="flex justify-between items-center mt-1">
                       {errors.teamUsage ? <p className={errorClass}>{errors.teamUsage}</p> : <span />}

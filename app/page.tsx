@@ -45,7 +45,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-slate-700">© {new Date().getFullYear()} Parametra. All rights reserved.</p>
             <p className="text-xs text-slate-600 font-mono sm:absolute sm:left-1/2 sm:-translate-x-1/2">v1.5.1.1</p>
-            <div className="grid grid-cols-3 gap-x-6 gap-y-3 sm:flex sm:items-center sm:gap-6">
+            <div className="grid grid-cols-3 justify-items-center gap-x-6 gap-y-3 sm:flex sm:items-center sm:gap-6">
               <a href="/how-it-works" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">How it works</a>
               <a href="/about" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">About</a>
               <a href="/contact" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Contact us</a>
