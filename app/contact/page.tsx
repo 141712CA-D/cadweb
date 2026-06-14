@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { Turnstile } from "@marsidev/react-turnstile";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 
@@ -130,10 +129,9 @@ export default function ContactPage() {
       <div className="relative z-10 w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-8 sm:p-10 shadow-sm">
         <div className="flex items-center justify-between mb-8">
           <Link href="/" className="flex items-center gap-0">
-            <div className="flex-shrink-0 w-4 h-4 sm:w-7 sm:h-7">
-              <Image src="/logo.svg" alt="Parametra" width={56} height={56} className="w-full h-auto" />
-            </div>
-            <span className="text-slate-500 text-sm font-medium whitespace-nowrap">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.svg" alt="Parametra" style={{ width: 32, height: 32, display: "block", flexShrink: 0, filter: "brightness(0)" }} />
+            <span className="text-slate-900 font-semibold text-base tracking-tight whitespace-nowrap">
               Parametra
             </span>
           </Link>
