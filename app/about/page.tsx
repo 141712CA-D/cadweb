@@ -259,7 +259,11 @@ export default function AboutPage() {
                       <div>
                         <p className="text-xs text-blue-600 font-semibold tracking-widest uppercase font-mono mb-1.5">{member.role}</p>
                         <h2 className="text-xl sm:text-3xl font-bold text-slate-900">{member.name}</h2>
-                        <p className="text-xs text-slate-500 mt-1 font-mono">{member.major} &nbsp;·&nbsp; {member.university}</p>
+                        <div className="flex flex-col items-center sm:flex-row sm:flex-wrap sm:items-start gap-y-0.5 sm:gap-y-0 sm:gap-x-0 mt-1">
+                          <span className="text-xs text-slate-500 font-mono whitespace-nowrap">{member.major}</span>
+                          <span className="hidden sm:inline text-xs text-slate-400 font-mono mx-1.5">·</span>
+                          <span className="text-xs text-slate-500 font-mono whitespace-nowrap">{member.university}</span>
+                        </div>
                       </div>
                       <div className="w-10 h-px bg-gradient-to-r from-blue-600 to-sky-400" />
                       <p className="text-sm text-slate-600 leading-relaxed max-w-md">{member.bio}</p>
