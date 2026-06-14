@@ -427,7 +427,7 @@ export default function Hero() {
             You think it, parametra makes it
           </h1>
 
-          <p className="mt-7 max-w-2xl text-lg font-light leading-8 text-slate-500 sm:text-xl">
+          <p className="mt-7 max-w-2xl text-sm font-light leading-6 text-slate-500 sm:text-xl sm:leading-8">
             Built by Engineers · For Everyone · Releasing Soon
           </p>
 
