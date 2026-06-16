@@ -50,7 +50,7 @@ const team = [
     major: "Computer Science",
     university: "New York University · Class of 2029",
     bio: "Abhijeet is a software engineer from New York building the product experience and web infrastructure behind Parametra. He's driven by the belief that powerful tools should feel effortless — and that the gap between a great idea and a finished CAD model should be a lot smaller than it is. He joined Parametra to help close that gap.",
-    image: null as string | null,
+    image: "/AbhijeetHeadshot.png" as string | null,
     objectPosition: "center center",
     socials: [{ label: "LinkedIn", href: "https://www.linkedin.com/in/abhijeet-chopra-473383319/" }],
   },
