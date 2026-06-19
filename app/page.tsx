@@ -41,6 +41,23 @@ export default function Home() {
       >
         <Header />
         <Hero />
+        <section className="bg-[#F5F0E8] py-16 px-6">
+          <div className="max-w-7xl mx-auto flex flex-col items-center gap-8">
+            <h2 className="text-2xl font-semibold text-slate-900">Our Partners</h2>
+            <a
+              href="https://www.onshape.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Onshape"
+            >
+              <img
+                src="/onshape-logo.png"
+                alt="Onshape"
+                className="h-24 w-24 sm:h-[150px] sm:w-[150px] object-contain bg-transparent grayscale hover:grayscale-0 transition-all duration-300"
+              />
+            </a>
+          </div>
+        </section>
         <footer className="bg-[#F5F0E8] border-t border-slate-300 py-6 px-6">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-slate-700">© {new Date().getFullYear()} Parametra. All rights reserved.</p>
