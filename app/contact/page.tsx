@@ -6,7 +6,7 @@ import { Turnstile } from "@marsidev/react-turnstile";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 
 type FormType = "individual" | "team";
-type Status = "idle" | "loading" | "success" | "cooldown" | "error";
+type Status = "idle" | "loading" | "verify" | "success" | "cooldown" | "error";
 
 const ROLES = ["Student", "Instructor", "Freelancer", "Hobbyist", "Other"];
 
@@ -30,6 +30,12 @@ export default function ContactPage() {
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const turnstileRef = useRef<TurnstileInstance>(null);
+
+  // Email-verification step state
+  const [code, setCode] = useState("");
+  const [verifyError, setVerifyError] = useState("");
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [verifying, setVerifying] = useState(false);
 
   useEffect(() => { document.body.style.overflow = ""; }, []);
 
@@ -105,13 +111,60 @@ export default function ContactPage() {
       if (!res.ok) {
         turnstileRef.current?.reset();
         setCaptchaToken(null);
+        setStatus("error");
+        return;
       }
-      setStatus(res.ok ? "success" : "error");
+      // Step 1 succeeded — a code was emailed. Move to the verification screen.
+      setPendingEmail(type === "individual" ? email : teamEmail);
+      setCode("");
+      setVerifyError("");
+      setStatus("verify");
     } catch {
       setStatus("error");
       turnstileRef.current?.reset();
       setCaptchaToken(null);
     }
+  }
+
+  async function handleVerify(e: React.FormEvent) {
+    e.preventDefault();
+    if (!/^\d{6}$/.test(code.trim())) {
+      setVerifyError("Enter the 6-digit code from your email.");
+      return;
+    }
+    setVerifying(true);
+    setVerifyError("");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ step: "verify", email: pendingEmail, code: code.trim() }),
+      });
+      if (res.ok) {
+        setStatus("success");
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 410 || data.error === "expired") {
+        setVerifyError("That code expired. Start over to get a new one.");
+      } else if (res.status === 429 || data.error === "too_many_attempts") {
+        setVerifyError("Too many attempts. Start over to get a new code.");
+      } else {
+        setVerifyError("Incorrect code. Please try again.");
+      }
+    } catch {
+      setVerifyError("Something went wrong. Please try again.");
+    } finally {
+      setVerifying(false);
+    }
+  }
+
+  function startOver() {
+    setStatus("idle");
+    setCode("");
+    setVerifyError("");
+    turnstileRef.current?.reset();
+    setCaptchaToken(null);
   }
 
   return (
@@ -154,6 +207,40 @@ export default function ContactPage() {
               className="mt-4 text-xs text-blue-600 hover:text-blue-700 transition-colors"
             >
               ← Go back
+            </button>
+          </div>
+        ) : status === "verify" ? (
+          <div className="flex flex-col items-center text-center py-4 gap-4">
+            <div className="w-12 h-12 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center">
+              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-slate-900">Check your email.</h2>
+            <p className="text-sm text-slate-500 max-w-xs leading-relaxed">
+              We sent a 6-digit code to <span className="text-slate-900 font-medium">{pendingEmail}</span>. Enter it below to send your message.
+            </p>
+            <form onSubmit={handleVerify} noValidate className="w-full max-w-xs flex flex-col gap-3 mt-2">
+              <input
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                placeholder="000000"
+                value={code}
+                onChange={(e) => { setCode(e.target.value.replace(/\D/g, "")); setVerifyError(""); }}
+                className={`w-full bg-white border ${verifyError ? "border-red-400" : "border-slate-200"} rounded-xl px-4 py-3 text-center text-2xl tracking-[0.4em] font-mono text-slate-900 placeholder:text-slate-300 focus:outline-none focus:border-blue-400 transition-all duration-200`}
+              />
+              {verifyError && <p className={errorClass}>{verifyError}</p>}
+              <button
+                type="submit"
+                disabled={verifying || code.length !== 6}
+                className="w-full py-3.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {verifying ? "Verifying..." : "Verify & send"}
+              </button>
+            </form>
+            <button onClick={startOver} className="mt-2 text-xs text-blue-600 hover:text-blue-700 transition-colors">
+              Didn&apos;t get it? Start over
             </button>
           </div>
         ) : status === "success" ? (
