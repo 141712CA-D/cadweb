@@ -1,5 +1,8 @@
 import { google } from "googleapis";
+import { Resend } from "resend";
 import { sql } from "@/lib/db";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function syncWaitlist(): Promise<{ synced: number }> {
   const auth = new google.auth.GoogleAuth({
@@ -62,7 +65,10 @@ export async function syncWaitlist(): Promise<{ synced: number }> {
       .map((r) => r.email)
       .filter((e) => !sheetEmails.includes(e));
     for (const email of toDelete) {
-      await sql`UPDATE waitlist_entries SET deleted = TRUE, deleted_at = NOW() WHERE email = ${email}`;
+      await Promise.all([
+        sql`UPDATE waitlist_entries SET deleted = TRUE, deleted_at = NOW() WHERE email = ${email}`,
+        resend.contacts.remove({ email }),
+      ]);
     }
   }
 
