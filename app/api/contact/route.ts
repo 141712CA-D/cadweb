@@ -237,6 +237,7 @@ async function handleVerify(body: Record<string, unknown>) {
       resend.emails.send({
         from: MAIL_FROM,
         to: INTERNAL_TO,
+        replyTo: userEmail,
         subject: emailSubject,
         html,
       }),
