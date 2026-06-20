@@ -95,7 +95,7 @@ function validateBody(body: Record<string, unknown>): string | null {
  */
 async function handleRequest(body: Record<string, unknown>) {
   const { captchaToken } = body as { captchaToken?: string };
-  if (!captchaToken || !(await verifyTurnstile(captchaToken))) {
+  if (!captchaToken) {
     return NextResponse.json({ success: false, error: "Invalid captcha" }, { status: 400 });
   }
 
@@ -104,8 +104,14 @@ async function handleRequest(body: Record<string, unknown>) {
     return NextResponse.json({ success: false, error: validationError }, { status: 400 });
   }
 
-  // Rebase DB from sheet first so manual deletions are reflected before checking
-  await syncWaitlist();
+  // Turnstile verification and sheet sync are independent — run in parallel.
+  const [turnstileOk] = await Promise.all([
+    verifyTurnstile(captchaToken),
+    syncWaitlist(),
+  ]);
+  if (!turnstileOk) {
+    return NextResponse.json({ success: false, error: "Invalid captcha" }, { status: 400 });
+  }
 
   const userEmail = (body.email as string).toLowerCase();
   const existing = await sql`SELECT id, deleted FROM waitlist_entries WHERE email = ${userEmail}`;

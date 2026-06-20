@@ -7,6 +7,7 @@ import type { TurnstileInstance } from "@marsidev/react-turnstile";
 
 type FormType = "individual" | "team";
 type Status = "idle" | "loading" | "verify" | "success" | "welcome_back" | "duplicate" | "error";
+type EmailCheck = "idle" | "checking" | "available" | "registered" | "returning";
 
 const INDIVIDUAL_ROLES = ["Student", "Instructor", "Freelancer", "Hobbyist"];
 
@@ -16,12 +17,22 @@ const inputClass = (error?: string) =>
 const labelClass = "block text-xs text-slate-500 font-medium tracking-wide mb-2 uppercase";
 const errorClass = "text-xs text-red-500 mt-1.5";
 
+function EmailCheckHint({ status }: { status: EmailCheck }) {
+  if (status === "checking") return <p className="text-xs text-slate-400 mt-1.5">Checking...</p>;
+  if (status === "registered") return <p className="text-xs text-amber-500 mt-1.5">This email is already on the waitlist.</p>;
+  if (status === "returning") return <p className="text-xs text-blue-500 mt-1.5">Looks like you were previously removed — you can re-join.</p>;
+  return null;
+}
+
 export default function SignupPage() {
   const [type, setType] = useState<FormType>("individual");
   const [status, setStatus] = useState<Status>("idle");
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const turnstileRef = useRef<TurnstileInstance>(null);
+  const [emailCheck, setEmailCheck] = useState<EmailCheck>("idle");
+  const registeredSet = useRef<Set<string>>(new Set());
+  const returningSet  = useRef<Set<string>>(new Set());
 
   // Email-verification step state
   const [code, setCode] = useState("");
@@ -30,6 +41,17 @@ export default function SignupPage() {
   const [verifying, setVerifying] = useState(false);
 
   useEffect(() => { document.body.style.overflow = ""; }, []);
+
+  // Pre-warm the DB sync and hydrate local hash sets for O(1) email lookup.
+  useEffect(() => {
+    fetch("/api/waitlist/prepare")
+      .then((r) => r.json())
+      .then((d) => {
+        registeredSet.current = new Set(d.registered ?? []);
+        returningSet.current  = new Set(d.returning  ?? []);
+      })
+      .catch(() => {});
+  }, []);
 
   // Individual fields
   const [indName, setIndName]             = useState("");
@@ -44,6 +66,29 @@ export default function SignupPage() {
   const [teamOrg, setTeamOrg]     = useState("");
   const [teamRole, setTeamRole]   = useState("");
   const [teamUsage, setTeamUsage] = useState("");
+
+  // Debounced email dedup check — hashes the typed address and looks it up in the
+  // in-memory sets hydrated from /api/waitlist/prepare. No extra network call.
+  useEffect(() => {
+    const email = (type === "individual" ? indEmail : teamEmail).toLowerCase().trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailCheck("idle");
+      return;
+    }
+    setEmailCheck("checking");
+    const timer = setTimeout(async () => {
+      try {
+        const buf = await window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(email));
+        const hex = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+        if (registeredSet.current.has(hex)) setEmailCheck("registered");
+        else if (returningSet.current.has(hex)) setEmailCheck("returning");
+        else setEmailCheck("available");
+      } catch {
+        setEmailCheck("idle");
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [indEmail, teamEmail, type]);
 
   function clearError(field: string) {
     setErrors((prev) => { const next = { ...prev }; delete next[field]; return next; });
@@ -297,7 +342,9 @@ export default function SignupPage() {
                     <label className={labelClass}>Email</label>
                     <input type="email" className={inputClass(errors.indEmail)} placeholder="you@example.com" value={indEmail} maxLength={254}
                       onChange={(e) => { setIndEmail(e.target.value); clearError("indEmail"); }} />
-                    {errors.indEmail && <p className={errorClass}>{errors.indEmail}</p>}
+                    {errors.indEmail
+                      ? <p className={errorClass}>{errors.indEmail}</p>
+                      : <EmailCheckHint status={emailCheck} />}
                   </div>
                   <div>
                     <label className={labelClass}>Role</label>
@@ -352,7 +399,9 @@ export default function SignupPage() {
                     <label className={labelClass}>Email</label>
                     <input type="email" className={inputClass(errors.teamEmail)} placeholder="you@company.com" value={teamEmail} maxLength={254}
                       onChange={(e) => { setTeamEmail(e.target.value); clearError("teamEmail"); }} />
-                    {errors.teamEmail && <p className={errorClass}>{errors.teamEmail}</p>}
+                    {errors.teamEmail
+                      ? <p className={errorClass}>{errors.teamEmail}</p>
+                      : <EmailCheckHint status={emailCheck} />}
                   </div>
                   <div>
                     <label className={labelClass}>Organization</label>
