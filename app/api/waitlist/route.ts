@@ -251,6 +251,35 @@ async function handleVerify(body: Record<string, unknown>) {
     </div>
   `;
 
+  const spaceIdx = userName.indexOf(" ");
+  const firstName = spaceIdx > 0 ? userName.slice(0, spaceIdx) : userName;
+  const lastName = spaceIdx > 0 ? userName.slice(spaceIdx + 1) : undefined;
+  const contactProperties =
+    type === "individual"
+      ? {
+          type: "individual",
+          role: (payload as Record<string, string>).role ?? null,
+          university: (payload as Record<string, string>).university ?? null,
+          reason_usage: (payload as Record<string, string>).reason ?? null,
+          organization: null,
+          timestamp,
+        }
+      : {
+          type: "team",
+          role: (payload as Record<string, string>).role ?? null,
+          university: null,
+          reason_usage: (payload as Record<string, string>).usage ?? null,
+          organization: (payload as Record<string, string>).org ?? null,
+          timestamp,
+        };
+  const audienceContact = resend.contacts.create({
+    email: userEmail,
+    firstName,
+    ...(lastName ? { lastName } : {}),
+    unsubscribed: false,
+    properties: contactProperties,
+  });
+
   try {
     await Promise.all([
       resend.emails.send({
@@ -267,6 +296,7 @@ async function handleVerify(body: Record<string, unknown>) {
       }),
       appendToSheet(sheetRow),
       dbInsert,
+      audienceContact,
     ]);
 
     // Rebase again after signup to reflect the new entry in DB
