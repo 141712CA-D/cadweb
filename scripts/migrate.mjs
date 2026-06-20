@@ -37,4 +37,20 @@ await sql`
   )
 `;
 
+// Pending email verifications (double opt-in). One row per (email, purpose);
+// the full form submission is stashed in `payload` so the server — not the
+// client — holds the data between the "request code" and "confirm code" steps.
+await sql`
+  CREATE TABLE IF NOT EXISTS pending_verifications (
+    email      TEXT        NOT NULL,
+    purpose    TEXT        NOT NULL,   -- 'waitlist' | 'contact'
+    code       TEXT        NOT NULL,   -- 6-digit verification code
+    payload    JSONB       NOT NULL,   -- the original form submission
+    attempts   INT         NOT NULL DEFAULT 0,
+    expires_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (email, purpose)
+  )
+`;
+
 console.log("Migration complete.");
