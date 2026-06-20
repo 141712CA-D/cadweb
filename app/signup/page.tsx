@@ -187,7 +187,7 @@ export default function SignupPage() {
             </div>
             <h2 className="text-xl font-bold text-slate-900">Welcome back to the list.</h2>
             <p className="text-sm text-slate-500 max-w-xs leading-relaxed">Good to see you again. You&apos;re back on the waitlist — we&apos;ll be in touch when access opens up.</p>
-            <p className="text-xs text-slate-400 max-w-xs leading-relaxed">If this is your first time receiving an email from developers@projcaden.dev, please unmark us as spam if applicable.</p>
+            <p className="text-xs text-slate-400 max-w-xs leading-relaxed">If this is your first time receiving an email from {process.env.NEXT_PUBLIC_MAIL_FROM_EMAIL ?? "no-reply@parametra.ai"}, please unmark us as spam if applicable.</p>
             <button
               onClick={() => { sessionStorage.removeItem("introPlayed"); window.location.href = "/"; }}
               className="mt-4 text-xs text-blue-600 hover:text-blue-700 transition-colors"
@@ -254,7 +254,7 @@ export default function SignupPage() {
             </div>
             <h2 className="text-xl font-bold text-slate-900">You&apos;re on the list.</h2>
             <p className="text-sm text-slate-500 max-w-xs leading-relaxed">We&apos;ll reach out when access opens up. Big things are coming.</p>
-            <p className="text-xs text-slate-400 max-w-xs leading-relaxed">If this is your first time receiving an email from developers@projcaden.dev, please unmark us as spam if applicable.</p>
+            <p className="text-xs text-slate-400 max-w-xs leading-relaxed">If this is your first time receiving an email from {process.env.NEXT_PUBLIC_MAIL_FROM_EMAIL ?? "no-reply@parametra.ai"}, please unmark us as spam if applicable.</p>
             <button
               onClick={() => { sessionStorage.removeItem("introPlayed"); window.location.href = "/"; }}
               className="mt-4 text-xs text-blue-600 hover:text-blue-700 transition-colors"

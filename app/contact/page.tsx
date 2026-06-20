@@ -252,7 +252,7 @@ export default function ContactPage() {
             </div>
             <h2 className="text-xl font-bold text-slate-900">Message received.</h2>
             <p className="text-sm text-slate-500 max-w-xs leading-relaxed">We&apos;ll get back to you as soon as we can.</p>
-            <p className="text-xs text-slate-400 max-w-xs leading-relaxed">If this is your first time receiving an email from developers@projcaden.dev, please unmark us as spam if applicable.</p>
+            <p className="text-xs text-slate-400 max-w-xs leading-relaxed">If this is your first time receiving an email from {process.env.NEXT_PUBLIC_MAIL_FROM_EMAIL ?? "no-reply@parametra.ai"}, please unmark us as spam if applicable.</p>
             <button
               onClick={() => { sessionStorage.removeItem("introPlayed"); window.location.href = "/"; }}
               className="mt-4 text-xs text-blue-600 hover:text-blue-700 transition-colors"
