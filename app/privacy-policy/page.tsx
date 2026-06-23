@@ -10,7 +10,7 @@ export default function PrivacyPolicyPage() {
 
       <main className="flex-1 max-w-3xl mx-auto px-6 py-32 sm:py-40 w-full">
         <h1 className="text-3xl sm:text-4xl font-bold mb-2 gradient-text">Privacy Policy</h1>
-        <p className="text-xs text-[#1E293B]/30 mb-12">Last updated: June 2026</p>
+        <p className="text-xs text-[#1E293B]/30 mb-12">Last updated: June 23, 2026</p>
 
         <div className="space-y-10 text-sm text-[#1E293B]/60 leading-relaxed">
 
@@ -22,6 +22,7 @@ export default function PrivacyPolicyPage() {
               <li>Role, institution, or organization (where provided)</li>
               <li>Your stated reason for interest in the Service</li>
               <li>Messages you send via the contact form</li>
+              <li>Verification metadata for one-time email codes (for example: code issuance time, expiry, and failed-attempt counters)</li>
             </ul>
             <p className="mt-3">
               We also collect standard server-side data such as IP addresses, browser type, and pages visited
@@ -37,6 +38,7 @@ export default function PrivacyPolicyPage() {
               <li>Respond to contact form inquiries</li>
               <li>Improve the Service and understand our user base</li>
               <li>Send product updates and launch announcements (you may opt out at any time)</li>
+              <li>Operate and enforce email verification controls to prevent abuse and unauthorized submissions</li>
             </ul>
           </section>
 
@@ -46,6 +48,15 @@ export default function PrivacyPolicyPage() {
               Waitlist data is stored in a Neon Serverless Postgres database and synced to Google Sheets.
               Both are hosted in the United States. We take reasonable technical measures to protect your data,
               but no system is completely secure.
+            </p>
+            <p className="mt-3">
+              As part of waitlist checks, we may synchronize records across systems during request processing and
+              temporarily hold SHA-256 email hashes in memory so the client can perform local duplicate checks
+              without exposing plaintext email addresses.
+            </p>
+            <p className="mt-3">
+              Pending verification records are stored server-side only as needed to complete verification and are
+              removed after successful verification or expiration.
             </p>
           </section>
 
