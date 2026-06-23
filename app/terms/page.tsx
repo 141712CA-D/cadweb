@@ -10,7 +10,7 @@ export default function TermsPage() {
 
       <main className="flex-1 max-w-3xl mx-auto px-6 py-32 sm:py-40 w-full">
         <h1 className="text-3xl sm:text-4xl font-bold mb-2 gradient-text">Terms of Service</h1>
-        <p className="text-xs text-[#1E293B]/30 mb-12">Last updated: June 2026</p>
+        <p className="text-xs text-[#1E293B]/30 mb-12">Last updated: June 23, 2026</p>
 
         <div className="space-y-10 text-sm text-[#1E293B]/60 leading-relaxed">
 
@@ -38,6 +38,16 @@ export default function TermsPage() {
               Joining the waitlist does not guarantee access to the Service. We may invite users in any order
               we choose. We reserve the right to decline access to any applicant at our sole discretion.
               Waitlist submissions must use a valid email address you own.
+            </p>
+            <p className="mt-3">
+              Waitlist enrollment uses a two-step email verification flow: you submit your information, receive
+              a one-time verification code, and must enter that code before your waitlist entry is finalized.
+              Verification codes may expire and may be rate-limited after repeated failed attempts.
+            </p>
+            <p className="mt-3">
+              To reduce duplicate submissions and improve consistency, we may perform synchronous refreshes
+              between our waitlist data sources during signup and verification. You agree not to attempt to
+              bypass or interfere with these verification and synchronization controls.
             </p>
           </section>
 
