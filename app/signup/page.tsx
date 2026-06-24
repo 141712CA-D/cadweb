@@ -17,11 +17,30 @@ const inputClass = (error?: string) =>
 const labelClass = "block text-xs text-slate-500 font-medium tracking-wide mb-2 uppercase";
 const errorClass = "text-xs text-red-500 mt-1.5";
 
-function EmailCheckHint({ status }: { status: EmailCheck }) {
-  if (status === "checking") return <p className="text-xs text-slate-400 mt-1.5">Checking...</p>;
-  if (status === "registered") return <p className="text-xs text-amber-500 mt-1.5">This email is already on the waitlist.</p>;
-  if (status === "returning") return <p className="text-xs text-blue-500 mt-1.5">Looks like you were previously removed — you can re-join.</p>;
-  return null;
+function EmailCheckBadge({ status, canRegister }: { status: EmailCheck; canRegister: boolean | null }) {
+  const baseClass = "inline-flex w-[120px] h-5 items-center justify-end text-[11px] normal-case tracking-normal font-bold transition-colors duration-150";
+
+  if (status === "idle") {
+    return (
+      <span className={`${baseClass} text-transparent`} aria-hidden="true">
+        Can register
+      </span>
+    );
+  }
+  if (status === "checking") {
+    return <span className={`${baseClass} text-slate-400`}>Checking...</span>;
+  }
+  if (status === "available" || status === "returning") {
+    return <span className={`${baseClass} text-emerald-600`}>Can register</span>;
+  }
+  if (status === "registered" || canRegister === false) {
+    return <span className={`${baseClass} text-amber-600`}>Cannot register</span>;
+  }
+  return (
+    <span className={`${baseClass} text-transparent`} aria-hidden="true">
+      Can register
+    </span>
+  );
 }
 
 export default function SignupPage() {
@@ -31,27 +50,17 @@ export default function SignupPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const turnstileRef = useRef<TurnstileInstance>(null);
   const [emailCheck, setEmailCheck] = useState<EmailCheck>("idle");
-  const registeredSet = useRef<Set<string>>(new Set());
-  const returningSet  = useRef<Set<string>>(new Set());
+  const [emailCanRegister, setEmailCanRegister] = useState<boolean | null>(null);
+  const emailCannotRegister = emailCheck === "registered" || emailCanRegister === false;
 
   // Email-verification step state
   const [code, setCode] = useState("");
   const [verifyError, setVerifyError] = useState("");
   const [pendingEmail, setPendingEmail] = useState("");
   const [verifying, setVerifying] = useState(false);
+  const emailCheckRequestId = useRef(0);
 
   useEffect(() => { document.body.style.overflow = ""; }, []);
-
-  // Pre-warm the DB sync and hydrate local hash sets for O(1) email lookup.
-  useEffect(() => {
-    fetch("/api/waitlist/prepare")
-      .then((r) => r.json())
-      .then((d) => {
-        registeredSet.current = new Set(d.registered ?? []);
-        returningSet.current  = new Set(d.returning  ?? []);
-      })
-      .catch(() => {});
-  }, []);
 
   // Individual fields
   const [indName, setIndName]             = useState("");
@@ -67,27 +76,44 @@ export default function SignupPage() {
   const [teamRole, setTeamRole]   = useState("");
   const [teamUsage, setTeamUsage] = useState("");
 
-  // Debounced email dedup check — hashes the typed address and looks it up in the
-  // in-memory sets hydrated from /api/waitlist/prepare. No extra network call.
+  // Debounced email dedup check against /api/waitlist/check.
   useEffect(() => {
     const email = (type === "individual" ? indEmail : teamEmail).toLowerCase().trim();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setEmailCheck("idle");
+      setEmailCanRegister(null);
       return;
     }
     setEmailCheck("checking");
+    setEmailCanRegister(null);
+    const currentRequestId = ++emailCheckRequestId.current;
+    const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
-        const buf = await window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(email));
-        const hex = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
-        if (registeredSet.current.has(hex)) setEmailCheck("registered");
-        else if (returningSet.current.has(hex)) setEmailCheck("returning");
-        else setEmailCheck("available");
-      } catch {
+        const res = await fetch(`/api/waitlist/check?email=${encodeURIComponent(email)}`, { signal: controller.signal });
+        if (!res.ok) {
+          setEmailCheck("idle");
+          return;
+        }
+        const data = await res.json();
+        if (currentRequestId !== emailCheckRequestId.current) return;
+        if (data.status === "registered" || data.status === "returning" || data.status === "available") {
+          setEmailCheck(data.status);
+          setEmailCanRegister(typeof data.canRegister === "boolean" ? data.canRegister : null);
+          return;
+        }
         setEmailCheck("idle");
+        setEmailCanRegister(null);
+      } catch {
+        if (currentRequestId !== emailCheckRequestId.current) return;
+        setEmailCheck("idle");
+        setEmailCanRegister(null);
       }
     }, 300);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [indEmail, teamEmail, type]);
 
   function clearError(field: string) {
@@ -117,6 +143,13 @@ export default function SignupPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
+    if (emailCannotRegister) {
+      setErrors((prev) => ({
+        ...prev,
+        [type === "individual" ? "indEmail" : "teamEmail"]: "This email is already on the waitlist.",
+      }));
+      return;
+    }
     if (!captchaToken) {
       setErrors({ captcha: "Please complete the verification." });
       return;
@@ -205,9 +238,9 @@ export default function SignupPage() {
 
       <div className="grid-bg absolute inset-0 pointer-events-none" />
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="orb-1 absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full"
+        <div className="orb-1 absolute -top-40 -left-40 w-125 h-125 rounded-full"
           style={{ background: "radial-gradient(circle, rgba(199,226,255,0.5) 0%, transparent 70%)", filter: "blur(40px)" }} />
-        <div className="orb-2 absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full"
+        <div className="orb-2 absolute -bottom-40 -right-40 w-125 h-125 rounded-full"
           style={{ background: "radial-gradient(circle, rgba(199,226,255,0.35) 0%, transparent 70%)", filter: "blur(40px)" }} />
       </div>
 
@@ -339,12 +372,17 @@ export default function SignupPage() {
                     {errors.indName && <p className={errorClass}>{errors.indName}</p>}
                   </div>
                   <div>
-                    <label className={labelClass}>Email</label>
+                    <div className="relative">
+                      <label className={labelClass}>Email</label>
+                      <div className="absolute right-0 top-0">
+                        <EmailCheckBadge status={emailCheck} canRegister={emailCanRegister} />
+                      </div>
+                    </div>
                     <input type="email" className={inputClass(errors.indEmail)} placeholder="you@example.com" value={indEmail} maxLength={254}
                       onChange={(e) => { setIndEmail(e.target.value); clearError("indEmail"); }} />
                     {errors.indEmail
                       ? <p className={errorClass}>{errors.indEmail}</p>
-                      : <EmailCheckHint status={emailCheck} />}
+                      : null}
                   </div>
                   <div>
                     <label className={labelClass}>Role</label>
@@ -396,12 +434,17 @@ export default function SignupPage() {
                     {errors.teamRep && <p className={errorClass}>{errors.teamRep}</p>}
                   </div>
                   <div>
-                    <label className={labelClass}>Email</label>
+                    <div className="relative">
+                      <label className={labelClass}>Email</label>
+                      <div className="absolute right-0 top-0">
+                        <EmailCheckBadge status={emailCheck} canRegister={emailCanRegister} />
+                      </div>
+                    </div>
                     <input type="email" className={inputClass(errors.teamEmail)} placeholder="you@company.com" value={teamEmail} maxLength={254}
                       onChange={(e) => { setTeamEmail(e.target.value); clearError("teamEmail"); }} />
                     {errors.teamEmail
                       ? <p className={errorClass}>{errors.teamEmail}</p>
-                      : <EmailCheckHint status={emailCheck} />}
+                      : null}
                   </div>
                   <div>
                     <label className={labelClass}>Organization</label>
@@ -442,7 +485,7 @@ export default function SignupPage() {
 
               <button
                 type="submit"
-                disabled={status === "loading" || !captchaToken}
+                disabled={status === "loading" || !captchaToken || emailCannotRegister}
                 className="mt-2 w-full py-3.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {status === "loading" ? "Sending..." : "Request access"}
