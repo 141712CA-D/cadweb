@@ -366,7 +366,7 @@ export default function SignupPage() {
               {type === "individual" ? (
                 <>
                   <div>
-                    <label className={labelClass}>Name</label>
+                    <label className={labelClass}>Name (First & Last)</label>
                     <input className={inputClass(errors.indName)} placeholder="Your full name" value={indName} maxLength={80}
                       onChange={(e) => { setIndName(e.target.value); clearError("indName"); }} />
                     {errors.indName && <p className={errorClass}>{errors.indName}</p>}
