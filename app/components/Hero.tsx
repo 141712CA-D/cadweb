@@ -424,7 +424,7 @@ export default function Hero() {
       <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-7xl items-center gap-12 px-5 pb-20 pt-36 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
         <div>
           <h1 className="max-w-4xl text-balance text-5xl font-black leading-[0.96] tracking-normal text-slate-900 sm:text-7xl lg:text-8xl">
-            You think it, parametra makes it
+            You think it, Parametra makes it
           </h1>
 
           <p className="mt-7 max-w-2xl text-sm font-light leading-6 text-slate-500 sm:text-xl sm:leading-8">
