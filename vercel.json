@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/sync-waitlist",
+      "path": "/api/cron/sync-waitlist",
       "schedule": "0 0 * * *"
     }
   ]

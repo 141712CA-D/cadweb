@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Turnstile } from "@marsidev/react-turnstile";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
+import { apiUrl } from "@/lib/api";
 
 type FormType = "individual" | "team";
 type Status = "idle" | "loading" | "verify" | "success" | "cooldown" | "error";
@@ -95,7 +96,7 @@ export default function ContactPage() {
         : { type, repName: teamRep, email: teamEmail, org: teamOrg, role: teamRole, subject: teamSubject, message: teamMessage };
 
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch(apiUrl("/api/contact/request"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...payload, captchaToken }),
@@ -135,10 +136,10 @@ export default function ContactPage() {
     setVerifying(true);
     setVerifyError("");
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch(apiUrl("/api/contact/verify"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ step: "verify", email: pendingEmail, code: code.trim() }),
+        body: JSON.stringify({ email: pendingEmail, code: code.trim() }),
       });
       if (res.ok) {
         setStatus("success");
