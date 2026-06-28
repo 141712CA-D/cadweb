@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Lato } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import BackgroundSync from "./components/BackgroundSync";
 import "./globals.css";
 
 const lato = Lato({
@@ -39,6 +40,7 @@ export default function RootLayout({
       className={`${lato.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body tabIndex={-1} className="min-h-full flex flex-col bg-[#F5F0E8] text-[#1E293B]">
+        <BackgroundSync />
         {children}
         <SpeedInsights />
       </body>
