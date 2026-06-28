@@ -191,7 +191,7 @@ export default function ContactPage() {
 
       <div className="grid-bg absolute inset-0 pointer-events-none" />
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="orb-1 absolute -top-40 -left-40 w-125 h-125 rounded-full"
+        <div className="orb-1 absolute -top-40 -left-40 w-125 h-126 rounded-full"
           style={{ background: "radial-gradient(circle, rgba(199,226,255,0.5) 0%, transparent 70%)", filter: "blur(40px)" }} />
         <div className="orb-2 absolute -bottom-40 -right-40 w-125 h-125 rounded-full"
           style={{ background: "radial-gradient(circle, rgba(199,226,255,0.35) 0%, transparent 70%)", filter: "blur(40px)" }} />
