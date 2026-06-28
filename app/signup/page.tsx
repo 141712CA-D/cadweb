@@ -86,6 +86,21 @@ export default function SignupPage() {
   const [teamRole, setTeamRole]   = useState("");
   const [teamUsage, setTeamUsage] = useState("");
 
+  // True only when every required field for the active tab is filled (and email is valid).
+  // Drives the disabled state of the submit button alongside the captcha + email-check gates.
+  const allFieldsFilled =
+    type === "individual"
+      ? indName.trim() !== "" &&
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(indEmail.trim()) &&
+        indRole !== "" &&
+        ((indRole !== "Student" && indRole !== "Instructor") || indUniversity.trim() !== "") &&
+        indReason.trim() !== ""
+      : teamRep.trim() !== "" &&
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(teamEmail.trim()) &&
+        teamOrg.trim() !== "" &&
+        teamRole.trim() !== "" &&
+        teamUsage.trim() !== "";
+
   // Fetch the hashed waitlist sets once on load. Dedup is then computed locally — the
   // plaintext email is never sent to the server until the user actually submits.
   useEffect(() => {
@@ -504,7 +519,7 @@ export default function SignupPage() {
 
               <button
                 type="submit"
-                disabled={status === "loading" || !captchaToken || emailCannotRegister}
+                disabled={status === "loading" || !captchaToken || emailCannotRegister || !allFieldsFilled}
                 className="mt-2 w-full py-3.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {status === "loading" ? "Sending..." : "Request access"}
