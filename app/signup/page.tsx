@@ -18,7 +18,14 @@ const inputClass = (error?: string) =>
 const labelClass = "block text-xs text-slate-500 font-medium tracking-wide mb-2 uppercase";
 const errorClass = "text-xs text-red-500 mt-1.5";
 
-function EmailCheckBadge({ status, canRegister }: { status: EmailCheck; canRegister: boolean | null }) {
+/** SHA-256 of a string as lowercase hex — matches the backend's hash in /api/waitlist/prepare. */
+async function sha256Hex(input: string): Promise<string> {
+  const bytes = new TextEncoder().encode(input);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function EmailCheckBadge({ status }: { status: EmailCheck }) {
   const baseClass = "inline-flex w-[120px] h-5 items-center justify-end text-[11px] normal-case tracking-normal font-bold transition-colors duration-150";
 
   if (status === "idle") {
@@ -34,7 +41,7 @@ function EmailCheckBadge({ status, canRegister }: { status: EmailCheck; canRegis
   if (status === "available" || status === "returning") {
     return <span className={`${baseClass} text-emerald-600`}>Can register</span>;
   }
-  if (status === "registered" || canRegister === false) {
+  if (status === "registered") {
     return <span className={`${baseClass} text-amber-600`}>Cannot register</span>;
   }
   return (
@@ -51,8 +58,10 @@ export default function SignupPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const turnstileRef = useRef<TurnstileInstance>(null);
   const [emailCheck, setEmailCheck] = useState<EmailCheck>("idle");
-  const [emailCanRegister, setEmailCanRegister] = useState<boolean | null>(null);
-  const emailCannotRegister = emailCheck === "registered" || emailCanRegister === false;
+  // SHA-256 hash sets of registered/returning emails, fetched once from /api/waitlist/prepare.
+  // Dedup is computed locally so the plaintext email never leaves the browser until submit.
+  const [hashSets, setHashSets] = useState<{ registered: Set<string>; returning: Set<string> } | null>(null);
+  const emailCannotRegister = emailCheck === "registered";
 
   // Email-verification step state
   const [code, setCode] = useState("");
@@ -77,45 +86,54 @@ export default function SignupPage() {
   const [teamRole, setTeamRole]   = useState("");
   const [teamUsage, setTeamUsage] = useState("");
 
-  // Debounced email dedup check against /api/waitlist/check.
+  // Fetch the hashed waitlist sets once on load. Dedup is then computed locally — the
+  // plaintext email is never sent to the server until the user actually submits.
+  useEffect(() => {
+    const controller = new AbortController();
+    (async () => {
+      try {
+        const res = await fetch(apiUrl("/api/waitlist/prepare"), { signal: controller.signal });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data?.success) {
+          setHashSets({
+            registered: new Set<string>(data.registered ?? []),
+            returning: new Set<string>(data.returning ?? []),
+          });
+        }
+      } catch {
+        // Ignore — if prepare fails the badge stays idle; the server-side gate
+        // (409 on submit) still prevents duplicate registration.
+      }
+    })();
+    return () => controller.abort();
+  }, []);
+
+  // Debounced local dedup check: hash the typed email and look it up in both sets.
   useEffect(() => {
     const email = (type === "individual" ? indEmail : teamEmail).toLowerCase().trim();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setEmailCheck("idle");
-      setEmailCanRegister(null);
       return;
     }
     setEmailCheck("checking");
-    setEmailCanRegister(null);
+    // Hashes not loaded yet — stay in "checking"; this effect re-runs once they arrive.
+    if (!hashSets) return;
     const currentRequestId = ++emailCheckRequestId.current;
-    const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(apiUrl(`/api/waitlist/check?email=${encodeURIComponent(email)}`), { signal: controller.signal });
-        if (!res.ok) {
-          setEmailCheck("idle");
-          return;
-        }
-        const data = await res.json();
+        const hash = await sha256Hex(email);
         if (currentRequestId !== emailCheckRequestId.current) return;
-        if (data.status === "registered" || data.status === "returning" || data.status === "available") {
-          setEmailCheck(data.status);
-          setEmailCanRegister(typeof data.canRegister === "boolean" ? data.canRegister : null);
-          return;
-        }
-        setEmailCheck("idle");
-        setEmailCanRegister(null);
+        if (hashSets.registered.has(hash)) setEmailCheck("registered");
+        else if (hashSets.returning.has(hash)) setEmailCheck("returning");
+        else setEmailCheck("available");
       } catch {
         if (currentRequestId !== emailCheckRequestId.current) return;
         setEmailCheck("idle");
-        setEmailCanRegister(null);
       }
     }, 300);
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
-  }, [indEmail, teamEmail, type]);
+    return () => clearTimeout(timer);
+  }, [indEmail, teamEmail, type, hashSets]);
 
   function clearError(field: string) {
     setErrors((prev) => { const next = { ...prev }; delete next[field]; return next; });
@@ -376,7 +394,7 @@ export default function SignupPage() {
                     <div className="relative">
                       <label className={labelClass}>Email</label>
                       <div className="absolute right-0 top-0">
-                        <EmailCheckBadge status={emailCheck} canRegister={emailCanRegister} />
+                        <EmailCheckBadge status={emailCheck} />
                       </div>
                     </div>
                     <input type="email" className={inputClass(errors.indEmail)} placeholder="you@example.com" value={indEmail} maxLength={254}
@@ -438,7 +456,7 @@ export default function SignupPage() {
                     <div className="relative">
                       <label className={labelClass}>Email</label>
                       <div className="absolute right-0 top-0">
-                        <EmailCheckBadge status={emailCheck} canRegister={emailCanRegister} />
+                        <EmailCheckBadge status={emailCheck} />
                       </div>
                     </div>
                     <input type="email" className={inputClass(errors.teamEmail)} placeholder="you@company.com" value={teamEmail} maxLength={254}
