@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Turnstile } from "@marsidev/react-turnstile";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
+import { apiUrl } from "@/lib/api";
 
 type FormType = "individual" | "team";
 type Status = "idle" | "loading" | "verify" | "success" | "welcome_back" | "duplicate" | "error";
@@ -90,7 +91,7 @@ export default function SignupPage() {
     const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/waitlist/check?email=${encodeURIComponent(email)}`, { signal: controller.signal });
+        const res = await fetch(apiUrl(`/api/waitlist/check?email=${encodeURIComponent(email)}`), { signal: controller.signal });
         if (!res.ok) {
           setEmailCheck("idle");
           return;
@@ -162,7 +163,7 @@ export default function SignupPage() {
         : { type, repName: teamRep, email: teamEmail, org: teamOrg, role: teamRole, usage: teamUsage };
 
     try {
-      const res = await fetch("/api/waitlist", {
+      const res = await fetch(apiUrl("/api/waitlist/request"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...payload, captchaToken }),
@@ -198,10 +199,10 @@ export default function SignupPage() {
     setVerifying(true);
     setVerifyError("");
     try {
-      const res = await fetch("/api/waitlist", {
+      const res = await fetch(apiUrl("/api/waitlist/verify"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ step: "verify", email: pendingEmail, code: code.trim() }),
+        body: JSON.stringify({ email: pendingEmail, code: code.trim() }),
       });
       if (res.ok) {
         const data = await res.json();
