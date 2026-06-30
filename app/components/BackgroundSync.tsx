@@ -2,11 +2,21 @@
 
 import { useEffect } from "react";
 import { apiUrl } from "@/lib/api";
-import { writePreparedHashSets } from "@/lib/waitlistPrepareCache";
 
 const SYNC_COOKIE = "waitlistSynced";
 const PREPARE_COOKIE = "waitlistPrepared";
 const SYNC_TTL_SECONDS = 3600; // once per hour per browser
+const PREPARE_STORAGE_KEY = "waitlistPrepareDataV1";
+const PREPARE_EVENT = "waitlist-prepare-updated";
+
+declare global {
+  interface Window {
+    __waitlistPrepareHashSets?: {
+      registered: Set<string>;
+      returning: Set<string>;
+    };
+  }
+}
 
 function hasCookie(name: string): boolean {
   return document.cookie.split("; ").some((c) => c.startsWith(`${name}=`));
@@ -14,6 +24,25 @@ function hasCookie(name: string): boolean {
 
 function setCookie(name: string): void {
   document.cookie = `${name}=1; Max-Age=${SYNC_TTL_SECONDS}; Path=/; SameSite=Lax`;
+}
+
+function normalizeHashes(input: unknown): string[] {
+  if (!Array.isArray(input)) return [];
+  return input.filter((value): value is string => typeof value === "string");
+}
+
+function writePreparedHashSets(registeredInput: unknown, returningInput: unknown): void {
+  const registered = normalizeHashes(registeredInput);
+  const returning = normalizeHashes(returningInput);
+  window.__waitlistPrepareHashSets = {
+    registered: new Set<string>(registered),
+    returning: new Set<string>(returning),
+  };
+  localStorage.setItem(
+    PREPARE_STORAGE_KEY,
+    JSON.stringify({ registered, returning, updatedAt: Date.now() }),
+  );
+  window.dispatchEvent(new Event(PREPARE_EVENT));
 }
 
 export default function BackgroundSync() {
