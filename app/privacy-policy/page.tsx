@@ -102,7 +102,9 @@ export default function PrivacyPolicyPage() {
               <li><strong className="text-[#1E293B]/70">waitlistPrepared</strong> — set for 1 hour per browser when hashed dedup data is refreshed in local storage from our waitlist prepare endpoint. This cookie is functional only and contains no personal data.</li>
             </ul>
             <p className="mt-3">
-              Session-level storage (e.g., to remember whether the intro animation has played) stays in your browser via sessionStorage and is never transmitted to our servers.
+              Browser storage is also used for functional purposes: sessionStorage (for UI state such as intro playback)
+              and localStorage (for short-lived SHA-256 waitlist dedup hash caches). This client-side storage is functional
+              only and is not used for advertising.
             </p>
             <p className="mt-3">
               We do not use tracking or advertising cookies.
