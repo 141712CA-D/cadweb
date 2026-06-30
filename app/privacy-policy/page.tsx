@@ -95,10 +95,11 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-base font-semibold text-[#1E293B]/80 mb-3">7. Cookies</h2>
             <p>
-              We use a functional cookie to optimize our waitlist synchronization:
+              We use functional cookies to optimize waitlist synchronization and local dedup preparation:
             </p>
             <ul className="list-disc list-inside mt-2 space-y-1">
               <li><strong className="text-[#1E293B]/70">waitlistSynced</strong> — set for 1 hour per browser to throttle background sync operations. This ensures our system resyncs waitlist data with our upstream database at most once per hour per browser, reducing unnecessary network traffic while keeping data fresh. This cookie is functional only and contains no personal data.</li>
+              <li><strong className="text-[#1E293B]/70">waitlistPrepared</strong> — set for 1 hour per browser when hashed dedup data is refreshed in local storage from our waitlist prepare endpoint. This cookie is functional only and contains no personal data.</li>
             </ul>
             <p className="mt-3">
               Session-level storage (e.g., to remember whether the intro animation has played) stays in your browser via sessionStorage and is never transmitted to our servers.

@@ -2,37 +2,56 @@
 
 import { useEffect } from "react";
 import { apiUrl } from "@/lib/api";
+import { writePreparedHashSets } from "@/lib/waitlistPrepareCache";
 
-// On page load, check if the backend is ready for a sync via /api/cookies/is-sync-ready.
-// If ready, fire /api/cookies/sync-waitlist. Throttled by a short-lived cookie so it
-// runs at most once per hour per browser.
 const SYNC_COOKIE = "waitlistSynced";
+const PREPARE_COOKIE = "waitlistPrepared";
 const SYNC_TTL_SECONDS = 3600; // once per hour per browser
+
+function hasCookie(name: string): boolean {
+  return document.cookie.split("; ").some((c) => c.startsWith(`${name}=`));
+}
+
+function setCookie(name: string): void {
+  document.cookie = `${name}=1; Max-Age=${SYNC_TTL_SECONDS}; Path=/; SameSite=Lax`;
+}
 
 export default function BackgroundSync() {
   useEffect(() => {
-    const alreadySynced = document.cookie
-      .split("; ")
-      .some((c) => c.startsWith(`${SYNC_COOKIE}=`));
-    if (alreadySynced) return;
-
-    // Set the throttle cookie before firing so rapid re-mounts can't double-trigger.
-    document.cookie = `${SYNC_COOKIE}=1; Max-Age=${SYNC_TTL_SECONDS}; Path=/; SameSite=Lax`;
-
     (async () => {
       try {
+        const alreadySynced = hasCookie(SYNC_COOKIE);
         const readyRes = await fetch(apiUrl("/api/cookies/is-sync-ready"), {
           method: "POST",
         });
-        if (!readyRes.ok) return;
-        const { isReady } = await readyRes.json();
-        if (!isReady) return;
+        if (readyRes.ok) {
+          const { isReady } = await readyRes.json();
+          if (isReady && !alreadySynced) {
+            const syncRes = await fetch(apiUrl("/api/cookies/sync-waitlist"), {
+              method: "POST",
+            });
+            if (syncRes.ok) {
+              setCookie(SYNC_COOKIE);
+            } else {
+              console.error("Background waitlist sync failed:", syncRes.status);
+            }
+          }
+        } else {
+          console.error("Background sync readiness check failed:", readyRes.status);
+        }
 
-        fetch(apiUrl("/api/cookies/sync-waitlist"), {
-          method: "POST",
-        }).catch(() => {});
-      } catch {
-        // fire-and-forget — silently swallow errors
+        const prepareRes = await fetch(apiUrl("/api/waitlist/prepare"));
+        if (!prepareRes.ok) {
+          console.error("Waitlist prepare fetch failed:", prepareRes.status);
+          return;
+        }
+        const data = await prepareRes.json();
+        if (!data?.success) return;
+
+        writePreparedHashSets(data.registered, data.returning);
+        setCookie(PREPARE_COOKIE);
+      } catch (error) {
+        console.error("Background sync orchestration failed:", error);
       }
     })();
   }, []);

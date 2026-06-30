@@ -5,6 +5,11 @@ import Link from "next/link";
 import { Turnstile } from "@marsidev/react-turnstile";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { apiUrl } from "@/lib/api";
+import {
+  PREPARE_EVENT,
+  getPreparedHashSets,
+  hydratePreparedHashSetsFromStorage,
+} from "@/lib/waitlistPrepareCache";
 
 type FormType = "individual" | "team";
 type Status = "idle" | "loading" | "verify" | "success" | "welcome_back" | "duplicate" | "error";
@@ -58,7 +63,7 @@ export default function SignupPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const turnstileRef = useRef<TurnstileInstance>(null);
   const [emailCheck, setEmailCheck] = useState<EmailCheck>("idle");
-  // SHA-256 hash sets of registered/returning emails, fetched once from /api/waitlist/prepare.
+  // SHA-256 hash sets are built during global /api/waitlist/prepare at app boot.
   // Dedup is computed locally so the plaintext email never leaves the browser until submit.
   const [hashSets, setHashSets] = useState<{ registered: Set<string>; returning: Set<string> } | null>(null);
   const emailCannotRegister = emailCheck === "registered";
@@ -101,27 +106,27 @@ export default function SignupPage() {
         teamRole.trim() !== "" &&
         teamUsage.trim() !== "";
 
-  // Fetch the hashed waitlist sets once on load. Dedup is then computed locally — the
-  // plaintext email is never sent to the server until the user actually submits.
+  // Read hashed waitlist sets from the global prepare cache populated by BackgroundSync.
   useEffect(() => {
-    const controller = new AbortController();
-    (async () => {
+    const onPrepared = () => {
       try {
-        const res = await fetch(apiUrl("/api/waitlist/prepare"), { signal: controller.signal });
-        if (!res.ok) return;
-        const data = await res.json();
-        if (data?.success) {
-          setHashSets({
-            registered: new Set<string>(data.registered ?? []),
-            returning: new Set<string>(data.returning ?? []),
-          });
+        const fromMemory = getPreparedHashSets();
+        if (fromMemory) {
+          setHashSets(fromMemory);
+          return;
+        }
+
+        const fromStorage = hydratePreparedHashSetsFromStorage();
+        if (fromStorage) {
+          setHashSets(fromStorage);
         }
       } catch {
-        // Ignore — if prepare fails the badge stays idle; the server-side gate
-        // (409 on submit) still prevents duplicate registration.
+        // If cache decode fails, keep local check in "checking"/"idle".
       }
-    })();
-    return () => controller.abort();
+    };
+    onPrepared();
+    window.addEventListener(PREPARE_EVENT, onPrepared);
+    return () => window.removeEventListener(PREPARE_EVENT, onPrepared);
   }, []);
 
   // Debounced local dedup check: hash the typed email and look it up in both sets.
