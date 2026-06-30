@@ -45,7 +45,7 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-base font-semibold text-[#1E293B]/80 mb-3">3. Data Storage</h2>
             <p>
-              Waitlist data is stored in a Neon Serverless Postgres database and synced to Google Sheets.
+              Waitlist data is stored in a Postgres database hosted on AWS and synced to Google Sheets.
               Both are hosted in the United States. We take reasonable technical measures to protect your data,
               but no system is completely secure.
             </p>
@@ -66,7 +66,7 @@ export default function PrivacyPolicyPage() {
             <ul className="list-disc list-inside mt-2 space-y-1">
               <li><strong className="text-[#1E293B]/70">Resend</strong> — transactional email delivery</li>
               <li><strong className="text-[#1E293B]/70">Google Sheets / Google Cloud</strong> — waitlist storage and sync</li>
-              <li><strong className="text-[#1E293B]/70">Neon</strong> — serverless Postgres database</li>
+              <li><strong className="text-[#1E293B]/70">AWS</strong> — database hosting and server infrastructure</li>
               <li><strong className="text-[#1E293B]/70">Cloudflare Turnstile</strong> — bot protection on forms</li>
               <li><strong className="text-[#1E293B]/70">Vercel</strong> — hosting and analytics</li>
             </ul>
