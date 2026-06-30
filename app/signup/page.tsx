@@ -5,28 +5,23 @@ import Link from "next/link";
 import { Turnstile } from "@marsidev/react-turnstile";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { apiUrl } from "@/lib/api";
+import {
+  PREPARE_EVENT,
+  getPreparedHashSets,
+  hydratePreparedHashSetsFromStorage,
+} from "@/lib/waitlistPrepareCache";
 
 type FormType = "individual" | "team";
 type Status = "idle" | "loading" | "verify" | "success" | "welcome_back" | "duplicate" | "error";
 type EmailCheck = "idle" | "checking" | "available" | "registered" | "returning";
 
 const INDIVIDUAL_ROLES = ["Student", "Instructor", "Freelancer", "Hobbyist"];
-const PREPARE_EVENT = "waitlist-prepare-updated";
 
 const inputClass = (error?: string) =>
   `w-full bg-white border ${error ? "border-red-400" : "border-slate-200"} rounded-xl px-4 py-3 text-sm text-slate-900 font-sans placeholder:text-slate-300 focus:outline-none focus:border-blue-400 focus:bg-white transition-all duration-200`;
 
 const labelClass = "block text-xs text-slate-500 font-medium tracking-wide mb-2 uppercase";
 const errorClass = "text-xs text-red-500 mt-1.5";
-
-declare global {
-  interface Window {
-    __waitlistPrepareHashSets?: {
-      registered: Set<string>;
-      returning: Set<string>;
-    };
-  }
-}
 
 /** SHA-256 of a string as lowercase hex — matches the backend's hash in /api/waitlist/prepare. */
 async function sha256Hex(input: string): Promise<string> {
@@ -115,9 +110,15 @@ export default function SignupPage() {
   useEffect(() => {
     const onPrepared = () => {
       try {
-        const fromMemory = window.__waitlistPrepareHashSets;
+        const fromMemory = getPreparedHashSets();
         if (fromMemory) {
           setHashSets(fromMemory);
+          return;
+        }
+
+        const fromStorage = hydratePreparedHashSetsFromStorage();
+        if (fromStorage) {
+          setHashSets(fromStorage);
         }
       } catch {
         // If cache decode fails, keep local check in "checking"/"idle".
