@@ -10,7 +10,7 @@ export default function PrivacyPolicyPage() {
 
       <main className="flex-1 max-w-3xl mx-auto px-6 py-32 sm:py-40 w-full">
         <h1 className="text-3xl sm:text-4xl font-bold mb-2 gradient-text">Privacy Policy</h1>
-        <p className="text-xs text-[#1E293B]/30 mb-12">Last updated: June 23, 2026</p>
+        <p className="text-xs text-[#1E293B]/30 mb-12">Last updated: June 30, 2026</p>
 
         <div className="space-y-10 text-sm text-[#1E293B]/60 leading-relaxed">
 
@@ -95,8 +95,16 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-base font-semibold text-[#1E293B]/80 mb-3">7. Cookies</h2>
             <p>
-              We do not use tracking cookies. Session-level storage (e.g., to remember whether the intro
-              animation has played) stays in your browser and is never transmitted to our servers.
+              We use a functional cookie to optimize our waitlist synchronization:
+            </p>
+            <ul className="list-disc list-inside mt-2 space-y-1">
+              <li><strong className="text-[#1E293B]/70">waitlistSynced</strong> — set for 1 hour per browser to throttle background sync operations. This ensures our system resyncs waitlist data with our upstream database at most once per hour per browser, reducing unnecessary network traffic while keeping data fresh. This cookie is functional only and contains no personal data.</li>
+            </ul>
+            <p className="mt-3">
+              Session-level storage (e.g., to remember whether the intro animation has played) stays in your browser via sessionStorage and is never transmitted to our servers.
+            </p>
+            <p className="mt-3">
+              We do not use tracking or advertising cookies.
             </p>
           </section>
 
