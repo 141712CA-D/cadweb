@@ -263,7 +263,7 @@ export default function ContactPage() {
         ) : (
           <>
             <h1 className="text-2xl font-bold text-slate-900 mb-1">Get in touch</h1>
-            <p className="text-sm text-slate-500 mb-8">Have a question or want to learn more? We&apos;d love to hear from you.</p>
+            <p className="text-sm text-slate-500 mb-8">Have a question or want to learn more? Drop us a message.</p>
 
             <div className="flex gap-2 mb-8 p-1 rounded-xl bg-slate-100 border border-slate-200">
               {(["individual", "team"] as FormType[]).map((t) => (
@@ -404,9 +404,9 @@ export default function ContactPage() {
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="text-xs text-slate-700">© {new Date().getFullYear()} Parametra. All rights reserved.</p>
         <div className="grid grid-cols-3 gap-x-6 gap-y-3 sm:flex sm:items-center sm:gap-6">
-          <Link href="/how-it-works" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">How it works</Link>
+          <Link href="/how-it-works" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">How It Works</Link>
           <Link href="/about" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">About</Link>
-          <Link href="/signup" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Join waitlist</Link>
+          <Link href="/signup" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Join Waitlist</Link>
           <Link href="/terms" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Terms</Link>
           <Link href="/privacy-policy" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Privacy</Link>
         </div>

@@ -63,10 +63,10 @@ export default function Home() {
             <p className="text-xs text-slate-700">© {new Date().getFullYear()} Parametra. All rights reserved.</p>
             <p className="text-xs text-slate-600 font-mono sm:absolute sm:left-1/2 sm:-translate-x-1/2">v1.5.1.1</p>
             <div className="grid grid-cols-3 justify-items-center gap-x-6 gap-y-3 sm:flex sm:items-center sm:gap-6">
-              <a href="/how-it-works" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">How it works</a>
+              <a href="/how-it-works" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">How It Works</a>
               <a href="/about" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">About</a>
-              <a href="/contact" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Contact us</a>
-              <a href="/signup" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Join waitlist</a>
+              <a href="/contact" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Contact Us</a>
+              <a href="/signup" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Join Waitlist</a>
               <a href="/terms" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Terms</a>
               <a href="/privacy-policy" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Privacy</a>
             </div>

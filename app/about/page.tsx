@@ -320,8 +320,8 @@ export default function AboutPage() {
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-slate-700">© {new Date().getFullYear()} Parametra. All rights reserved.</p>
             <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:flex sm:items-center sm:gap-6">
-              <Link href="/contact" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Contact us</Link>
-              <Link href="/signup" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Join waitlist</Link>
+              <Link href="/contact" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Contact Us</Link>
+              <Link href="/signup" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Join Waitlist</Link>
               <Link href="/terms" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Terms</Link>
               <Link href="/privacy-policy" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Privacy</Link>
             </div>

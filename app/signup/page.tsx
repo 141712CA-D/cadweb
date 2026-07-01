@@ -331,7 +331,7 @@ export default function SignupPage() {
               </svg>
             </div>
             <h2 className="text-xl font-bold text-slate-900">You&apos;re on the list.</h2>
-            <p className="text-sm text-slate-500 max-w-xs leading-relaxed">We&apos;ll reach out when access opens up. Big things are coming.</p>
+            <p className="text-sm text-slate-500 max-w-xs leading-relaxed">We&apos;ll reach out when access opens up. You won&apos;t want to miss it.</p>
             <p className="text-xs text-slate-400 max-w-xs leading-relaxed">If this is your first time receiving an email from {process.env.NEXT_PUBLIC_MAIL_FROM_EMAIL ?? "no-reply@parametra.ai"}, please unmark us as spam if applicable.</p>
             <button
               onClick={() => { sessionStorage.removeItem("introPlayed"); window.location.href = "/"; }}
@@ -499,9 +499,9 @@ export default function SignupPage() {
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="text-xs text-slate-700">© {new Date().getFullYear()} Parametra. All rights reserved.</p>
         <div className="grid grid-cols-3 gap-x-6 gap-y-3 sm:flex sm:items-center sm:gap-6">
-          <Link href="/how-it-works" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">How it works</Link>
+          <Link href="/how-it-works" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">How It Works</Link>
           <Link href="/about" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">About</Link>
-          <Link href="/contact" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Contact us</Link>
+          <Link href="/contact" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Contact Us</Link>
           <Link href="/terms" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Terms</Link>
           <Link href="/privacy-policy" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Privacy</Link>
         </div>

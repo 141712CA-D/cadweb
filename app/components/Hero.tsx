@@ -104,7 +104,7 @@ const platformStages = [
   },
   {
     title: "One prompt. Every tool.",
-    summary: "Design where the job demands. Parametra removes the barrier between your intent and the CAD software that needs it.",
+    summary: "One prompt. Every tool. No rebuilding, no re-modeling, no starting over.",
   },
 ];
 
@@ -453,7 +453,7 @@ export default function Hero() {
 
         <div className="flex flex-col gap-5">
           <p className="text-base leading-7 text-slate-500 sm:text-lg sm:leading-8">
-            Parametra is the most advanced design engine to bring your ideas to life. Built with Onshape in mind, Parametra allows you to not only build models, but persist designs across CAD software — making your toolset limitless.
+            Describe what you need. Parametra builds it — parametric, constrained, and ready to go. Design in Onshape, persist anywhere. Your tools, your workflow, no limits.
           </p>
           <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <div className="relative overflow-hidden rounded-lg">

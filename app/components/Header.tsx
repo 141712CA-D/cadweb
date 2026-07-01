@@ -51,7 +51,7 @@ export default function Header() {
             href="/how-it-works"
             className="hidden sm:block text-sm font-medium px-4 py-2 rounded-full border border-slate-300 bg-white/60 text-slate-600 hover:border-blue-500 hover:bg-white hover:text-slate-900 transition-all duration-200"
           >
-            How it works
+            How It Works
           </Link>
           <Link
             href="/about"
@@ -66,7 +66,7 @@ export default function Header() {
             className="text-xs sm:text-sm font-medium px-4 sm:px-5 py-2 rounded-full bg-slate-900 text-[#F5F0E8] hover:bg-slate-700 transition-all duration-200 shadow-sm whitespace-nowrap"
           >
             <span className="sm:hidden">Waitlist</span>
-            <span className="hidden sm:inline">Join the waitlist</span>
+            <span className="hidden sm:inline">Join the Waitlist</span>
           </Link>
 
           {/* Mobile hamburger */}
@@ -101,7 +101,7 @@ export default function Header() {
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center gap-3 px-4 py-3 text-sm text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors"
                 >
-                  How it works
+                  How It Works
                 </Link>
                 <div className="h-px bg-slate-100 mx-4" />
                 <Link

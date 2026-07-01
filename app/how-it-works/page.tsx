@@ -52,7 +52,7 @@ export default function HowItWorksPage() {
             <span className="text-slate-800">for Parametra.</span>
           </h1>
           <p className="mt-6 text-slate-600 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-            Type what you need or hand us a drawing. Parametra handles the rest.
+            Type what you need or drop in a drawing. We'll handle the CAD.
           </p>
         </div>
 
@@ -163,7 +163,7 @@ export default function HowItWorksPage() {
               <span className="text-slate-800">Every CAD tool, one platform.</span>
             </h2>
             <p className="mt-6 text-slate-600 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-              Parametra isn&apos;t just a prompt-to-model tool. It&apos;s the bridge between every major CAD environment.
+              Prompt-to-model is just the start. Parametra connects every major CAD environment in one place.
             </p>
           </div>
 
@@ -220,7 +220,7 @@ export default function HowItWorksPage() {
                   Our first integration runs directly inside Onshape. Describe a part, drop in a drawing, and a multi-agent pipeline builds the full parametric model in your document — sketch, extrude, fillet, and all.
                 </p>
                 <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
-                  Users coming from SolidWorks or any other tool can import their work into Parametra and pick up right where they left off — in Onshape.
+                  Already working in SolidWorks or another tool? Import your model into Parametra and continue in Onshape — no rebuilding required.
                 </p>
               </div>
             </div>
@@ -246,8 +246,8 @@ export default function HowItWorksPage() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-slate-700">© {new Date().getFullYear()} Parametra. All rights reserved.</p>
           <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:flex sm:items-center sm:gap-6">
-            <Link href="/contact" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Contact us</Link>
-            <Link href="/signup" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Join waitlist</Link>
+            <Link href="/contact" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Contact Us</Link>
+            <Link href="/signup" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Join Waitlist</Link>
             <Link href="/terms" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Terms</Link>
             <Link href="/privacy-policy" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Privacy</Link>
           </div>
