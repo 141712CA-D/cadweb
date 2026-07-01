@@ -48,8 +48,7 @@ export default function TermsPage() {
               To reduce duplicate submissions and improve consistency, we perform synchronization operations:
               (1) during signup and verification, for real-time dedup checks across our systems; and (2) via a 
               background sync that runs at most once per hour per browser (throttled by a functional cookie called 
-              <strong> waitlistSynced</strong>). We also refresh hashed dedup data in browser storage at app load and
-              mark the refresh with a functional cookie called <strong>waitlistPrepared</strong>. The background sync ensures our database remains synchronized with our 
+              <strong>waitlistSynced</strong>). The background sync ensures our database remains synchronized with our 
               upstream data sources. You agree not to attempt to bypass or interfere with these verification and 
               synchronization controls.
             </p>

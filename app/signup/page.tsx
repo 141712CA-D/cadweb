@@ -5,11 +5,6 @@ import Link from "next/link";
 import { Turnstile } from "@marsidev/react-turnstile";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { apiUrl } from "@/lib/api";
-import {
-  PREPARE_EVENT,
-  getPreparedHashSets,
-  hydratePreparedHashSetsFromStorage,
-} from "@/lib/waitlistPrepareCache";
 
 type FormType = "individual" | "team";
 type Status = "idle" | "loading" | "verify" | "success" | "welcome_back" | "duplicate" | "error";
@@ -22,13 +17,6 @@ const inputClass = (error?: string) =>
 
 const labelClass = "block text-xs text-slate-500 font-medium tracking-wide mb-2 uppercase";
 const errorClass = "text-xs text-red-500 mt-1.5";
-
-/** SHA-256 of a string as lowercase hex — matches the backend's hash in /api/waitlist/prepare. */
-async function sha256Hex(input: string): Promise<string> {
-  const bytes = new TextEncoder().encode(input);
-  const digest = await crypto.subtle.digest("SHA-256", bytes);
-  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, "0")).join("");
-}
 
 function EmailCheckBadge({ status }: { status: EmailCheck }) {
   const baseClass = "inline-flex w-[120px] h-5 items-center justify-end text-[11px] normal-case tracking-normal font-bold transition-colors duration-150";
@@ -63,9 +51,6 @@ export default function SignupPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const turnstileRef = useRef<TurnstileInstance>(null);
   const [emailCheck, setEmailCheck] = useState<EmailCheck>("idle");
-  // SHA-256 hash sets are built during global /api/waitlist/prepare at app boot.
-  // Dedup is computed locally so the plaintext email never leaves the browser until submit.
-  const [hashSets, setHashSets] = useState<{ registered: Set<string>; returning: Set<string> } | null>(null);
   const emailCannotRegister = emailCheck === "registered";
 
   // Email-verification step state
@@ -106,30 +91,7 @@ export default function SignupPage() {
         teamRole.trim() !== "" &&
         teamUsage.trim() !== "";
 
-  // Read hashed waitlist sets from the global prepare cache populated by BackgroundSync.
-  useEffect(() => {
-    const onPrepared = () => {
-      try {
-        const fromMemory = getPreparedHashSets();
-        if (fromMemory) {
-          setHashSets(fromMemory);
-          return;
-        }
-
-        const fromStorage = hydratePreparedHashSetsFromStorage();
-        if (fromStorage) {
-          setHashSets(fromStorage);
-        }
-      } catch {
-        // If cache decode fails, keep local check in "checking"/"idle".
-      }
-    };
-    onPrepared();
-    window.addEventListener(PREPARE_EVENT, onPrepared);
-    return () => window.removeEventListener(PREPARE_EVENT, onPrepared);
-  }, []);
-
-  // Debounced local dedup check: hash the typed email and look it up in both sets.
+  // Debounced email check via backend API
   useEffect(() => {
     const email = (type === "individual" ? indEmail : teamEmail).toLowerCase().trim();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -137,23 +99,30 @@ export default function SignupPage() {
       return;
     }
     setEmailCheck("checking");
-    // Hashes not loaded yet — stay in "checking"; this effect re-runs once they arrive.
-    if (!hashSets) return;
     const currentRequestId = ++emailCheckRequestId.current;
     const timer = setTimeout(async () => {
       try {
-        const hash = await sha256Hex(email);
+        const res = await fetch(apiUrl(`/api/waitlist/check-cache?email=${encodeURIComponent(email)}`));
         if (currentRequestId !== emailCheckRequestId.current) return;
-        if (hashSets.registered.has(hash)) setEmailCheck("registered");
-        else if (hashSets.returning.has(hash)) setEmailCheck("returning");
-        else setEmailCheck("available");
+        if (!res.ok) {
+          setEmailCheck("idle");
+          return;
+        }
+        const data = await res.json();
+        if (!data.canRegister) {
+          setEmailCheck("registered");
+        } else if (data.status === "returning") {
+          setEmailCheck("returning");
+        } else {
+          setEmailCheck("available");
+        }
       } catch {
         if (currentRequestId !== emailCheckRequestId.current) return;
         setEmailCheck("idle");
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [indEmail, teamEmail, type, hashSets]);
+  }, [indEmail, teamEmail, type]);
 
   function clearError(field: string) {
     setErrors((prev) => { const next = { ...prev }; delete next[field]; return next; });
