@@ -10,7 +10,7 @@ export default function PrivacyPolicyPage() {
 
       <main className="flex-1 max-w-3xl mx-auto px-6 py-32 sm:py-40 w-full">
         <h1 className="text-3xl sm:text-4xl font-bold mb-2 gradient-text">Privacy Policy</h1>
-        <p className="text-xs text-[#1E293B]/30 mb-12">Last updated: June 23, 2026</p>
+        <p className="text-xs text-[#1E293B]/30 mb-12">Last updated: June 30, 2026</p>
 
         <div className="space-y-10 text-sm text-[#1E293B]/60 leading-relaxed">
 
@@ -45,7 +45,7 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-base font-semibold text-[#1E293B]/80 mb-3">3. Data Storage</h2>
             <p>
-              Waitlist data is stored in a Neon Serverless Postgres database and synced to Google Sheets.
+              Waitlist data is stored in a Postgres database hosted on AWS and synced to Google Sheets.
               Both are hosted in the United States. We take reasonable technical measures to protect your data,
               but no system is completely secure.
             </p>
@@ -66,7 +66,7 @@ export default function PrivacyPolicyPage() {
             <ul className="list-disc list-inside mt-2 space-y-1">
               <li><strong className="text-[#1E293B]/70">Resend</strong> — transactional email delivery</li>
               <li><strong className="text-[#1E293B]/70">Google Sheets / Google Cloud</strong> — waitlist storage and sync</li>
-              <li><strong className="text-[#1E293B]/70">Neon</strong> — serverless Postgres database</li>
+              <li><strong className="text-[#1E293B]/70">AWS</strong> — database hosting and server infrastructure</li>
               <li><strong className="text-[#1E293B]/70">Cloudflare Turnstile</strong> — bot protection on forms</li>
               <li><strong className="text-[#1E293B]/70">Vercel</strong> — hosting and analytics</li>
             </ul>
@@ -95,8 +95,17 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-base font-semibold text-[#1E293B]/80 mb-3">7. Cookies</h2>
             <p>
-              We do not use tracking cookies. Session-level storage (e.g., to remember whether the intro
-              animation has played) stays in your browser and is never transmitted to our servers.
+              We use functional cookies to optimize waitlist synchronization:
+            </p>
+            <ul className="list-disc list-inside mt-2 space-y-1">
+              <li><strong className="text-[#1E293B]/70">waitlistSynced</strong> — set for 1 hour per browser to throttle background sync operations. This ensures our system resyncs waitlist data with our upstream database at most once per hour per browser, reducing unnecessary network traffic while keeping data fresh. This cookie is functional only and contains no personal data.</li>
+            </ul>
+            <p className="mt-3">
+              Browser storage is also used for functional purposes: sessionStorage (for UI state such as intro playback).
+              This client-side storage is functional only and is not used for advertising.
+            </p>
+            <p className="mt-3">
+              We do not use tracking or advertising cookies.
             </p>
           </section>
 

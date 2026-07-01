@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Turnstile } from "@marsidev/react-turnstile";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
+import { apiUrl } from "@/lib/api";
 
 type FormType = "individual" | "team";
 type Status = "idle" | "loading" | "verify" | "success" | "welcome_back" | "duplicate" | "error";
@@ -17,7 +18,7 @@ const inputClass = (error?: string) =>
 const labelClass = "block text-xs text-slate-500 font-medium tracking-wide mb-2 uppercase";
 const errorClass = "text-xs text-red-500 mt-1.5";
 
-function EmailCheckBadge({ status, canRegister }: { status: EmailCheck; canRegister: boolean | null }) {
+function EmailCheckBadge({ status }: { status: EmailCheck }) {
   const baseClass = "inline-flex w-[120px] h-5 items-center justify-end text-[11px] normal-case tracking-normal font-bold transition-colors duration-150";
 
   if (status === "idle") {
@@ -33,7 +34,7 @@ function EmailCheckBadge({ status, canRegister }: { status: EmailCheck; canRegis
   if (status === "available" || status === "returning") {
     return <span className={`${baseClass} text-emerald-600`}>Can register</span>;
   }
-  if (status === "registered" || canRegister === false) {
+  if (status === "registered") {
     return <span className={`${baseClass} text-amber-600`}>Cannot register</span>;
   }
   return (
@@ -50,8 +51,7 @@ export default function SignupPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const turnstileRef = useRef<TurnstileInstance>(null);
   const [emailCheck, setEmailCheck] = useState<EmailCheck>("idle");
-  const [emailCanRegister, setEmailCanRegister] = useState<boolean | null>(null);
-  const emailCannotRegister = emailCheck === "registered" || emailCanRegister === false;
+  const emailCannotRegister = emailCheck === "registered";
 
   // Email-verification step state
   const [code, setCode] = useState("");
@@ -76,44 +76,52 @@ export default function SignupPage() {
   const [teamRole, setTeamRole]   = useState("");
   const [teamUsage, setTeamUsage] = useState("");
 
-  // Debounced email dedup check against /api/waitlist/check.
+  // True only when every required field for the active tab is filled (and email is valid).
+  // Drives the disabled state of the submit button alongside the captcha + email-check gates.
+  const allFieldsFilled =
+    type === "individual"
+      ? indName.trim() !== "" &&
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(indEmail.trim()) &&
+        indRole !== "" &&
+        ((indRole !== "Student" && indRole !== "Instructor") || indUniversity.trim() !== "") &&
+        indReason.trim() !== ""
+      : teamRep.trim() !== "" &&
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(teamEmail.trim()) &&
+        teamOrg.trim() !== "" &&
+        teamRole.trim() !== "" &&
+        teamUsage.trim() !== "";
+
+  // Debounced email check via backend API
   useEffect(() => {
     const email = (type === "individual" ? indEmail : teamEmail).toLowerCase().trim();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setEmailCheck("idle");
-      setEmailCanRegister(null);
       return;
     }
     setEmailCheck("checking");
-    setEmailCanRegister(null);
     const currentRequestId = ++emailCheckRequestId.current;
-    const controller = new AbortController();
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/waitlist/check?email=${encodeURIComponent(email)}`, { signal: controller.signal });
+        const res = await fetch(apiUrl(`/api/waitlist/check-cache?email=${encodeURIComponent(email)}`));
+        if (currentRequestId !== emailCheckRequestId.current) return;
         if (!res.ok) {
           setEmailCheck("idle");
           return;
         }
         const data = await res.json();
-        if (currentRequestId !== emailCheckRequestId.current) return;
-        if (data.status === "registered" || data.status === "returning" || data.status === "available") {
-          setEmailCheck(data.status);
-          setEmailCanRegister(typeof data.canRegister === "boolean" ? data.canRegister : null);
-          return;
+        if (!data.canRegister) {
+          setEmailCheck("registered");
+        } else if (data.status === "returning") {
+          setEmailCheck("returning");
+        } else {
+          setEmailCheck("available");
         }
-        setEmailCheck("idle");
-        setEmailCanRegister(null);
       } catch {
         if (currentRequestId !== emailCheckRequestId.current) return;
         setEmailCheck("idle");
-        setEmailCanRegister(null);
       }
     }, 300);
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
+    return () => clearTimeout(timer);
   }, [indEmail, teamEmail, type]);
 
   function clearError(field: string) {
@@ -162,7 +170,7 @@ export default function SignupPage() {
         : { type, repName: teamRep, email: teamEmail, org: teamOrg, role: teamRole, usage: teamUsage };
 
     try {
-      const res = await fetch("/api/waitlist", {
+      const res = await fetch(apiUrl("/api/waitlist/request"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...payload, captchaToken }),
@@ -198,10 +206,10 @@ export default function SignupPage() {
     setVerifying(true);
     setVerifyError("");
     try {
-      const res = await fetch("/api/waitlist", {
+      const res = await fetch(apiUrl("/api/waitlist/verify"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ step: "verify", email: pendingEmail, code: code.trim() }),
+        body: JSON.stringify({ email: pendingEmail, code: code.trim() }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -375,7 +383,7 @@ export default function SignupPage() {
                     <div className="relative">
                       <label className={labelClass}>Email</label>
                       <div className="absolute right-0 top-0">
-                        <EmailCheckBadge status={emailCheck} canRegister={emailCanRegister} />
+                        <EmailCheckBadge status={emailCheck} />
                       </div>
                     </div>
                     <input type="email" className={inputClass(errors.indEmail)} placeholder="you@example.com" value={indEmail} maxLength={254}
@@ -437,7 +445,7 @@ export default function SignupPage() {
                     <div className="relative">
                       <label className={labelClass}>Email</label>
                       <div className="absolute right-0 top-0">
-                        <EmailCheckBadge status={emailCheck} canRegister={emailCanRegister} />
+                        <EmailCheckBadge status={emailCheck} />
                       </div>
                     </div>
                     <input type="email" className={inputClass(errors.teamEmail)} placeholder="you@company.com" value={teamEmail} maxLength={254}
@@ -485,7 +493,7 @@ export default function SignupPage() {
 
               <button
                 type="submit"
-                disabled={status === "loading" || !captchaToken || emailCannotRegister}
+                disabled={status === "loading" || !captchaToken || emailCannotRegister || !allFieldsFilled}
                 className="mt-2 w-full py-3.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {status === "loading" ? "Sending..." : "Request access"}

@@ -10,7 +10,7 @@ export default function TermsPage() {
 
       <main className="flex-1 max-w-3xl mx-auto px-6 py-32 sm:py-40 w-full">
         <h1 className="text-3xl sm:text-4xl font-bold mb-2 gradient-text">Terms of Service</h1>
-        <p className="text-xs text-[#1E293B]/30 mb-12">Last updated: June 23, 2026</p>
+        <p className="text-xs text-[#1E293B]/30 mb-12">Last updated: June 30, 2026</p>
 
         <div className="space-y-10 text-sm text-[#1E293B]/60 leading-relaxed">
 
@@ -45,9 +45,12 @@ export default function TermsPage() {
               Verification codes may expire and may be rate-limited after repeated failed attempts.
             </p>
             <p className="mt-3">
-              To reduce duplicate submissions and improve consistency, we may perform synchronous refreshes
-              between our waitlist data sources during signup and verification. You agree not to attempt to
-              bypass or interfere with these verification and synchronization controls.
+              To reduce duplicate submissions and improve consistency, we perform synchronization operations:
+              (1) during signup and verification, for real-time dedup checks across our systems; and (2) via a 
+              background sync that runs at most once per hour per browser (throttled by a functional cookie called 
+              <strong>waitlistSynced</strong>). The background sync ensures our database remains synchronized with our 
+              upstream data sources. You agree not to attempt to bypass or interfere with these verification and 
+              synchronization controls.
             </p>
           </section>
 

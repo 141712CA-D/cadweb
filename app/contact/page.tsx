@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Turnstile } from "@marsidev/react-turnstile";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
+import { apiUrl } from "@/lib/api";
 
 type FormType = "individual" | "team";
 type Status = "idle" | "loading" | "verify" | "success" | "cooldown" | "error";
@@ -55,6 +56,23 @@ export default function ContactPage() {
   const [teamSubject, setTeamSubject] = useState("");
   const [teamMessage, setTeamMessage] = useState("");
 
+  // True only when every required field for the active tab is filled (and email is valid).
+  // Drives the disabled state of the submit button alongside the captcha gate.
+  const allFieldsFilled =
+    type === "individual"
+      ? name.trim() !== "" &&
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) &&
+        role !== "" &&
+        (role !== "Student" || university.trim() !== "") &&
+        subject.trim() !== "" &&
+        message.trim() !== ""
+      : teamRep.trim() !== "" &&
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(teamEmail.trim()) &&
+        teamOrg.trim() !== "" &&
+        teamRole.trim() !== "" &&
+        teamSubject.trim() !== "" &&
+        teamMessage.trim() !== "";
+
   function clearError(field: string) {
     setErrors((prev) => { const next = { ...prev }; delete next[field]; return next; });
   }
@@ -95,7 +113,7 @@ export default function ContactPage() {
         : { type, repName: teamRep, email: teamEmail, org: teamOrg, role: teamRole, subject: teamSubject, message: teamMessage };
 
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch(apiUrl("/api/contact/request"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...payload, captchaToken }),
@@ -135,10 +153,10 @@ export default function ContactPage() {
     setVerifying(true);
     setVerifyError("");
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch(apiUrl("/api/contact/verify"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ step: "verify", email: pendingEmail, code: code.trim() }),
+        body: JSON.stringify({ email: pendingEmail, code: code.trim() }),
       });
       if (res.ok) {
         setStatus("success");
@@ -173,9 +191,9 @@ export default function ContactPage() {
 
       <div className="grid-bg absolute inset-0 pointer-events-none" />
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="orb-1 absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full"
+        <div className="orb-1 absolute -top-40 -left-40 w-125 h-125 rounded-full"
           style={{ background: "radial-gradient(circle, rgba(199,226,255,0.5) 0%, transparent 70%)", filter: "blur(40px)" }} />
-        <div className="orb-2 absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full"
+        <div className="orb-2 absolute -bottom-40 -right-40 w-125 h-125 rounded-full"
           style={{ background: "radial-gradient(circle, rgba(199,226,255,0.35) 0%, transparent 70%)", filter: "blur(40px)" }} />
       </div>
 
@@ -390,7 +408,7 @@ export default function ContactPage() {
 
               <button
                 type="submit"
-                disabled={status === "loading" || !captchaToken}
+                disabled={status === "loading" || !captchaToken || !allFieldsFilled}
                 className="mt-2 w-full py-3.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {status === "loading" ? "Sending..." : "Send message"}
