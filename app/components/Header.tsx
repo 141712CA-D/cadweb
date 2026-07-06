@@ -4,25 +4,19 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import SignupModal from "./SignupModal";
 
-export default function Header() {
+interface HeaderProps {
+  onJoinWaitlist?: () => void;
+}
+
+export default function Header({ onJoinWaitlist }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [signupModalOpen, setSignupModalOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+   const onScroll = () => setScrolled(window.scrollY > 20);
+   window.addEventListener("scroll", onScroll, { passive: true });
+   return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
@@ -33,14 +27,16 @@ export default function Header() {
   }, [menuOpen]);
 
   const handleWaitlistClick = (e: React.MouseEvent) => {
-    if (isMobile) {
-      // On mobile, navigate to page
-      window.location.href = "/signup";
-    } else {
-      // On desktop, open modal
+    if (onJoinWaitlist) {
       e.preventDefault();
-      setSignupModalOpen(true);
+      setMenuOpen(false);
+      onJoinWaitlist();
+      return;
     }
+
+    e.preventDefault();
+    setMenuOpen(false);
+    setSignupModalOpen(true);
   };
 
   return (
@@ -142,8 +138,7 @@ export default function Header() {
         </div>
       </header>
 
-      {/* Signup Modal - only rendered on desktop */}
-      {mounted && !isMobile && (
+      {!onJoinWaitlist && (
         <SignupModal isOpen={signupModalOpen} onClose={() => setSignupModalOpen(false)} />
       )}
     </>

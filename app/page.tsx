@@ -5,11 +5,13 @@ import Header from "./components/Header";
 import Hero from "./components/Hero";
 import IntroAnimation from "./components/IntroAnimation";
 import DevBanner from "./components/DevBanner";
+import SignupModal from "./components/SignupModal";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [introComplete, setIntroComplete] = useState(false);
   const [skipIntro, setSkipIntro] = useState(false);
+  const [signupModalOpen, setSignupModalOpen] = useState(false);
 
   useEffect(() => {
     const initIntro = () => {
@@ -39,8 +41,8 @@ export default function Home() {
           transition: skipIntro ? "none" : "opacity 0.15s ease",
         }}
       >
-        <Header />
-        <Hero />
+        <Header onJoinWaitlist={() => setSignupModalOpen(true)} />
+        <Hero onJoinWaitlist={() => setSignupModalOpen(true)} />
         <section className="bg-[#F5F0E8] py-16 px-6">
           <div className="max-w-7xl mx-auto flex flex-col items-center gap-8">
             <h2 className="text-2xl font-semibold text-slate-900">Our Partners</h2>
@@ -66,12 +68,19 @@ export default function Home() {
               <a href="/how-it-works" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">How It Works</a>
               <a href="/about" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">About</a>
               <a href="/contact" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Contact Us</a>
-              <a href="/signup" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Join Waitlist</a>
+              <button
+                type="button"
+                onClick={() => setSignupModalOpen(true)}
+                className="text-xs text-slate-800 hover:text-slate-900 transition-colors"
+              >
+                Join Waitlist
+              </button>
               <a href="/terms" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Terms</a>
               <a href="/privacy-policy" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Privacy</a>
             </div>
           </div>
         </footer>
+        <SignupModal isOpen={signupModalOpen} onClose={() => setSignupModalOpen(false)} />
       </main>
     </>
   );

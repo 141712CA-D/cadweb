@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Turnstile } from "@marsidev/react-turnstile";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { apiUrl } from "@/lib/api";
+import { consumeExpired } from "@/lib/consumeExpired";
 import MorphSwitch from "./MorphSwitch";
 
 type FormType = "individual" | "team";
@@ -14,7 +15,7 @@ type EmailCheck = "idle" | "checking" | "available" | "registered" | "returning"
 const INDIVIDUAL_ROLES = ["Student", "Instructor", "Freelancer", "Hobbyist"];
 
 const inputClass = (error?: string) =>
-  `w-full bg-white border ${error ? "border-red-500/50" : "border-slate-300"} rounded-lg px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 focus:border-transparent transition-all duration-150`;
+  `w-full bg-white border ${error ? "border-red-500/50" : "border-slate-300"} rounded-lg px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 focus:ring-offset-0 focus:border-transparent transition-all duration-150`;
 
 const labelClass = "block text-sm font-medium text-slate-700 mb-1.5";
 const errorClass = "text-xs text-red-600 mt-1";
@@ -202,6 +203,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
       });
       if (res.ok) {
         const data = await res.json();
+        void consumeExpired("waitlist");
         setStatus(data.returning ? "welcome_back" : "success");
         return;
       }
@@ -319,7 +321,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
                 placeholder="000000"
                 value={code}
                 onChange={(e) => { setCode(e.target.value.replace(/\D/g, "")); setVerifyError(""); }}
-                className={`w-full bg-white border ${verifyError ? "border-red-500/50" : "border-slate-300"} rounded-lg px-4 py-3 text-center text-2xl tracking-[0.4em] font-mono text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-all duration-150`}
+                className={`w-full bg-white border ${verifyError ? "border-red-500/50" : "border-slate-300"} rounded-lg px-4 py-3 text-center text-2xl tracking-[0.4em] font-mono text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 focus:ring-offset-0 transition-all duration-150`}
               />
               {verifyError && <p className={errorClass}>{verifyError}</p>}
               <button
