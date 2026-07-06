@@ -185,6 +185,39 @@ html {
   animation: cursor-blink 1s step-end infinite;
 }
 
+/* ── Form morph animations ── */
+@keyframes morph-fade-in {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.98); filter: blur(4px); }
+  60%  { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+@keyframes morph-fade-out {
+  0%   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+  100% { opacity: 0; transform: translateY(-10px) scale(0.98); filter: blur(4px); }
+}
+
+@keyframes field-morph-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.form-field-enter {
+  animation: field-morph-in 400ms cubic-bezier(0, 0, 0.2, 1) forwards;
+}
+
+.form-field-enter.delay-100 { animation-delay: 50ms; }
+.form-field-enter.delay-200 { animation-delay: 100ms; }
+.form-field-enter.delay-300 { animation-delay: 150ms; }
+.form-field-enter.delay-400 { animation-delay: 200ms; }
+.form-field-enter.delay-500 { animation-delay: 250ms; }
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

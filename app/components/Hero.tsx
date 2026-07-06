@@ -313,7 +313,11 @@ function PlatformTree({ activeIndex }: { activeIndex: number }) {
   );
 }
 
-export default function Hero() {
+interface HeroProps {
+  onJoinWaitlist?: () => void;
+}
+
+export default function Hero({ onJoinWaitlist }: HeroProps) {
   const demoRef = useRef<HTMLDivElement>(null);
   const treeRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -442,12 +446,22 @@ export default function Hero() {
           </div>
 
           <div className="mt-9">
-            <Link
-              href="/signup"
-              className="inline-flex min-h-12 items-center justify-center rounded-full bg-slate-900 px-7 text-sm font-bold text-[#F5F0E8] transition hover:bg-slate-700"
-            >
-              Join the waitlist
-            </Link>
+            {onJoinWaitlist ? (
+              <button
+                type="button"
+                onClick={onJoinWaitlist}
+                className="inline-flex min-h-12 items-center justify-center rounded-full bg-slate-900 px-7 text-sm font-bold text-[#F5F0E8] transition hover:bg-slate-700"
+              >
+                Join the waitlist
+              </button>
+            ) : (
+              <Link
+                href="/signup"
+                className="inline-flex min-h-12 items-center justify-center rounded-full bg-slate-900 px-7 text-sm font-bold text-[#F5F0E8] transition hover:bg-slate-700"
+              >
+                Join the waitlist
+              </Link>
+            )}
           </div>
         </div>
 
