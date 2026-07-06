@@ -30,10 +30,10 @@ function EmailCheckBadge({ status }: { status: EmailCheck }) {
     return <span className={`${baseClass} text-slate-500`}>Checking...</span>;
   }
   if (status === "available" || status === "returning") {
-    return <span className={`${baseClass} text-emerald-600`}>✓ Can register</span>;
+    return <span className={`${baseClass} text-emerald-600`}>Can register</span>;
   }
   if (status === "registered") {
-    return <span className={`${baseClass} text-red-600`}>✗ Already registered</span>;
+    return <span className={`${baseClass} text-red-600`}>Already registered</span>;
   }
   return <span className={`${baseClass} text-transparent`} aria-hidden="true">Can register</span>;
 }
