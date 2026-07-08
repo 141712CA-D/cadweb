@@ -42,9 +42,9 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
   return (
     <>
       <header
-        className={`fixed top-8 left-0 right-0 z-50 transition-all duration-500 ${
+        className={`fixed top-8 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled
-            ? "header-glass border-b border-slate-200"
+            ? "header-glass border-b border-[#262626]"
             : "bg-transparent border-b border-transparent"
         }`}
       >
@@ -56,9 +56,9 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
             <img
               src="/logo.svg"
               alt="Parametra"
-              style={{ width: 32, height: 32, display: "block", flexShrink: 0, filter: "brightness(0)" }}
+              style={{ width: 32, height: 32, display: "block", flexShrink: 0, filter: "brightness(0) invert(1)" }}
             />
-            <span className="text-slate-900 font-semibold text-base sm:text-lg tracking-tight whitespace-nowrap">
+            <span className="text-[#e8e8e8] font-semibold text-base sm:text-lg tracking-tight whitespace-nowrap">
               Parametra
             </span>
           </Link>
@@ -69,13 +69,13 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
             {/* Desktop nav links */}
             <Link
               href="/how-it-works"
-              className="hidden sm:block text-sm font-medium px-4 py-2 rounded-full border border-slate-300 bg-white/60 text-slate-600 hover:border-blue-500 hover:bg-white hover:text-slate-900 transition-all duration-200"
+              className="hidden sm:block font-mono text-xs uppercase tracking-widest px-4 py-2 border border-[#262626] text-[#888] hover:border-[#00ff41] hover:text-[#00ff41] transition-all duration-200"
             >
               How It Works
             </Link>
             <Link
               href="/about"
-              className="hidden sm:block text-sm font-medium px-4 py-2 rounded-full border border-slate-300 bg-white/60 text-slate-600 hover:border-blue-500 hover:bg-white hover:text-slate-900 transition-all duration-200"
+              className="hidden sm:block font-mono text-xs uppercase tracking-widest px-4 py-2 border border-[#262626] text-[#888] hover:border-[#00ff41] hover:text-[#00ff41] transition-all duration-200"
             >
               About Us
             </Link>
@@ -83,16 +83,17 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
             {/* Waitlist button */}
             <button
               onClick={handleWaitlistClick}
-              className="text-xs sm:text-sm font-medium px-4 sm:px-5 py-2 rounded-full bg-slate-900 text-white hover:bg-slate-800 transition-all duration-200 shadow-sm whitespace-nowrap"
+              className="font-mono text-xs uppercase tracking-widest px-4 sm:px-5 py-2 bg-[#00ff41] text-black hover:bg-[#00cc33] transition-all duration-200 whitespace-nowrap"
             >
               <span className="sm:hidden">Waitlist</span>
               <span className="hidden sm:inline">Join the Waitlist</span>
             </button>
+
             {/* Mobile hamburger */}
             <div className="relative sm:hidden" onClick={(e) => e.stopPropagation()}>
               <button
                 onClick={() => setMenuOpen((v) => !v)}
-                className="flex flex-col justify-center items-center w-9 h-9 rounded-full border border-slate-300 bg-white/60 text-slate-600 hover:border-blue-500 hover:bg-white hover:text-slate-900 transition-all duration-200 gap-1.5"
+                className="flex flex-col justify-center items-center w-9 h-9 border border-[#262626] text-[#888] hover:border-[#00ff41] hover:text-[#00ff41] transition-all duration-200 gap-1.5"
                 aria-label="Menu"
               >
                 <span
@@ -112,21 +113,21 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
               {/* Dropdown */}
               {menuOpen && (
                 <div
-                  className="absolute right-0 top-12 w-44 rounded-2xl border border-slate-200 overflow-hidden"
-                  style={{ background: "rgba(245,240,232,0.97)", backdropFilter: "blur(20px)" }}
+                  className="absolute right-0 top-12 w-44 border border-[#262626] overflow-hidden"
+                  style={{ background: "rgba(15,15,15,0.98)", backdropFilter: "blur(20px)" }}
                 >
                   <Link
                     href="/how-it-works"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 text-sm text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 font-mono text-xs uppercase tracking-widest text-[#888] hover:text-[#00ff41] hover:bg-[#161616] transition-colors"
                   >
                     How It Works
                   </Link>
-                  <div className="h-px bg-slate-100 mx-4" />
+                  <div className="h-px bg-[#262626]" />
                   <Link
                     href="/about"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 text-sm text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 font-mono text-xs uppercase tracking-widest text-[#888] hover:text-[#00ff41] hover:bg-[#161616] transition-colors"
                   >
                     About Us
                   </Link>

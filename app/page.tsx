@@ -35,7 +35,7 @@ export default function Home() {
       {mounted && !skipIntro && <IntroAnimation onDone={handleIntroDone} />}
 
       <main
-        className="flex flex-col min-h-screen bg-[#F5F0E8]"
+        className="flex flex-col min-h-screen bg-[#0f0f0f]"
         style={{
           opacity: introComplete ? 1 : 0,
           transition: skipIntro ? "none" : "opacity 0.15s ease",
@@ -43,9 +43,9 @@ export default function Home() {
       >
         <Header onJoinWaitlist={() => setSignupModalOpen(true)} />
         <Hero onJoinWaitlist={() => setSignupModalOpen(true)} />
-        <section className="bg-[#F5F0E8] py-16 px-6">
-          <div className="max-w-7xl mx-auto flex flex-col items-center gap-8">
-            <h2 className="text-2xl font-semibold text-slate-900">Our Partners</h2>
+        <section className="bg-[#0f0f0f] border-t border-[#262626] py-16 px-6">
+          <div className="max-w-7xl mx-auto flex flex-col items-center gap-6">
+            <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#555]">Partners</p>
             <a
               href="https://www.onshape.com/"
               target="_blank"
@@ -55,28 +55,28 @@ export default function Home() {
               <img
                 src="/onshape-logo.png"
                 alt="Onshape"
-                className="h-24 w-24 sm:h-[150px] sm:w-[150px] object-contain bg-transparent grayscale hover:grayscale-0 transition-all duration-300"
+                className="h-20 w-20 sm:h-[120px] sm:w-[120px] object-contain bg-transparent grayscale hover:grayscale-0 transition-all duration-300"
               />
             </a>
           </div>
         </section>
-        <footer className="bg-[#F5F0E8] border-t border-slate-300 py-6 px-6">
+        <footer className="bg-[#0f0f0f] border-t border-[#262626] py-6 px-6">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-slate-700">© {new Date().getFullYear()} Parametra. All rights reserved.</p>
-            <p className="text-xs text-slate-600 font-mono sm:absolute sm:left-1/2 sm:-translate-x-1/2">v1.5.1.1</p>
+            <p className="font-mono text-xs text-[#555]">© {new Date().getFullYear()} Parametra</p>
+            <p className="font-mono text-xs text-[#333] sm:absolute sm:left-1/2 sm:-translate-x-1/2">v1.5.1.1</p>
             <div className="grid grid-cols-3 justify-items-center gap-x-6 gap-y-3 sm:flex sm:items-center sm:gap-6">
-              <a href="/how-it-works" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">How It Works</a>
-              <a href="/about" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">About</a>
-              <a href="/contact" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Contact Us</a>
+              <a href="/how-it-works" className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">How It Works</a>
+              <a href="/about" className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">About</a>
+              <a href="/contact" className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">Contact Us</a>
               <button
                 type="button"
                 onClick={() => setSignupModalOpen(true)}
-                className="text-xs text-slate-800 hover:text-slate-900 transition-colors"
+                className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors"
               >
                 Join Waitlist
               </button>
-              <a href="/terms" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Terms</a>
-              <a href="/privacy-policy" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Privacy</a>
+              <a href="/terms" className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">Terms</a>
+              <a href="/privacy-policy" className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">Privacy</a>
             </div>
           </div>
         </footer>

@@ -115,21 +115,21 @@ function clamp(value: number, min = 0, max = 1) {
 function TerminalCardInner({ stage }: { stage: (typeof stages)[0] }) {
   return (
     <>
-      <div className="flex min-h-10 items-center justify-between gap-4 border-b border-slate-100 px-4 py-2">
+      <div className="flex min-h-10 items-center justify-between gap-4 border-b border-[#262626] px-4 py-2">
         <div className="flex items-center gap-1.5">
-          <span className="h-2 w-2 flex-shrink-0 rounded-full bg-red-400" />
-          <span className="h-2 w-2 flex-shrink-0 rounded-full bg-amber-400" />
-          <span className="h-2 w-2 flex-shrink-0 rounded-full bg-emerald-400" />
+          <span className="h-2 w-2 flex-shrink-0 rounded-full bg-red-500" />
+          <span className="h-2 w-2 flex-shrink-0 rounded-full bg-amber-500" />
+          <span className="h-2 w-2 flex-shrink-0 rounded-full bg-[#00ff41]" />
         </div>
-        <p className="truncate font-mono text-[10px] text-slate-500">{stage.status}</p>
+        <p className="truncate font-mono text-[10px] text-[#555]">{stage.status}</p>
       </div>
       <div className="p-4">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">{stage.eyebrow}</p>
-            <h3 className="mt-1 text-xl font-black text-slate-900">{stage.title}</h3>
+            <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#555]">{stage.eyebrow}</p>
+            <h3 className="mt-1 text-xl font-black text-[#e8e8e8]">{stage.title}</h3>
           </div>
-          <span className={`mt-0.5 h-2.5 w-2.5 flex-shrink-0 rounded-full ${stage.accent}`} />
+          <span className={`mt-0.5 h-2.5 w-2.5 flex-shrink-0 ${stage.accent}`} />
         </div>
         <div className="space-y-1.5 font-mono text-[11px] leading-[1.65]">
           {stage.lines.map((line, i) => (
@@ -137,10 +137,10 @@ function TerminalCardInner({ stage }: { stage: (typeof stages)[0] }) {
               key={line}
               className={
                 i === 0
-                  ? "text-slate-700"
+                  ? "text-[#e8e8e8]"
                   : line.startsWith("[done]") || line.startsWith("[result]")
-                    ? "text-emerald-600"
-                    : "text-slate-500"
+                    ? "text-[#00ff41]"
+                    : "text-[#555]"
               }
             >
               {line}
@@ -160,12 +160,12 @@ function TerminalSwap({ activeIndex }: { activeIndex: number }) {
         return (
           <article
             key={stage.eyebrow}
-            className={`absolute inset-0 rounded-lg border bg-white shadow-md transition-all duration-700 ${
+            className={`absolute inset-0 border bg-[#161616] transition-all duration-700 ${
               active
                 ? `translate-y-0 scale-100 ${stage.border} opacity-100`
                 : index < activeIndex
-                  ? `-translate-y-6 scale-[0.98] border-slate-100 opacity-0`
-                  : `translate-y-6 scale-[0.98] border-slate-100 opacity-0`
+                  ? `-translate-y-6 scale-[0.98] border-[#262626] opacity-0`
+                  : `translate-y-6 scale-[0.98] border-[#262626] opacity-0`
             }`}
             aria-hidden={!active}
           >
@@ -185,10 +185,10 @@ function TerminalAccumulator({ activeIndex }: { activeIndex: number }) {
         return (
           <article
             key={stage.eyebrow}
-            className={`rounded-lg border bg-white shadow-md transition-all duration-700 ${
+            className={`border bg-[#161616] transition-all duration-700 ${
               visible
                 ? `translate-y-0 scale-100 ${stage.border} opacity-100`
-                : `translate-y-8 scale-[0.97] border-slate-100 opacity-0 pointer-events-none`
+                : `translate-y-8 scale-[0.97] border-[#262626] opacity-0 pointer-events-none`
             }`}
             aria-hidden={!visible}
           >
@@ -212,19 +212,19 @@ function LeafList({
   return (
     <div className={`transition-all duration-700 ${show ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
       <div className="flex justify-center">
-        <div className="h-5 w-px bg-slate-200" />
+        <div className="h-5 w-px bg-[#262626]" />
       </div>
-      <div className="relative ml-5 border-l border-slate-200 pl-4 space-y-2">
+      <div className="relative ml-5 border-l border-[#262626] pl-4 space-y-2">
         {leaves.map(({ tag, text }, i) => (
           <div
             key={tag}
             className={`relative transition-all duration-500 ${show ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"}`}
             style={{ transitionDelay: `${i * 55}ms` }}
           >
-            <div className="absolute -left-4 top-1/2 w-3 h-px bg-slate-200" />
-            <div className="rounded border border-slate-200 bg-white px-3 py-1.5 font-mono text-[11px] shadow-sm">
+            <div className="absolute -left-4 top-1/2 w-3 h-px bg-[#262626]" />
+            <div className="border border-[#262626] bg-[#161616] px-3 py-1.5 font-mono text-[11px]">
               <span className={tagColor}>{tag}</span>
-              <span className="ml-1.5 text-slate-500">{text}</span>
+              <span className="ml-1.5 text-[#555]">{text}</span>
             </div>
           </div>
         ))}
@@ -238,15 +238,15 @@ function PlatformTree({ activeIndex }: { activeIndex: number }) {
     <div className="mx-auto max-w-2xl">
       {/* Root: Onshape */}
       <div className="flex justify-center">
-        <div className="w-72 rounded-lg border border-sky-400 bg-white p-4 shadow-md">
+        <div className="w-72 border border-[#00ff41]/40 bg-[#161616] p-4">
           <div className="mb-2.5 flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-sky-400" />
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">Source · Onshape</span>
+            <span className="h-2 w-2 bg-[#00ff41]" />
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#555]">Source · Onshape</span>
           </div>
           <div className="space-y-1">
-            <p className="font-mono text-[11px] text-slate-500">[feature] base plate extruded: 8mm</p>
-            <p className="font-mono text-[11px] text-slate-500">[cut] 6 through holes + 4 M6 mounts</p>
-            <p className={`font-mono text-[11px] transition-all duration-500 ${activeIndex >= 5 ? "text-emerald-600" : "text-slate-500"}`}>
+            <p className="font-mono text-[11px] text-[#555]">[feature] base plate extruded: 8mm</p>
+            <p className="font-mono text-[11px] text-[#555]">[cut] 6 through holes + 4 M6 mounts</p>
+            <p className={`font-mono text-[11px] transition-all duration-500 ${activeIndex >= 5 ? "text-[#00ff41]" : "text-[#555]"}`}>
               [done] parametric tree committed
             </p>
           </div>
@@ -255,10 +255,10 @@ function PlatformTree({ activeIndex }: { activeIndex: number }) {
 
       {/* Trunk + crossbar */}
       <div className={`transition-opacity duration-700 ${activeIndex >= 1 ? "opacity-100" : "opacity-0"}`}>
-        <div className="flex justify-center"><div className="h-6 w-px bg-slate-200" /></div>
-        <div className="relative mx-[25%] h-px bg-slate-200">
-          <div className="absolute -left-px top-0 h-6 w-px bg-slate-200" />
-          <div className="absolute -right-px top-0 h-6 w-px bg-slate-200" />
+        <div className="flex justify-center"><div className="h-6 w-px bg-[#262626]" /></div>
+        <div className="relative mx-[25%] h-px bg-[#262626]">
+          <div className="absolute -left-px top-0 h-6 w-px bg-[#262626]" />
+          <div className="absolute -right-px top-0 h-6 w-px bg-[#262626]" />
         </div>
         <div className="h-6" />
       </div>
@@ -267,12 +267,12 @@ function PlatformTree({ activeIndex }: { activeIndex: number }) {
       <div className="grid grid-cols-2 gap-5">
         {/* Fusion 360 branch */}
         <div className={`transition-all duration-700 ${activeIndex >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}>
-          <div className="rounded-lg border border-blue-300 bg-white p-4 shadow-md">
+          <div className="border border-blue-900 bg-[#161616] p-4">
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-blue-400" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">Fusion 360</span>
+              <span className="h-2 w-2 bg-blue-500" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#555]">Fusion 360</span>
             </div>
-            <p className="mt-2 font-mono text-[11px] text-slate-500">[translate] model persisted</p>
+            <p className="mt-2 font-mono text-[11px] text-[#555]">[translate] model persisted</p>
           </div>
           <LeafList
             show={activeIndex >= 3}
@@ -289,12 +289,12 @@ function PlatformTree({ activeIndex }: { activeIndex: number }) {
 
         {/* SolidWorks branch */}
         <div className={`transition-all duration-700 ${activeIndex >= 2 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}>
-          <div className="rounded-lg border border-violet-300 bg-white p-4 shadow-md">
+          <div className="border border-violet-900 bg-[#161616] p-4">
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-violet-400" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">SolidWorks</span>
+              <span className="h-2 w-2 bg-violet-500" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#555]">SolidWorks</span>
             </div>
-            <p className="mt-2 font-mono text-[11px] text-slate-500">[translate] model persisted</p>
+            <p className="mt-2 font-mono text-[11px] text-[#555]">[translate] model persisted</p>
           </div>
           <LeafList
             show={activeIndex >= 4}
@@ -417,78 +417,75 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
   }, []);
 
   return (
-    <section className="relative bg-[#F5F0E8] text-slate-900">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute inset-0 grid-bg opacity-70" />
-        <div className="absolute inset-x-0 top-0 h-[760px] bg-[radial-gradient(ellipse_at_50%_0%,rgba(199,226,255,0.5),rgba(245,240,232,0)_62%)]" />
-        <div className="absolute inset-x-0 bottom-0 h-[620px] bg-[radial-gradient(ellipse_at_50%_100%,rgba(199,226,255,0.35),rgba(245,240,232,0)_62%)]" />
-      </div>
+    <section className="relative bg-[#0f0f0f] text-[#e8e8e8]">
+      <div className="absolute inset-0 pointer-events-none grid-bg" />
 
       {/* ── Initial hero ── */}
       <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-7xl items-center gap-12 px-5 pb-20 pt-36 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
         <div>
-          <h1 className="max-w-4xl text-balance text-5xl font-black leading-[0.96] tracking-normal text-slate-900 sm:text-7xl lg:text-8xl">
-            You think it, Parametra makes it
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#00ff41] mb-6">Parametra · v1.0 · Releasing Soon</p>
+          <h1 className="max-w-4xl text-balance text-5xl font-black leading-[0.96] tracking-tight text-[#e8e8e8] sm:text-7xl lg:text-8xl">
+            One prompt.<br />Real CAD.
           </h1>
 
-          <p className="mt-7 max-w-2xl text-sm font-light leading-6 text-slate-500 sm:text-xl sm:leading-8">
-            Built by Engineers · For Everyone · Releasing Soon
+          <p className="mt-6 max-w-md text-sm leading-6 text-[#888] sm:text-base sm:leading-7">
+            Software shouldn&apos;t make engineers wait. Type what you need — Parametra builds a fully constrained, editable part studio in Onshape.
           </p>
 
-          <div className="mt-8 rounded-lg border border-slate-200 bg-white p-4">
-            <p className="font-mono text-xs uppercase tracking-[0.18em] text-slate-500">Test Prompt</p>
-            <p className="relative mt-3 text-base font-bold leading-7 text-slate-700">
+          <div className="mt-8 border border-[#262626] bg-[#161616] p-4">
+            <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#555]">Try a prompt</p>
+            <p className="relative mt-3 font-mono text-sm leading-7 text-[#e8e8e8]">
               <span className="invisible select-none" aria-hidden="true">{typingPrompts[0].text}</span>
               <span className="absolute inset-0">
-                {typedText}<span className="cursor-blink ml-px text-slate-400">|</span>
+                {typedText}<span className="cursor-blink ml-px text-[#00ff41]">|</span>
               </span>
             </p>
           </div>
 
-          <div className="mt-9">
+          <div className="mt-8 flex items-center gap-4">
             {onJoinWaitlist ? (
               <button
                 type="button"
                 onClick={onJoinWaitlist}
-                className="inline-flex min-h-12 items-center justify-center rounded-full bg-slate-900 px-7 text-sm font-bold text-[#F5F0E8] transition hover:bg-slate-700"
+                className="inline-flex min-h-12 items-center justify-center bg-[#00ff41] px-7 font-mono text-xs uppercase tracking-widest text-black transition hover:bg-[#00cc33]"
               >
-                Join the waitlist
+                Join the Waitlist
               </button>
             ) : (
               <Link
                 href="/signup"
-                className="inline-flex min-h-12 items-center justify-center rounded-full bg-slate-900 px-7 text-sm font-bold text-[#F5F0E8] transition hover:bg-slate-700"
+                className="inline-flex min-h-12 items-center justify-center bg-[#00ff41] px-7 font-mono text-xs uppercase tracking-widest text-black transition hover:bg-[#00cc33]"
               >
-                Join the waitlist
+                Join the Waitlist
               </Link>
             )}
+            <Link
+              href="/how-it-works"
+              className="font-mono text-xs uppercase tracking-widest text-[#555] hover:text-[#00ff41] transition-colors"
+            >
+              How it works →
+            </Link>
           </div>
         </div>
 
         <div className="flex flex-col gap-5">
-          <p className="text-base leading-7 text-slate-500 sm:text-lg sm:leading-8">
-            Describe what you need. Parametra builds it — parametric, constrained, and ready to go. Design in Onshape, persist anywhere. Your tools, your workflow, no limits.
+          <p className="text-sm leading-6 text-[#888]">
+            Type what you need. Parametra generates a fully constrained, editable part studio in Onshape — sketches, features, and dimensions all intact. Export to Fusion 360 or SolidWorks when the job calls for it.
           </p>
-          <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="relative overflow-hidden rounded-lg">
-              <img
-                src="/OnshapeRaw.png"
-                alt="Onshape sketch"
-                className={`block w-full transition-opacity duration-[900ms] ease-in-out ${demoView === "raw" ? "opacity-100" : "opacity-0"}`}
+          <div className="border border-[#262626] bg-[#161616] p-4">
+            <div className="relative overflow-hidden bg-[#0f0f0f]">
+              <video
+                src="/demo.mp4"
+                autoPlay
+                muted
+                loop
+                playsInline
+                poster="/OnshapeDemo.png"
+                className="block w-full"
               />
-              <img
-                src="/OnshapeDemo.png"
-                alt="Onshape model"
-                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[900ms] ease-in-out ${demoView === "demo" ? "opacity-100" : "opacity-0"}`}
-              />
-              <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between border-t border-slate-200 bg-white px-3 py-2 backdrop-blur-md">
-                <span className={`font-mono text-[11px] transition-all duration-700 ${demoView === "raw" ? "text-sky-600" : "text-emerald-600"}`}>
-                  {demoView === "raw" ? "sketch · degrees of freedom: 0" : "features built · ready in Onshape"}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className={`h-1.5 w-1.5 rounded-full transition-all duration-700 ${demoView === "raw" ? "bg-sky-400" : "bg-slate-200"}`} />
-                  <span className={`h-1.5 w-1.5 rounded-full transition-all duration-700 ${demoView === "demo" ? "bg-emerald-400" : "bg-slate-200"}`} />
-                </span>
+              <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between border-t border-[#262626] bg-[#161616] px-3 py-2">
+                <span className="font-mono text-[11px] text-[#00ff41]">features built · ready in Onshape</span>
+                <span className="h-1.5 w-1.5 bg-[#00ff41]" />
               </div>
             </div>
           </div>
@@ -496,17 +493,17 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
       </div>
 
       {/* ── Pinned scroll demo ── */}
-      <div id="generation-demo" ref={demoRef} className="relative z-10 min-h-[500vh] scroll-mt-28 border-t border-slate-100">
+      <div id="generation-demo" ref={demoRef} className="relative z-10 min-h-[250vh] scroll-mt-28 border-t border-[#262626]">
         <div className="sticky top-20 flex min-h-[calc(100vh-5rem)] flex-col justify-start px-5 pt-8 pb-10 sm:px-6 lg:px-8">
           <div className="mx-auto w-full max-w-7xl">
 
             <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.24em] text-slate-500">Generation in progress</p>
-                <h2 className="mt-2 text-3xl font-black leading-tight text-slate-900 sm:text-4xl lg:text-5xl">
+                <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#00ff41]">How it generates</p>
+                <h2 className="mt-2 text-3xl font-black leading-tight text-[#e8e8e8] sm:text-4xl lg:text-5xl">
                   {activeStage.title}
                 </h2>
-                <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500 sm:text-base">
+                <p className="mt-2 max-w-xl text-sm leading-6 text-[#888] sm:text-base">
                   {activeStage.summary}
                 </p>
               </div>
@@ -515,12 +512,12 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
                 {stages.map((stage, index) => (
                   <span
                     key={stage.eyebrow}
-                    className={`h-2 w-2 rounded-full transition-all duration-500 ${
-                      index <= activeIndex ? stage.accent : "bg-slate-200"
+                    className={`h-2 w-2 transition-all duration-500 ${
+                      index <= activeIndex ? stage.accent : "bg-[#262626]"
                     }`}
                   />
                 ))}
-                <span className="ml-1 font-mono text-[11px] text-slate-400">
+                <span className="ml-1 font-mono text-[11px] text-[#555]">
                   {activeIndex + 1}/{stages.length}
                 </span>
               </div>
@@ -544,24 +541,24 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
           showNudge ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3 pointer-events-none"
         }`}
       >
-        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-slate-400">scroll</span>
-        <svg className="h-4 w-4 animate-bounce text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#555]">scroll</span>
+        <svg className="h-4 w-4 animate-bounce text-[#555]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       </div>
 
       {/* ── Platform tree section ── */}
-      <div ref={treeRef} className="relative z-10 min-h-[600vh] border-t border-slate-100">
+      <div ref={treeRef} className="relative z-10 min-h-[300vh] border-t border-[#262626]">
         <div className="sticky top-20 flex min-h-[calc(100vh-5rem)] flex-col justify-start px-5 pt-8 pb-10 sm:px-6 lg:px-8">
           <div className="mx-auto w-full max-w-7xl">
             <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="text-xs font-black uppercase tracking-[0.24em] text-slate-500">Cross-platform persistence</p>
-                <h2 className="relative mt-2 text-3xl font-black leading-tight text-slate-900 sm:text-4xl lg:text-5xl">
+                <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#00ff41]">Works where the job demands</p>
+                <h2 className="relative mt-2 text-3xl font-black leading-tight text-[#e8e8e8] sm:text-4xl lg:text-5xl">
                   <span className="invisible select-none" aria-hidden="true">{platformStages[1].title}</span>
                   <span className="absolute inset-0">{activePlatformStage.title}</span>
                 </h2>
-                <p className="relative mt-2 max-w-xl text-sm leading-6 text-slate-500 sm:text-base">
+                <p className="relative mt-2 max-w-xl text-sm leading-6 text-[#888] sm:text-base">
                   <span className="invisible select-none" aria-hidden="true">{platformStages[1].summary}</span>
                   <span className="absolute inset-0">{activePlatformStage.summary}</span>
                 </p>
@@ -570,10 +567,10 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
                 {platformStages.map((_, index) => (
                   <span
                     key={index}
-                    className={`h-2 w-2 rounded-full transition-all duration-500 ${index <= platformIndex ? "bg-blue-500" : "bg-slate-200"}`}
+                    className={`h-2 w-2 transition-all duration-500 ${index <= platformIndex ? "bg-[#00ff41]" : "bg-[#262626]"}`}
                   />
                 ))}
-                <span className="ml-1 font-mono text-[11px] text-slate-400">{platformIndex + 1}/{platformStages.length}</span>
+                <span className="ml-1 font-mono text-[11px] text-[#555]">{platformIndex + 1}/{platformStages.length}</span>
               </div>
             </div>
             <div className="relative">

@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F5F0E8;
-  --foreground: #1E293B;
+  --background: #0f0f0f;
+  --foreground: #e8e8e8;
+  --surface: #161616;
+  --border: #262626;
+  --accent: #00ff41;
 }
 
 @theme inline {
@@ -22,28 +25,6 @@ body {
 html {
   scroll-behavior: smooth;
 }
-
-/* ── Orb float animations ── */
-@keyframes orb-drift-1 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33%       { transform: translate(60px, -80px) scale(1.08); }
-  66%       { transform: translate(-40px, 40px) scale(0.95); }
-}
-
-@keyframes orb-drift-2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33%       { transform: translate(-80px, 60px) scale(0.92); }
-  66%       { transform: translate(50px, -50px) scale(1.1); }
-}
-
-@keyframes orb-drift-3 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50%       { transform: translate(30px, 70px) scale(1.05); }
-}
-
-.orb-1 { animation: orb-drift-1 18s ease-in-out infinite; }
-.orb-2 { animation: orb-drift-2 22s ease-in-out infinite; }
-.orb-3 { animation: orb-drift-3 16s ease-in-out infinite; }
 
 /* ── Text reveal animations ── */
 @keyframes fade-up {
@@ -75,36 +56,20 @@ html {
 .delay-1000 { animation-delay: 1000ms; }
 .delay-1200 { animation-delay: 1200ms; }
 
-/* ── Grid shimmer ── */
-@keyframes grid-pulse {
-  0%, 100% { opacity: 0.5; }
-  50%       { opacity: 1; }
-}
-
+/* ── Technical coordinate grid ── */
 .grid-bg {
   background-image:
-    linear-gradient(rgba(30,41,59,0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(30,41,59,0.06) 1px, transparent 1px);
-  background-size: 60px 60px;
-  animation: grid-pulse 6s ease-in-out infinite;
+    linear-gradient(rgba(0,255,65,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,65,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
 }
 
 /* ── Gradient text ── */
 .gradient-text {
-  background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #00ff41 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-}
-
-/* ── Glow button ── */
-@keyframes button-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(67, 56, 202, 0.35), 0 0 60px rgba(199, 226, 255, 0.2); }
-  50%       { box-shadow: 0 0 35px rgba(67, 56, 202, 0.5), 0 0 90px rgba(199, 226, 255, 0.3); }
-}
-
-.glow-button {
-  animation: button-glow 3s ease-in-out infinite;
 }
 
 /* ── Rotating wireframe ── */
@@ -121,35 +86,9 @@ html {
 .wireframe-outer { animation: spin-slow 20s linear infinite; transform-style: preserve-3d; }
 .wireframe-inner { animation: spin-reverse 14s linear infinite; transform-style: preserve-3d; }
 
-/* ── Badge shimmer ── */
-@keyframes badge-shimmer {
-  0%   { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-
-.badge-shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(67,56,202,0.12) 0%,
-    rgba(199,226,255,0.3) 50%,
-    rgba(67,56,202,0.12) 100%
-  );
-  background-size: 200% auto;
-  animation: badge-shimmer 3s linear infinite;
-}
-
-/* ── Particle dots ── */
-@keyframes particle-float {
-  0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.4; }
-  25%       { transform: translateY(-20px) translateX(10px); opacity: 0.8; }
-  75%       { transform: translateY(10px) translateX(-8px); opacity: 0.3; }
-}
-
-.particle { animation: particle-float var(--duration, 8s) ease-in-out infinite; animation-delay: var(--delay, 0s); }
-
 /* ── Header glass ── */
 .header-glass {
-  background: rgba(245, 240, 232, 0.88);
+  background: rgba(15,15,15,0.95);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }

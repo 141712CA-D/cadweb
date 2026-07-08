@@ -36,7 +36,7 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
 
   return (
     <div
-      className="fixed inset-0 z-[999] flex items-center justify-center bg-[#F5F0E8]"
+      className="fixed inset-0 z-[999] flex items-center justify-center bg-[#0f0f0f]"
       style={{
         transform: phase === "slide" ? "translateY(-100%)" : "translateY(0)",
         transition: phase === "slide" ? "transform 0.75s cubic-bezier(0.76, 0, 0.24, 1)" : "none",
@@ -48,8 +48,8 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(30,41,59,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(30,41,59,0.05) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
+            "linear-gradient(rgba(0,255,65,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,65,0.04) 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
         }}
       />
 
@@ -60,7 +60,7 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
           width: 600, height: 600,
           top: "50%", left: "50%",
           transform: "translate(-50%, -50%)",
-          background: "radial-gradient(circle, rgba(199,226,255,0.6) 0%, transparent 70%)",
+          background: "radial-gradient(circle, rgba(0,255,65,0.06) 0%, transparent 70%)",
           filter: "blur(40px)",
           opacity: risen ? 1 : 0,
           transition: "opacity 1s ease",
@@ -87,7 +87,7 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
               width={220}
               height={220}
               loading="eager"
-              style={{ width: "clamp(60px, 15vw, 110px)", height: "auto", filter: "brightness(0)" }}
+              style={{ width: "clamp(60px, 15vw, 110px)", height: "auto", filter: "brightness(0) invert(1)" }}
             />
           </div>
 
@@ -101,7 +101,7 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
               transition: "opacity 0.7s ease, transform 1s cubic-bezier(0.16,1,0.3,1)",
             }}
           >
-            <span className="text-[#1E293B]">Parametra</span>
+            <span className="text-[#e8e8e8]">Parametra</span>
           </div>
         </div>
 
@@ -109,7 +109,7 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
         <p
           className="text-sm tracking-widest uppercase font-medium"
           style={{
-            color: "rgba(30,41,59,0.4)",
+            color: "#00ff41",
             opacity: taglineShown ? 1 : 0,
             transform: taglineShown ? "translateY(0)" : "translateY(10px)",
             transition: "opacity 0.6s ease, transform 0.6s ease",
