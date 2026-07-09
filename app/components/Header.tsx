@@ -83,7 +83,7 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
             {/* Waitlist button */}
             <button
               onClick={handleWaitlistClick}
-              className="font-mono text-xs uppercase tracking-widest px-4 sm:px-5 py-2 bg-[#00ff41] text-black hover:bg-[#00cc33] transition-all duration-200 whitespace-nowrap"
+              className="cursor-pointer font-mono text-xs uppercase tracking-widest px-4 sm:px-5 py-2 bg-[#00ff41] text-black hover:bg-[#00cc33] transition-all duration-200 whitespace-nowrap"
             >
               <span className="sm:hidden">Waitlist</span>
               <span className="hidden sm:inline">Join the Waitlist</span>

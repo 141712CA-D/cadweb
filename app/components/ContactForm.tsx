@@ -14,10 +14,10 @@ type Status = "idle" | "loading" | "verify" | "success" | "cooldown" | "error";
 const ROLES = ["Student", "Instructor", "Freelancer", "Hobbyist", "Other"];
 
 const inputClass = (error?: string) =>
-  `w-full bg-white border ${error ? "border-red-500/50" : "border-slate-300"} rounded-lg px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 focus:ring-offset-0 focus:border-transparent transition-all duration-150`;
+  `w-full bg-[#161616] border ${error ? "border-red-500/60" : "border-[#262626]"} px-4 py-3 text-sm text-[#e8e8e8] placeholder:text-[#444] focus:outline-none focus:border-[#00ff41] transition-all duration-150 font-mono`;
 
-const labelClass = "block text-sm font-medium text-slate-700 mb-1.5";
-const errorClass = "text-xs text-red-600 mt-1";
+const labelClass = "block font-mono text-xs uppercase tracking-[0.2em] text-[#555] mb-1.5";
+const errorClass = "text-xs text-red-400/80 mt-1.5";
 
 interface ContactFormProps {
   onSuccess?: () => void;
@@ -213,45 +213,45 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
   };
 
   return (
-    <div className={isModal ? "" : "min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4 py-12"}>
+    <div className={isModal ? "" : "min-h-screen bg-[#0f0f0f] grid-bg flex flex-col items-center justify-center px-4 py-12"}>
       <div className={isModal ? "w-full" : "w-full max-w-lg"}>
 
         {!isModal && (
           <div className="flex items-center justify-between mb-8">
             <Link href="/" className="flex items-center gap-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.svg" alt="Parametra" style={{ width: 32, height: 32, display: "block", flexShrink: 0, filter: "brightness(0)" }} />
-              <span className="text-slate-900 font-semibold text-base tracking-tight">Parametra</span>
+              <img src="/logo.svg" alt="Parametra" style={{ width: 32, height: 32, display: "block", flexShrink: 0, filter: "brightness(0) invert(1)" }} />
+              <span className="text-[#e8e8e8] font-mono text-sm tracking-tight">Parametra</span>
             </Link>
-            <Link href="/" className="text-xs text-slate-500 hover:text-slate-700 transition-colors">← Back</Link>
+            <Link href="/" className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">← Back</Link>
           </div>
         )}
 
         {status === "cooldown" ? (
           <div className="flex flex-col items-center text-center py-8 gap-4">
-            <div className="w-12 h-12 rounded-full bg-amber-100 border border-amber-300 flex items-center justify-center">
-              <svg className="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 border border-[#262626] bg-[#161616] flex items-center justify-center">
+              <svg className="w-6 h-6 text-[#00ff41]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-slate-900">Slow down.</h2>
-            <p className="text-sm text-slate-600 max-w-sm">You already sent a message recently. Try again in about {cooldownMins} minute{cooldownMins !== 1 ? "s" : ""}.</p>
+            <h2 className="font-mono text-sm uppercase tracking-widest text-[#e8e8e8]">Slow down.</h2>
+            <p className="text-sm text-[#888] max-w-sm">You already sent a message recently. Try again in about {cooldownMins} minute{cooldownMins !== 1 ? "s" : ""}.</p>
             <button
               onClick={() => setStatus("idle")}
-              className="mt-4 text-sm text-blue-600 hover:text-blue-700 transition-colors font-medium"
+              className="mt-4 font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors"
             >
               Go back
             </button>
           </div>
         ) : status === "verify" ? (
           <div className="flex flex-col items-center text-center py-4 gap-4">
-            <div className="w-12 h-12 rounded-full bg-blue-100 border border-blue-300 flex items-center justify-center">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 border border-[#262626] bg-[#161616] flex items-center justify-center">
+              <svg className="w-6 h-6 text-[#00ff41]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-slate-900">Check your email.</h2>
-            <p className="text-sm text-slate-600 max-w-sm">We sent a 6-digit code to <span className="font-medium text-slate-900">{pendingEmail}</span>. Enter it below to send your message.</p>
+            <h2 className="font-mono text-sm uppercase tracking-widest text-[#e8e8e8]">Check your email.</h2>
+            <p className="text-sm text-[#888] max-w-sm">We sent a 6-digit code to <span className="font-mono text-[#e8e8e8]">{pendingEmail}</span>. Enter it below to send your message.</p>
             <form onSubmit={handleVerify} noValidate className="w-full max-w-xs flex flex-col gap-3 mt-2">
               <input
                 inputMode="numeric"
@@ -260,53 +260,53 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
                 placeholder="000000"
                 value={code}
                 onChange={(e) => { setCode(e.target.value.replace(/\D/g, "")); setVerifyError(""); }}
-                className={`w-full bg-white border ${verifyError ? "border-red-500/50" : "border-slate-300"} rounded-lg px-4 py-3 text-center text-2xl tracking-[0.4em] font-mono text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 focus:ring-offset-0 transition-all duration-150`}
+                className={`w-full bg-[#161616] border ${verifyError ? "border-red-500/60" : "border-[#262626]"} px-4 py-3 text-center text-2xl tracking-[0.4em] font-mono text-[#e8e8e8] placeholder:text-[#444] focus:outline-none focus:border-[#00ff41] transition-all duration-150`}
               />
               {verifyError && <p className={errorClass}>{verifyError}</p>}
               <button
                 type="submit"
                 disabled={verifying || code.length !== 6}
-                className="w-full py-2.5 rounded-lg bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-2.5 bg-[#00ff41] text-black font-mono text-xs uppercase tracking-widest hover:bg-[#00cc33] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {verifying ? "Verifying..." : "Verify & send"}
               </button>
             </form>
-            <button onClick={startOver} className="mt-2 text-xs text-slate-500 hover:text-slate-700 transition-colors">
+            <button onClick={startOver} className="mt-2 font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">
               Didn&apos;t get it? Start over
             </button>
           </div>
         ) : status === "success" ? (
           <div className="flex flex-col items-center text-center py-8 gap-4">
-            <div className="w-12 h-12 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center">
-              <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 border border-[#00ff41]/30 bg-[#161616] flex items-center justify-center">
+              <svg className="w-6 h-6 text-[#00ff41]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-slate-900">Message received.</h2>
-            <p className="text-sm text-slate-600 max-w-sm">We&apos;ll get back to you as soon as we can.</p>
-            <p className="text-xs text-slate-500 max-w-sm">If this is your first time receiving an email from {process.env.NEXT_PUBLIC_MAIL_FROM_EMAIL ?? "no-reply@parametra.ai"}, please unmark us as spam if applicable.</p>
-            <button onClick={handleSuccess} className="mt-4 text-sm text-blue-600 hover:text-blue-700 transition-colors font-medium">
+            <h2 className="font-mono text-sm uppercase tracking-widest text-[#e8e8e8]">Message received.</h2>
+            <p className="text-sm text-[#888] max-w-sm">We&apos;ll get back to you as soon as we can.</p>
+            <p className="text-xs text-[#555] max-w-sm">If this is your first time receiving an email from {process.env.NEXT_PUBLIC_MAIL_FROM_EMAIL ?? "no-reply@parametra.ai"}, please unmark us as spam if applicable.</p>
+            <button onClick={handleSuccess} className="mt-4 font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">
               Done
             </button>
           </div>
         ) : (
           <>
-            <h1 className="text-2xl font-bold text-slate-900 mb-2">Get in touch</h1>
-            <p className="text-sm text-slate-600 mb-6">Have a question or want to learn more? Drop us a message.</p>
+            <h1 className="text-2xl font-bold text-[#e8e8e8] mb-2">Get in touch</h1>
+            <p className="font-mono text-xs text-[#555] mb-6">Have a question or want to learn more? Drop us a message.</p>
 
-            <div className="flex gap-2 mb-6 bg-slate-100 p-1 rounded-lg border border-slate-200">
+            <div className="flex gap-0 mb-6 border border-[#262626]">
               {(["individual", "team"] as FormType[]).map((t) => (
                 <button
                   key={t}
                   type="button"
                   onClick={() => { setType(t); setErrors({}); }}
-                  className={`flex-1 py-2 px-3 rounded-md text-xs font-semibold transition-all duration-150 ${
+                  className={`flex-1 py-2 px-3 font-mono text-xs uppercase tracking-widest transition-all duration-150 ${
                     type === t
-                      ? "bg-slate-900 text-white shadow-sm"
-                      : "text-slate-600 hover:text-slate-900"
+                      ? "bg-[#00ff41] text-black"
+                      : "text-[#555] hover:text-[#e8e8e8] bg-transparent"
                   }`}
                 >
-                  {t === "individual" ? "Individual" : "Team / Organization"}
+                  {t === "individual" ? "Individual" : "Team / Org"}
                 </button>
               ))}
             </div>
@@ -331,10 +331,10 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
                     <label className={labelClass}>Role</label>
                     <select className={inputClass(errors.role) + " cursor-pointer appearance-none pr-10"} value={role}
                       style={{
-                        color: role ? "rgb(15, 23, 42)" : "rgb(107, 114, 128)",
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgb(71,85,105)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
+                        color: role ? "rgb(232, 232, 232)" : "rgba(255,255,255,0.25)",
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
                         backgroundRepeat: "no-repeat",
-                        backgroundPosition: "right 12px center",
+                        backgroundPosition: "right 14px center",
                       }}
                       onChange={(e) => { setRole(e.target.value); setUniversity(""); clearError("role"); }}>
                       <option value="" disabled>Select your role</option>
@@ -362,7 +362,7 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
                       onChange={(e) => { setMessage(e.target.value); clearError("message"); }} />
                     <div className="flex justify-between items-center mt-1">
                       {errors.message ? <p className={errorClass}>{errors.message}</p> : <span />}
-                      <span className={`text-xs ${message.length >= 2000 ? "text-red-600" : message.length > 1600 ? "text-amber-600" : "text-slate-400"}`}>{message.length} / 2000</span>
+                      <span className={`text-xs ${message.length >= 2000 ? "text-red-400" : message.length > 1600 ? "text-amber-400" : "text-[#555]"}`}>{message.length} / 2000</span>
                     </div>
                   </div>
                 </div>
@@ -404,7 +404,7 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
                       onChange={(e) => { setTeamMessage(e.target.value); clearError("teamMessage"); }} />
                     <div className="flex justify-between items-center mt-1">
                       {errors.teamMessage ? <p className={errorClass}>{errors.teamMessage}</p> : <span />}
-                      <span className={`text-xs ${teamMessage.length >= 2000 ? "text-red-600" : teamMessage.length > 1600 ? "text-amber-600" : "text-slate-400"}`}>{teamMessage.length} / 2000</span>
+                      <span className={`text-xs ${teamMessage.length >= 2000 ? "text-red-400" : teamMessage.length > 1600 ? "text-amber-400" : "text-[#555]"}`}>{teamMessage.length} / 2000</span>
                     </div>
                   </div>
                 </div>
@@ -416,7 +416,7 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
                 siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
                 onSuccess={(token) => { setCaptchaToken(token); clearError("captcha"); }}
                 onExpire={() => setCaptchaToken(null)}
-                options={{ theme: "light" }}
+                options={{ theme: "dark" }}
               />
               {errors.captcha && <p className={errorClass}>{errors.captcha}</p>}
 
@@ -427,7 +427,7 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
               <button
                 type="submit"
                 disabled={status === "loading" || !captchaToken || !allFieldsFilled}
-                className="w-full py-2.5 rounded-lg bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full py-2.5 bg-[#00ff41] text-black font-mono text-xs uppercase tracking-widest hover:bg-[#00cc33] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {status === "loading" ? "Sending..." : "Send message"}
               </button>
