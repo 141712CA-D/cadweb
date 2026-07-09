@@ -24,6 +24,32 @@ body {
 
 html {
   scroll-behavior: smooth;
+  scrollbar-color: var(--border) var(--background);
+  scrollbar-width: thin;
+}
+
+/* ── Scrollbar (WebKit) ── */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border: 3px solid var(--background);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #333333;
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--background);
 }
 
 /* ── Text reveal animations ── */

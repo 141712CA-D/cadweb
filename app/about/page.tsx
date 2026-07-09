@@ -134,7 +134,7 @@ export default function AboutPage() {
               />
             </button>
             {i < team.length - 1 && (
-              <div className="w-px ml-[3px] bg-slate-200" style={{ height: "32px" }} />
+              <div className="w-px ml-[3px] bg-[#333]" style={{ height: "32px" }} />
             )}
           </React.Fragment>
         ))}

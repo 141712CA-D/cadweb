@@ -4,20 +4,36 @@ import Header from "../components/Header";
 
 const processingSteps = [
   {
+    eyebrow: "Layer 01",
     label: "NLM Processor",
+    status: "reading input",
     desc: "Reads your input — whether it's a drawing or plain text — and figures out what you're actually trying to build",
+    accent: "bg-amber-400",
+    border: "border-amber-300",
   },
   {
+    eyebrow: "Layer 02",
     label: "Interpreter",
+    status: "extracting geometry",
     desc: "Breaks that down into real geometry. Holes, profiles, extrusions — the stuff CAD actually needs",
+    accent: "bg-sky-400",
+    border: "border-sky-300",
   },
   {
+    eyebrow: "Layer 03",
     label: "Reasoning Engine",
+    status: "resolving intent",
     desc: "Fills in the gaps. Resolves what's implied, catches what doesn't add up, and makes sure the design holds together",
+    accent: "bg-emerald-400",
+    border: "border-emerald-300",
   },
   {
+    eyebrow: "Layer 04",
     label: "Execution Layer",
+    status: "running pipeline",
     desc: "Drives the agent pipeline start to finish — sketch, extrude, fillet, edit — until the part is done",
+    accent: "bg-violet-400",
+    border: "border-violet-300",
   },
 ];
 
@@ -92,20 +108,28 @@ export default function HowItWorksPage() {
               <h2 className="text-base sm:text-xl font-bold text-[#e8e8e8]">The Parametra Pipeline</h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-              {processingSteps.map((step, i) => (
-                <div
-                  key={step.label}
-                  className="flex items-start gap-3 p-3 sm:p-4 border border-[#262626] bg-[#0f0f0f]"
-                >
-                  <div className="w-6 h-6 flex items-center justify-center font-mono text-xs font-bold text-[#00ff41] border border-[#262626] flex-shrink-0 mt-0.5">
-                    {i + 1}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {processingSteps.map((step) => (
+                <article key={step.label} className={`border bg-[#161616] ${step.border}`}>
+                  <div className="flex min-h-10 items-center justify-between gap-4 border-b border-[#262626] px-4 py-2">
+                    <div className="flex items-center gap-1.5">
+                      <span className="h-2 w-2 flex-shrink-0 rounded-full bg-red-500" />
+                      <span className="h-2 w-2 flex-shrink-0 rounded-full bg-amber-500" />
+                      <span className="h-2 w-2 flex-shrink-0 rounded-full bg-[#00ff41]" />
+                    </div>
+                    <p className="truncate font-mono text-[10px] text-[#555]">{step.status}</p>
                   </div>
-                  <div>
-                    <p className="text-xs sm:text-sm font-semibold text-[#e8e8e8]">{step.label}</p>
-                    <p className="font-mono text-xs text-[#555] mt-0.5 leading-relaxed">{step.desc}</p>
+                  <div className="p-4">
+                    <div className="mb-2 flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#555]">{step.eyebrow}</p>
+                        <h3 className="mt-1 text-sm sm:text-base font-bold text-[#e8e8e8]">{step.label}</h3>
+                      </div>
+                      <span className={`mt-0.5 h-2.5 w-2.5 flex-shrink-0 ${step.accent}`} />
+                    </div>
+                    <p className="font-mono text-xs text-[#555] leading-relaxed">{step.desc}</p>
                   </div>
-                </div>
+                </article>
               ))}
             </div>
           </div>

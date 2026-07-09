@@ -43,7 +43,7 @@ export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
         <div className="sticky top-0 flex items-center justify-end p-4 border-b border-[#262626] bg-[#0f0f0f]/95 backdrop-blur-sm z-10">
           <button
             onClick={onClose}
-            className="p-2 text-[#555] hover:text-[#00ff41] hover:bg-[#161616] transition-all duration-150"
+            className="cursor-pointer p-2 text-[#555] hover:text-[#00ff41] hover:bg-[#161616] transition-all duration-150"
             aria-label="Close"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
