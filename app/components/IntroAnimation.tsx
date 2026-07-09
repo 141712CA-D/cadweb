@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { lockScroll, unlockScroll } from "@/lib/scrollLock";
 
 const PHASE_RISE    = 80;
 const PHASE_TEXT    = 350;
@@ -13,14 +14,21 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
   const [phase, setPhase] = useState<"idle" | "rise" | "text" | "slide">("idle");
   const [taglineShown, setTaglineShown] = useState(false);
   const [mounted, setMounted] = useState(true);
+  const lockedRef = useRef(false);
 
   useEffect(() => {
-    document.body.style.overflow = "hidden";
+    if (!lockedRef.current) {
+      lockedRef.current = true;
+      lockScroll();
+    }
 
     const t1 = setTimeout(() => setPhase("rise"),  PHASE_RISE);
     const t2 = setTimeout(() => { setPhase("text"); setTaglineShown(true); }, PHASE_TEXT);
     const t3 = setTimeout(() => {
-      document.body.style.overflow = "";
+      if (lockedRef.current) {
+        lockedRef.current = false;
+        unlockScroll();
+      }
       document.body.focus();
       onDone();
     }, PHASE_REVEAL);
@@ -29,6 +37,15 @@ export default function IntroAnimation({ onDone }: { onDone: () => void }) {
 
     return () => { [t1, t2, t3, t4, t5].forEach(clearTimeout); };
   }, [onDone]);
+
+  useEffect(() => {
+    return () => {
+      if (lockedRef.current) {
+        lockedRef.current = false;
+        unlockScroll();
+      }
+    };
+  }, []);
 
   if (!mounted) return null;
 

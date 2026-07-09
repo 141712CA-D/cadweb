@@ -6,6 +6,7 @@ import Hero from "./components/Hero";
 import IntroAnimation from "./components/IntroAnimation";
 import DevBanner from "./components/DevBanner";
 import SignupModal from "./components/SignupModal";
+import DemoSection from "./components/DemoSection";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -43,6 +44,9 @@ export default function Home() {
       >
         <Header onJoinWaitlist={() => setSignupModalOpen(true)} />
         <Hero onJoinWaitlist={() => setSignupModalOpen(true)} />
+
+        <DemoSection />
+
         <section className="bg-[#0f0f0f] border-t border-[#262626] py-16 px-6">
           <div className="max-w-7xl mx-auto flex flex-col items-center gap-6">
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#555]">Partners</p>

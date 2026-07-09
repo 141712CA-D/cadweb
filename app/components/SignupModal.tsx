@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import SignupForm from "./SignupForm";
+import { lockScroll, unlockScroll } from "@/lib/scrollLock";
 
 interface SignupModalProps {
   isOpen: boolean;
@@ -9,16 +10,26 @@ interface SignupModalProps {
 }
 
 export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
+  const lockedRef = useRef(false);
+
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+    if (isOpen && !lockedRef.current) {
+      lockedRef.current = true;
+      lockScroll();
+    } else if (!isOpen && lockedRef.current) {
+      lockedRef.current = false;
+      unlockScroll();
     }
-    return () => {
-      document.body.style.overflow = "";
-    };
   }, [isOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (lockedRef.current) {
+        lockedRef.current = false;
+        unlockScroll();
+      }
+    };
+  }, []);
 
   return (
     <>
