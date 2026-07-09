@@ -327,7 +327,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
               <button
                 type="submit"
                 disabled={verifying || code.length !== 6}
-                className="w-full py-2.5 bg-[#00ff41] font-mono text-xs uppercase tracking-widest text-black hover:bg-[#00cc33] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="cursor-pointer w-full py-2.5 bg-[#00ff41] font-mono text-xs uppercase tracking-widest text-black hover:bg-[#00cc33] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {verifying ? "Verifying..." : "Verify & join"}
               </button>
@@ -361,7 +361,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
                   key={t}
                   type="button"
                   onClick={() => { setType(t); setErrors({}); }}
-                  className={`flex-1 py-2 px-3 font-mono text-xs uppercase tracking-widest transition-all duration-150 ${
+                  className={`cursor-pointer flex-1 py-2 px-3 font-mono text-xs uppercase tracking-widest transition-all duration-150 ${
                     type === t
                       ? "bg-[#00ff41] text-black"
                       : "text-[#555] hover:text-[#e8e8e8] bg-[#0f0f0f]"
@@ -490,7 +490,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
               <button
                 type="submit"
                 disabled={status === "loading" || !captchaToken || emailCannotRegister || !allFieldsFilled}
-                className="w-full py-2.5 bg-[#00ff41] font-mono text-xs uppercase tracking-widest text-black hover:bg-[#00cc33] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="cursor-pointer w-full py-2.5 bg-[#00ff41] font-mono text-xs uppercase tracking-widest text-black hover:bg-[#00cc33] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {status === "loading" ? "Sending..." : "Request access"}
               </button>

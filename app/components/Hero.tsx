@@ -447,7 +447,7 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
               <button
                 type="button"
                 onClick={onJoinWaitlist}
-                className="inline-flex min-h-12 items-center justify-center bg-[#00ff41] px-7 font-mono text-xs uppercase tracking-widest text-black transition hover:bg-[#00cc33]"
+                className="cursor-pointer inline-flex min-h-12 items-center justify-center bg-[#00ff41] px-7 font-mono text-xs uppercase tracking-widest text-black transition hover:bg-[#00cc33]"
               >
                 Join the Waitlist
               </button>

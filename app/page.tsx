@@ -71,7 +71,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={() => setSignupModalOpen(true)}
-                className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors"
+                className="cursor-pointer font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors"
               >
                 Join Waitlist
               </button>

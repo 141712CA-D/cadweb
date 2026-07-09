@@ -266,7 +266,7 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
               <button
                 type="submit"
                 disabled={verifying || code.length !== 6}
-                className="w-full py-2.5 bg-[#00ff41] text-black font-mono text-xs uppercase tracking-widest hover:bg-[#00cc33] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="cursor-pointer w-full py-2.5 bg-[#00ff41] text-black font-mono text-xs uppercase tracking-widest hover:bg-[#00cc33] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {verifying ? "Verifying..." : "Verify & send"}
               </button>
@@ -300,7 +300,7 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
                   key={t}
                   type="button"
                   onClick={() => { setType(t); setErrors({}); }}
-                  className={`flex-1 py-2 px-3 font-mono text-xs uppercase tracking-widest transition-all duration-150 ${
+                  className={`cursor-pointer flex-1 py-2 px-3 font-mono text-xs uppercase tracking-widest transition-all duration-150 ${
                     type === t
                       ? "bg-[#00ff41] text-black"
                       : "text-[#555] hover:text-[#e8e8e8] bg-transparent"
@@ -427,7 +427,7 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
               <button
                 type="submit"
                 disabled={status === "loading" || !captchaToken || !allFieldsFilled}
-                className="w-full py-2.5 bg-[#00ff41] text-black font-mono text-xs uppercase tracking-widest hover:bg-[#00cc33] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="cursor-pointer w-full py-2.5 bg-[#00ff41] text-black font-mono text-xs uppercase tracking-widest hover:bg-[#00cc33] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {status === "loading" ? "Sending..." : "Send message"}
               </button>
