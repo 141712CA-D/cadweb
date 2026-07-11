@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import DemoSection from "./DemoSection";
 
 const prompt =
   "make me a base plate with 6 through holes and 4 m6 holes for mounting. The whole base plate should be 15x35cm";
@@ -11,74 +12,6 @@ const typingPrompts = [
   { text: "design an L-bracket with two M4 bolt holes, 2mm wall thickness, 40mm legs", holdMs: 2200 },
   { text: "create a cylindrical enclosure 60mm diameter, 80mm tall with a snap-fit lid", holdMs: 2200 },
   { text: "build a spur gear — 24 teeth, module 1.5, 8mm bore, 5mm face width", holdMs: 2200 },
-];
-
-const stages = [
-  {
-    eyebrow: "Terminal 01",
-    title: "Prompt intake",
-    status: "reading design intent",
-    summary: "The prompt becomes a structured design brief: size, hole counts, mounting intent, and assumptions.",
-    accent: "bg-amber-400",
-    border: "border-amber-300",
-    text: "text-amber-700",
-    lines: [
-      `$ parametra generate "${prompt}"`,
-      "[intent] base plate detected",
-      "[dimensions] overall envelope: 150mm x 350mm",
-      "[features] 6 through holes + 4 M6 mounting holes",
-      "[assumption] rectangular plate, centered hole pattern",
-    ],
-  },
-  {
-    eyebrow: "Terminal 02",
-    title: "Sketch solver",
-    status: "placing sketch geometry",
-    summary: "A constrained 350mm by 150mm sketch is created before any solid features are generated.",
-    accent: "bg-sky-400",
-    border: "border-sky-300",
-    text: "text-sky-700",
-    lines: [
-      "[sketch] create rectangle: 350mm x 150mm",
-      "[reference] add horizontal and vertical centerlines",
-      "[holes] distribute 6 through holes across plate body",
-      "[mounting] place 4 M6 holes near the corners",
-      "[solver] horizontal, vertical, symmetric, equal",
-      "[solver] degrees of freedom: 0",
-    ],
-  },
-  {
-    eyebrow: "Terminal 03",
-    title: "Feature build",
-    status: "writing feature timeline",
-    summary: "The sketch turns into editable Onshape operations: extrude, cut, clearance holes, and edge cleanup.",
-    accent: "bg-emerald-400",
-    border: "border-emerald-300",
-    text: "text-emerald-700",
-    lines: [
-      "[feature] extrude base plate profile: 8mm",
-      "[cut] through holes: through all",
-      "[cut] M6 mounting holes: 6.0mm clearance",
-      "[edge] apply 0.5mm chamfer to top perimeter",
-      "[validate] feature tree has no failed operations",
-    ],
-  },
-  {
-    eyebrow: "Terminal 04",
-    title: "Ready in Onshape",
-    status: "sync complete",
-    summary: "The final feature tree is editable, inspectable, and ready for another prompt-driven iteration.",
-    accent: "bg-violet-400",
-    border: "border-violet-300",
-    text: "text-violet-700",
-    lines: [
-      "[api] commit feature list to Onshape part studio",
-      "[sync] sketch, extrude, cuts, chamfer created",
-      "[review] editable feature tree preserved",
-      "[result] base plate ready for dimension edits",
-      "[done] generated model linked to prompt history",
-    ],
-  },
 ];
 
 const platformStages = [
@@ -110,94 +43,6 @@ const platformStages = [
 
 function clamp(value: number, min = 0, max = 1) {
   return Math.min(max, Math.max(min, value));
-}
-
-function TerminalCardInner({ stage }: { stage: (typeof stages)[0] }) {
-  return (
-    <>
-      <div className="flex min-h-10 items-center justify-between gap-4 border-b border-[#262626] px-4 py-2">
-        <div className="flex items-center gap-1.5">
-          <span className="h-2 w-2 flex-shrink-0 rounded-full bg-red-500" />
-          <span className="h-2 w-2 flex-shrink-0 rounded-full bg-amber-500" />
-          <span className="h-2 w-2 flex-shrink-0 rounded-full bg-[#00ff41]" />
-        </div>
-        <p className="truncate font-mono text-[10px] text-[#555]">{stage.status}</p>
-      </div>
-      <div className="p-4">
-        <div className="mb-3 flex items-start justify-between gap-3">
-          <div>
-            <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#555]">{stage.eyebrow}</p>
-            <h3 className="mt-1 text-xl font-black text-[#e8e8e8]">{stage.title}</h3>
-          </div>
-          <span className={`mt-0.5 h-2.5 w-2.5 flex-shrink-0 ${stage.accent}`} />
-        </div>
-        <div className="space-y-1.5 font-mono text-[11px] leading-[1.65]">
-          {stage.lines.map((line, i) => (
-            <p
-              key={line}
-              className={
-                i === 0
-                  ? "text-[#e8e8e8]"
-                  : line.startsWith("[done]") || line.startsWith("[result]")
-                    ? "text-[#00ff41]"
-                    : "text-[#555]"
-              }
-            >
-              {line}
-            </p>
-          ))}
-        </div>
-      </div>
-    </>
-  );
-}
-
-function TerminalSwap({ activeIndex }: { activeIndex: number }) {
-  return (
-    <div className="relative min-h-[340px]">
-      {stages.map((stage, index) => {
-        const active = index === activeIndex;
-        return (
-          <article
-            key={stage.eyebrow}
-            className={`absolute inset-0 border bg-[#161616] transition-all duration-700 ${
-              active
-                ? `translate-y-0 scale-100 ${stage.border} opacity-100`
-                : index < activeIndex
-                  ? `-translate-y-6 scale-[0.98] border-[#262626] opacity-0`
-                  : `translate-y-6 scale-[0.98] border-[#262626] opacity-0`
-            }`}
-            aria-hidden={!active}
-          >
-            <TerminalCardInner stage={stage} />
-          </article>
-        );
-      })}
-    </div>
-  );
-}
-
-function TerminalAccumulator({ activeIndex }: { activeIndex: number }) {
-  return (
-    <div className="grid gap-4 sm:grid-cols-2">
-      {stages.map((stage, index) => {
-        const visible = index <= activeIndex;
-        return (
-          <article
-            key={stage.eyebrow}
-            className={`border bg-[#161616] transition-all duration-700 ${
-              visible
-                ? `translate-y-0 scale-100 ${stage.border} opacity-100`
-                : `translate-y-8 scale-[0.97] border-[#262626] opacity-0 pointer-events-none`
-            }`}
-            aria-hidden={!visible}
-          >
-            <TerminalCardInner stage={stage} />
-          </article>
-        );
-      })}
-    </div>
-  );
 }
 
 function LeafList({
@@ -318,11 +163,8 @@ interface HeroProps {
 }
 
 export default function Hero({ onJoinWaitlist }: HeroProps) {
-  const demoRef = useRef<HTMLDivElement>(null);
   const treeRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
   const [platformIndex, setPlatformIndex] = useState(0);
-  const activeStage = stages[activeIndex];
   const activePlatformStage = platformStages[platformIndex];
   const [showNudge, setShowNudge] = useState(false);
   const [demoView, setDemoView] = useState<"raw" | "demo">("raw");
@@ -387,22 +229,6 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
   useEffect(() => {
     let frame = 0;
     const update = () => {
-      if (!demoRef.current) return;
-      const rect = demoRef.current.getBoundingClientRect();
-      const travel = rect.height - window.innerHeight;
-      const raw = travel > 0 ? -rect.top / travel : 0;
-      setActiveIndex(Math.min(stages.length - 1, Math.floor(clamp(raw) * stages.length)));
-    };
-    const onScroll = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(update); };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => { cancelAnimationFrame(frame); window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); };
-  }, []);
-
-  useEffect(() => {
-    let frame = 0;
-    const update = () => {
       if (!treeRef.current) return;
       const rect = treeRef.current.getBoundingClientRect();
       const travel = rect.height - window.innerHeight;
@@ -424,7 +250,7 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
       <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-7xl items-center gap-12 px-5 pb-20 pt-36 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#00ff41] mb-6">Parametra · v1.0 · Releasing Soon</p>
-          <h1 className="max-w-md text-balance text-2xl font-bold leading-tight tracking-tight text-[#e8e8e8] sm:text-3xl">
+          <h1 className="max-w-2xl text-balance text-4xl font-black leading-[1.05] tracking-tight text-[#e8e8e8] sm:text-5xl lg:text-6xl">
             One prompt. Real CAD.
           </h1>
 
@@ -500,47 +326,9 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
         </div>
       </div>
 
-      {/* ── Pinned scroll demo ── */}
-      <div id="generation-demo" ref={demoRef} className="relative z-10 min-h-[250vh] scroll-mt-28 border-t border-[#262626]">
-        <div className="sticky top-20 flex min-h-[calc(100vh-5rem)] flex-col justify-start px-5 pt-8 pb-10 sm:px-6 lg:px-8">
-          <div className="mx-auto w-full max-w-7xl">
-
-            <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#00ff41]">How it generates</p>
-                <h2 className="mt-2 text-3xl font-black leading-tight text-[#e8e8e8] sm:text-4xl lg:text-5xl">
-                  {activeStage.title}
-                </h2>
-                <p className="mt-2 max-w-xl text-sm leading-6 text-[#888] sm:text-base">
-                  {activeStage.summary}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2.5">
-                {stages.map((stage, index) => (
-                  <span
-                    key={stage.eyebrow}
-                    className={`h-2 w-2 transition-all duration-500 ${
-                      index <= activeIndex ? stage.accent : "bg-[#262626]"
-                    }`}
-                  />
-                ))}
-                <span className="ml-1 font-mono text-[11px] text-[#555]">
-                  {activeIndex + 1}/{stages.length}
-                </span>
-              </div>
-            </div>
-
-            <div className="sm:hidden">
-              <TerminalSwap activeIndex={activeIndex} />
-            </div>
-
-            <div className="hidden sm:block">
-              <TerminalAccumulator activeIndex={activeIndex} />
-            </div>
-
-          </div>
-        </div>
+      {/* ── Live demo video ── */}
+      <div className="relative z-10">
+        <DemoSection />
       </div>
 
       {/* ── Scroll nudge ── */}

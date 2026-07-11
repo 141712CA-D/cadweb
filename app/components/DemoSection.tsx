@@ -11,42 +11,65 @@ export default function DemoSection() {
   const [locked, setLocked] = useState(false);
 
   useEffect(() => {
-    if (sessionStorage.getItem("demoPlayed") === "true") {
-      triggeredRef.current = true;
-      return;
-    }
-
     const section = sectionRef.current;
     const video = videoRef.current;
     if (!section || !video) return;
 
+    // Track scroll direction so the lock only captures downward passes —
+    // scrolling back up through the section shouldn't re-trap the user.
+    let lastY = window.scrollY;
+    let scrollingDown = true;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (y !== lastY) scrollingDown = y > lastY;
+      lastY = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (!entry.isIntersecting || triggeredRef.current) return;
-        triggeredRef.current = true;
-        observer.disconnect();
+        if (!entry.isIntersecting) {
+          // Out of view: pause replays, but never interrupt the locked run.
+          if (!lockedRef.current) video.pause();
+          return;
+        }
 
-        // Lock synchronously so momentum/fling scrolling can't carry the
-        // user past the section while video.play() is still resolving.
-        lockedRef.current = true;
-        setLocked(true);
-        lockScroll();
-        section.scrollIntoView({ block: "center" });
+        if (!triggeredRef.current) {
+          // The one-time locked run only captures a downward pass.
+          if (!scrollingDown) return;
+          triggeredRef.current = true;
 
-        video.currentTime = 0;
-        video.play().catch(() => {
-          // Autoplay blocked — don't trap the user, release the lock.
-          lockedRef.current = false;
-          setLocked(false);
-          unlockScroll();
-          sessionStorage.setItem("demoPlayed", "true");
-        });
+          // Lock synchronously so momentum/fling scrolling can't carry the
+          // user past the section while video.play() is still resolving.
+          lockedRef.current = true;
+          setLocked(true);
+          lockScroll();
+          section.scrollIntoView({ block: "center" });
+
+          video.currentTime = 0;
+          video.play().catch(() => {
+            // Autoplay blocked — don't trap the user, release the lock.
+            lockedRef.current = false;
+            setLocked(false);
+            unlockScroll();
+          });
+          return;
+        }
+
+        // Replay mode: after the one-time locked run, just loop in view.
+        if (!lockedRef.current) {
+          video.loop = true;
+          video.play().catch(() => {});
+        }
       },
       { threshold: 0.6 }
     );
 
     observer.observe(section);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", onScroll);
+    };
   }, []);
 
   const handleEnded = () => {
@@ -55,7 +78,12 @@ export default function DemoSection() {
       setLocked(false);
       unlockScroll();
     }
-    sessionStorage.setItem("demoPlayed", "true");
+    // Keep the demo running as a loop now that the lock is released.
+    const video = videoRef.current;
+    if (video) {
+      video.loop = true;
+      video.play().catch(() => {});
+    }
   };
 
   useEffect(() => {

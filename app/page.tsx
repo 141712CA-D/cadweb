@@ -6,7 +6,6 @@ import Hero from "./components/Hero";
 import IntroAnimation from "./components/IntroAnimation";
 import DevBanner from "./components/DevBanner";
 import SignupModal from "./components/SignupModal";
-import DemoSection from "./components/DemoSection";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -45,7 +44,24 @@ export default function Home() {
         <Header onJoinWaitlist={() => setSignupModalOpen(true)} />
         <Hero onJoinWaitlist={() => setSignupModalOpen(true)} />
 
-        <DemoSection />
+        <section className="bg-[#0f0f0f] border-t border-[#262626] py-24 px-6">
+          <div className="max-w-3xl mx-auto flex flex-col items-center text-center gap-6">
+            <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#00ff41]">Releasing Soon</p>
+            <h2 className="text-3xl font-black leading-tight text-[#e8e8e8] sm:text-4xl lg:text-5xl">
+              Stop modeling by hand.
+            </h2>
+            <p className="max-w-xl text-sm leading-6 text-[#888] sm:text-base">
+              Describe the part. Get back real, editable CAD. Join the waitlist and be first in line when Parametra releases.
+            </p>
+            <button
+              type="button"
+              onClick={() => setSignupModalOpen(true)}
+              className="cursor-pointer inline-flex min-h-12 items-center justify-center bg-[#00ff41] px-8 font-mono text-xs uppercase tracking-widest text-black transition hover:bg-[#00cc33]"
+            >
+              Join the Waitlist
+            </button>
+          </div>
+        </section>
 
         <section className="bg-[#0f0f0f] border-t border-[#262626] py-16 px-6">
           <div className="max-w-7xl mx-auto flex flex-col items-center gap-6">
@@ -64,6 +80,7 @@ export default function Home() {
             </a>
           </div>
         </section>
+
         <footer className="bg-[#0f0f0f] border-t border-[#262626] py-6 px-6">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="font-mono text-xs text-[#555]">© {new Date().getFullYear()} Parametra</p>
