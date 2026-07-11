@@ -26,17 +26,21 @@ export default function DemoSection() {
         triggeredRef.current = true;
         observer.disconnect();
 
+        // Lock synchronously so momentum/fling scrolling can't carry the
+        // user past the section while video.play() is still resolving.
+        lockedRef.current = true;
+        setLocked(true);
+        lockScroll();
+        section.scrollIntoView({ block: "center" });
+
         video.currentTime = 0;
-        video.play()
-          .then(() => {
-            lockedRef.current = true;
-            setLocked(true);
-            lockScroll();
-          })
-          .catch(() => {
-            // Autoplay blocked — don't trap the user, just skip the lock.
-            sessionStorage.setItem("demoPlayed", "true");
-          });
+        video.play().catch(() => {
+          // Autoplay blocked — don't trap the user, release the lock.
+          lockedRef.current = false;
+          setLocked(false);
+          unlockScroll();
+          sessionStorage.setItem("demoPlayed", "true");
+        });
       },
       { threshold: 0.6 }
     );

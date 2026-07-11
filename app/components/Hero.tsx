@@ -424,8 +424,8 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
       <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-7xl items-center gap-12 px-5 pb-20 pt-36 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#00ff41] mb-6">Parametra · v1.0 · Releasing Soon</p>
-          <h1 className="max-w-4xl text-balance text-5xl font-black leading-[0.96] tracking-tight text-[#e8e8e8] sm:text-7xl lg:text-8xl">
-            One prompt.<br />Real CAD.
+          <h1 className="max-w-md text-balance text-2xl font-bold leading-tight tracking-tight text-[#e8e8e8] sm:text-3xl">
+            One prompt. Real CAD.
           </h1>
 
           <p className="mt-6 max-w-md text-sm leading-6 text-[#888] sm:text-base sm:leading-7">
