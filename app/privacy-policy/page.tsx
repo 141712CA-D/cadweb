@@ -101,7 +101,7 @@ export default function PrivacyPolicyPage() {
               <li><strong className="text-[#e8e8e8]">waitlistSynced</strong> — set for 1 hour per browser to throttle background sync operations. This ensures our system resyncs waitlist data with our upstream database at most once per hour per browser, reducing unnecessary network traffic while keeping data fresh. This cookie is functional only and contains no personal data.</li>
             </ul>
             <p className="mt-3">
-              Browser storage is also used for functional purposes: sessionStorage (for UI state such as intro playback).
+              Browser storage is also used for functional purposes: sessionStorage (to gate the first-visit demo experience so it only plays once per session).
               This client-side storage is functional only and is not used for advertising.
             </p>
             <p className="mt-3">

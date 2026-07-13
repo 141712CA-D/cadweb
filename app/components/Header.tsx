@@ -13,10 +13,27 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [signupModalOpen, setSignupModalOpen] = useState(false);
 
+  const [hiddenForDemo, setHiddenForDemo] = useState(false);
+
   useEffect(() => {
-   const onScroll = () => setScrolled(window.scrollY > 20);
-   window.addEventListener("scroll", onScroll, { passive: true });
-   return () => window.removeEventListener("scroll", onScroll);
+    let obs: IntersectionObserver;
+    const attach = () => {
+      const demo = document.getElementById("live-demo");
+      if (!demo) { setTimeout(attach, 100); return; }
+      obs = new IntersectionObserver(
+        ([e]) => setHiddenForDemo(e.isIntersecting),
+        { threshold: 0.1 }
+      );
+      obs.observe(demo);
+    };
+    attach();
+    return () => obs?.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
@@ -46,7 +63,7 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
           scrolled
             ? "header-glass border-b border-[#262626]"
             : "bg-transparent border-b border-transparent"
-        }`}
+        } ${hiddenForDemo ? "-translate-y-[calc(100%+2rem)] opacity-0 pointer-events-none" : "translate-y-0 opacity-100"}`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 

@@ -207,7 +207,6 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
     if (onSuccess) {
       onSuccess();
     } else if (!isModal) {
-      sessionStorage.removeItem("introPlayed");
       window.location.href = "/";
     }
   };

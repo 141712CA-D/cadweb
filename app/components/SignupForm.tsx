@@ -257,7 +257,6 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
     if (onSuccess) {
       onSuccess();
     } else if (!isModal) {
-      sessionStorage.removeItem("introPlayed");
       window.location.href = "/";
     }
   };

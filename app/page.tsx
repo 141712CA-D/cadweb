@@ -3,44 +3,44 @@
 import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
-import IntroAnimation from "./components/IntroAnimation";
 import DevBanner from "./components/DevBanner";
 import SignupModal from "./components/SignupModal";
 
 export default function Home() {
-  const [mounted, setMounted] = useState(false);
-  const [introComplete, setIntroComplete] = useState(false);
-  const [skipIntro, setSkipIntro] = useState(false);
   const [signupModalOpen, setSignupModalOpen] = useState(false);
 
+  // First-visit demo snap — once per session, separate from animation gate
   useEffect(() => {
-    const initIntro = () => {
-      const played = sessionStorage.getItem("introPlayed") === "true";
-      setSkipIntro(played);
-      setIntroComplete(played);
-      setMounted(true);
+    if (sessionStorage.getItem("demoSnapped") === "true") return;
+    sessionStorage.setItem("demoSnapped", "true");
+
+    let active = true;
+
+    const snap = (e: Event) => {
+      if (!active) return;
+      e.preventDefault();
+      active = false;
+      window.removeEventListener("wheel",     snap);
+      window.removeEventListener("touchmove", snap);
+      const demo = document.getElementById("live-demo");
+      if (!demo) return;
+      window.scrollTo({ top: demo.getBoundingClientRect().top, behavior: "smooth" });
     };
 
-    initIntro();
-  }, []);
+    window.addEventListener("wheel",     snap, { passive: false });
+    window.addEventListener("touchmove", snap, { passive: false });
 
-  function handleIntroDone() {
-    sessionStorage.setItem("introPlayed", "true");
-    setIntroComplete(true);
-  }
+    return () => {
+      active = false;
+      window.removeEventListener("wheel",     snap);
+      window.removeEventListener("touchmove", snap);
+    };
+  }, []);
 
   return (
     <>
       <DevBanner />
-      {mounted && !skipIntro && <IntroAnimation onDone={handleIntroDone} />}
-
-      <main
-        className="flex flex-col min-h-screen bg-[#0f0f0f]"
-        style={{
-          opacity: introComplete ? 1 : 0,
-          transition: skipIntro ? "none" : "opacity 0.15s ease",
-        }}
-      >
+      <main className="flex flex-col min-h-screen bg-[#0f0f0f]">
         <Header onJoinWaitlist={() => setSignupModalOpen(true)} />
         <Hero onJoinWaitlist={() => setSignupModalOpen(true)} />
 

@@ -167,7 +167,6 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
   const [platformIndex, setPlatformIndex] = useState(0);
   const activePlatformStage = platformStages[platformIndex];
   const [showNudge, setShowNudge] = useState(false);
-  const [demoView, setDemoView] = useState<"raw" | "demo">("raw");
 
   useEffect(() => {
     const timer = setTimeout(() => setShowNudge(true), 4000);
@@ -175,15 +174,8 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
   }, []);
 
   useEffect(() => {
-    const id = setInterval(() => {
-      setDemoView((v) => (v === "raw" ? "demo" : "raw"));
-    }, 3200);
-    return () => clearInterval(id);
-  }, []);
-
-  useEffect(() => {
     const onScroll = () => {
-      if (window.scrollY > 60) setShowNudge(false);
+      if (window.scrollY > 0) setShowNudge(false);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -300,26 +292,24 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
           </p>
           <div className="border border-[#262626] bg-[#161616] p-4">
             <div className="relative overflow-hidden bg-[#0f0f0f]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/OnshapeRaw.png"
-                alt="Onshape sketch geometry"
-                className={`block w-full transition-opacity duration-[900ms] ease-in-out ${demoView === "raw" ? "opacity-100" : "opacity-0"}`}
-              />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/OnshapeDemo.png"
-                alt="Completed Onshape part studio"
-                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[900ms] ease-in-out ${demoView === "demo" ? "opacity-100" : "opacity-0"}`}
+              <video
+                src="/demoVideo.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="block w-full"
               />
               <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between border-t border-[#262626] bg-[#161616] px-3 py-2">
-                <span className="font-mono text-[11px] text-[#00ff41]">
-                  {demoView === "raw" ? "sketch · degrees of freedom: 0" : "features built · ready in Onshape"}
+              <button
+                onClick={() => { setShowNudge(false); document.getElementById("live-demo")?.scrollIntoView({ behavior: "smooth" }); }}
+                className="flex items-center gap-2 group"
+              >
+                <span className="font-mono text-[9px] text-[#00ff41] group-hover:underline underline-offset-2 whitespace-nowrap">
+                  like what you see? scroll down to see Parametra in action
                 </span>
-                <span className="flex items-center gap-1.5">
-                  <span className={`h-1.5 w-1.5 transition-all duration-700 ${demoView === "raw" ? "bg-[#00ff41]" : "bg-[#333]"}`} />
-                  <span className={`h-1.5 w-1.5 transition-all duration-700 ${demoView === "demo" ? "bg-[#00ff41]" : "bg-[#333]"}`} />
-                </span>
+                <span className="text-[#00ff41] animate-bounce inline-block">↓</span>
+              </button>
               </div>
             </div>
           </div>
