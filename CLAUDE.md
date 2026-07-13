@@ -2,269 +2,160 @@
 
 Pre-launch marketing site for Parametra.ai, an AI-powered multi-agent CAD design tool for Onshape. Built with Next.js 16, Tailwind CSS v4, TypeScript.
 
-**Current version: v1.6.0**
-- Hero redesigned: badge removed, subtitle is "Built by Engineers · For Everyone · Releasing Soon"
-- Hero right panel: animated crossfade between `/OnshapeRaw.png` and `/OnshapeDemo.png` every 3.2s (900ms fade), status bar overlay shows current phase
-- Hero right panel: description paragraph sits above the image card
-- Hero prompt box: label "TEST PROMPT", typewriter animation cycles 4 prompts — main prompt holds 5000ms, others 2200ms; 36ms/char typing, 14ms/char erasing; invisible spacer locks box height on mobile
-- Hero background gradients: both top AND bottom use blue-600 `rgba(37,99,235,...)` (previously top was sky, bottom was emerald)
-- "Scroll the demo" button removed; scroll nudge (font-mono "scroll" + bouncing chevron) fades in after 4s idle, disappears when `scrollY > 60`
-- Bottom feature cards ("Native workflow", "Editable output", "Prompt to iteration") removed
-- New **platform tree** scroll section added after terminal demo (see Hero section below)
-- `cursor-blink` keyframe + class added to `globals.css` (step-end, 1s)
-- About Us link now visible on mobile header (removed `hidden sm:block`)
-- About page: social links added — Andy has LinkedIn, Sandeep has LinkedIn + Website; icons on mobile, text labels on desktop
-- About page: cards are fully clickable (stretched link pattern, `absolute inset-0 z-10`) — Andy → LinkedIn, Sandeep → personal website; social buttons sit above at `z-20`
-- About page: Andy's card has `mt-6` offset and photo `objectPosition: center 15%`
-- `icons` map in `about/page.tsx` holds inline SVGs for LinkedIn and Website
-- React import added to `about/page.tsx` for `React.ReactNode` type
-- Waitlist + contact role dropdown: "Project Manager" replaced with "Freelancer"
-- Instructor role now shows "Where do you teach?" school field (same `university` DB column, no migration needed)
-- Student school field placeholder: "Where do you attend?"
-- API route validates school required for both Student and Instructor roles separately
-- Role allowlist validation added to API: `["Student", "Instructor", "Freelancer", "Hobbyist"]`
+**Current state: full dark-theme redesign** (branch `redesign`) — "precision engineering / terminal" aesthetic. The old blue/sky light-accent design this doc previously described is gone.
 
----
+## Design language
+
+- **Colors**: near-black base `#0f0f0f`, panels `#161616`, borders `#262626`, text `#e8e8e8` (primary) / `#888` (secondary) / `#555` (dim), accent **CAD green `#00ff41`** (hover `#00cc33`). Blue is used only for the Fusion 360 node, violet only for the SolidWorks node in the platform tree.
+- **Fonts**: Lato (`--font-lato`, sans) + Geist Mono (`--font-geist-mono`) via `next/font/google`. (No longer Geist Sans.)
+- **Style**: sharp corners (no rounded borders), monospace eyebrows/labels in uppercase tracking-widest, terminal-style `[tag]` log lines.
+- Key CSS classes in `globals.css`: `grid-bg`, `gradient-text`, `header-glass`, `cursor-blink`, `morph-fade-in/out`, `form-field-enter`, `cad-scan-line`, `cad-pulse`, `animate-fade-up/in`.
 
 ## Stack
 
 - **Framework**: Next.js 16.2.1 (App Router, Turbopack)
-- **Styling**: Tailwind CSS v4 — no config file, uses `@import "tailwindcss"` in `globals.css`
-- **Language**: TypeScript
-- **Backend API**: external C# (ASP.NET Core) service at `https://api.parametra.ai` (repo `141712CA-D/parametra-infra-api`, deployed on AWS behind Cloudflare). This site is a **thin client** — all waitlist/contact logic, email (Resend), Google Sheets sync, Postgres, and Turnstile *verification* live in that backend. The front end no longer has any API routes, DB access, or server secrets.
-- **Captcha**: Cloudflare Turnstile (`@marsidev/react-turnstile`) — widget only; the secret-key verification happens in the backend
-- **Fonts**: Geist Sans + Geist Mono via `next/font/google`
-- **Analytics**: Vercel Speed Insights (`@vercel/speed-insights/next`) — mounted in `layout.tsx`
-- **Deployment**: Vercel (connected to GitHub repo `141712CA-D/cadweb`, branch `main`)
-
----
+- **Styling**: Tailwind CSS v4 — no config file, `@import "tailwindcss"` in `globals.css`
+- **Backend API**: external C# (ASP.NET Core) service at `https://api.parametra.ai` (repo `141712CA-D/parametra-infra-api`, AWS behind Cloudflare). This site is a **thin client** — all waitlist/contact logic, email (Resend), Google Sheets sync, Postgres, and Turnstile verification live in that backend.
+- **Captcha**: Cloudflare Turnstile (`@marsidev/react-turnstile`) — widget only; secret-key verification is in the backend
+- **Analytics**: Vercel Speed Insights, mounted in `layout.tsx`
+- **Deployment**: Vercel (GitHub repo `141712CA-D/cadweb`, production branch `main`)
 
 ## Environment Variables
 
-Since the backend moved to `api.parametra.ai`, the front end is a thin client and needs **only public (`NEXT_PUBLIC_`) vars**. All email/Google/Postgres/Turnstile-secret config now lives on the C# backend, not here. Stored in `.env.local` locally and in Vercel's encrypted storage. Never committed.
+Only public (`NEXT_PUBLIC_`) vars plus two server-only cron secrets. Stored in `.env.local` locally and Vercel encrypted storage. Never committed. **Note: there is currently no `.env.local` in the local checkout** — forms cannot work locally until one is created.
 
 ```
 NEXT_PUBLIC_API_URL                 # Backend base URL — https://api.parametra.ai
 NEXT_PUBLIC_TURNSTILE_SITE_KEY      # Cloudflare Turnstile site key (browser-safe)
-NEXT_PUBLIC_MAIL_FROM_EMAIL         # Sender shown in the "unmark as spam" UI notice (optional; defaults to no-reply@parametra.ai)
+NEXT_PUBLIC_MAIL_FROM_EMAIL         # Sender shown in spam notice (optional; defaults to no-reply@parametra.ai)
 CRON_SECRET                         # Server-only. Authenticates Vercel Cron → /api/cron/sync-waitlist
-ADMIN_SYNC_SECRET                   # Server-only. Forwarded as X-Admin-Secret; MUST equal the backend's ADMIN_SYNC_SECRET
+ADMIN_SYNC_SECRET                   # Server-only. Forwarded as X-Admin-Secret; MUST equal backend's ADMIN_SYNC_SECRET
 ```
 
-> `NEXT_PUBLIC_*` vars are **build-time inlined** — changing one in Vercel requires a redeploy to take effect. `CRON_SECRET` / `ADMIN_SYNC_SECRET` are server-only (no `NEXT_PUBLIC_` prefix) and read at runtime by the cron route.
->
-> The old server secrets (`RESEND_API_KEY`, `GOOGLE_*`, `TURNSTILE_SECRET_KEY`, `WAITLIST_STORAGE_POSTGRES_URL`, `SYNC_SECRET`, `CRON_SECRET`, `MAIL_FROM_EMAIL`, `MAIL_TO_EMAIL`) have been removed from this project and should be **deleted from the Vercel dashboard** too. They now live in the AWS/backend environment.
-
----
+> `NEXT_PUBLIC_*` vars are build-time inlined — changing one in Vercel requires a redeploy.
 
 ## File Structure
 
 ```
 app/
-├── layout.tsx              # Root layout — fonts, metadata, favicon, SpeedInsights, tabIndex on body
-├── page.tsx                # Home page — manages intro animation state via sessionStorage
-├── globals.css             # All custom CSS: animations, orbs, grid, gradient-text, etc.
+├── layout.tsx              # Fonts (Lato + Geist Mono), metadata, favicon, BackgroundSync, SpeedInsights, tabIndex=-1 on body
+├── page.tsx                # Home — intro state via sessionStorage, SignupModal state, CTA band, Partners, footer
+├── globals.css             # All custom CSS: keyframes, grid-bg, header-glass, morph animations, etc.
 │
 ├── components/
-│   ├── DevBanner.tsx       # Fixed top bar "This project is currently in development" with ping dot
-│   ├── Header.tsx          # Fixed header (sits below DevBanner at top-8). Logo + About Us + Join waitlist
-│   ├── Hero.tsx            # Full landing page hero section with terminal demo and three pillars
-│   └── IntroAnimation.tsx  # Cinematic intro overlay — phases: idle→scan→type→burst→exit
+│   ├── BackgroundSync.tsx  # Mounted in layout: warms /api/health, hourly cookie-throttled waitlist sync
+│   ├── ContactForm.tsx     # Contact form (Individual + Team tabs, 6-digit email code verify step)
+│   ├── DemoSection.tsx     # Scroll-locked demo video section (see below)
+│   ├── DevBanner.tsx       # Fixed top bar "This project is currently in development"
+│   ├── Header.tsx          # Fixed header at top-8: logo, How It Works + About Us, waitlist button, mobile hamburger menu
+│   ├── Hero.tsx            # Hero fold + embedded DemoSection + platform tree scroll section
+│   ├── IntroAnimation.tsx  # Curtain intro overlay — uses shared lockScroll/unlockScroll
+│   ├── MorphSwitch.tsx     # Height/opacity morph between form tab contents (frozen-snapshot exit, live entry)
+│   ├── SignupForm.tsx      # Waitlist form + live email dedup badge + 6-digit code verify step
+│   └── SignupModal.tsx     # Right-side slide-in panel (z-70, over DevBanner) hosting SignupForm
 │
-├── about/page.tsx          # About Us page — Andrew Yang and Sandeep Sawhney cards
-├── signup/page.tsx         # Waitlist form — Individual (with university if Student) + Team tabs
-├── contact/page.tsx        # Contact form — Individual + Team tabs, subject + message
+├── about/page.tsx          # Scroll-snap full-viewport cards: Andrew Yang, Sandeep Sawhney, Abhijeet Chopra
+├── signup/page.tsx         # Thin wrapper: SignupForm + footer
+├── contact/page.tsx        # Thin wrapper: ContactForm + footer
+├── how-it-works/page.tsx   # Vision flow tree (ASME Drawing + Prompt → pipeline → Onshape) + 4 processing layers
+├── privacy-policy/page.tsx # Dark-theme legal page
+├── terms/page.tsx          # Dark-theme legal page
 │
 └── api/
-    └── cron/sync-waitlist/route.ts  # ONLY remaining route — Vercel-cron proxy. Verifies CRON_SECRET,
+    └── cron/sync-waitlist/route.ts  # ONLY route — Vercel-cron proxy. Verifies Bearer CRON_SECRET,
                                      # forwards to backend POST /api/admin/sync-waitlist with X-Admin-Secret.
-                                     # (All real app logic lives in the api.parametra.ai backend.)
 
 lib/
-└── api.ts                  # apiUrl(path) helper — prefixes NEXT_PUBLIC_API_URL onto backend calls
+├── api.ts                  # apiUrl(path) — prefixes NEXT_PUBLIC_API_URL (falls back to same-origin, fails loudly)
+├── consumeExpired.ts       # POST /api/{waitlist|contact}/consume-expired (keepalive) after successful verify
+└── scrollLock.ts           # Shared reference-counted body scroll lock (lockScroll/unlockScroll)
 
-vercel.json                 # Vercel Cron: /api/cron/sync-waitlist runs daily at 00:00 UTC
+public/demo.mp4             # Demo screen recording (currently ~60 KB — likely placeholder, verify before launch)
+vercel.json                 # Vercel Cron: /api/cron/sync-waitlist daily at 00:00 UTC (production only)
 ```
 
----
+The old `/overview` page was removed.
 
-## Pages
+## Home page (`/`)
 
-### Home (`/`)
-- Renders `DevBanner` + `IntroAnimation` + `Header` + `Hero` + footer
-- `sessionStorage("introPlayed")` controls whether intro animation runs
-  - First visit: animation plays, sets flag on completion
-  - Return visit: skips animation, page appears instantly (`transition: none`)
-  - "← Back to home" on success pages clears the flag so animation replays
-- `mounted` state gates IntroAnimation to prevent hydration mismatch (sessionStorage not available on server)
-- Footer: © year + nav links + `v1.5.0` centered in monospace dim text
+Section order: **hero fold → demo video (scroll-locked) → platform tree → CTA band → Partners → footer**.
 
-### Intro Animation (`IntroAnimation.tsx`)
-- Phases and timings:
-  ```
-  PHASE_RISE    = 80ms    logo + title rise from bottom
-  PHASE_TEXT    = 350ms   tagline fades in
-  PHASE_REVEAL  = 800ms   call onDone so page is ready underneath
-  PHASE_SLIDE   = 900ms   overlay slides up (curtain reveal)
-  PHASE_UNMOUNT = 1650ms  remove from DOM
-  ```
-- Locks `document.body.style.overflow = "hidden"` on mount, restores at PHASE_REVEAL
-- `document.body.focus()` called at PHASE_REVEAL for scroll restoration
-- Logo and title in a `flex-col items-center gap-0` container; title uses `mt-2 sm:-mt-6` — small positive gap on mobile, slight overlap on desktop (do NOT use large negative margins, it causes the logo to clip into the title on mobile)
-- Color palette: blue (`rgba(37,99,235,...)`) and sky (`rgba(14,165,233,...)`)
+- `sessionStorage("introPlayed")` gates the intro animation (plays once per session); `mounted` state prevents hydration mismatch
+- All "Join the Waitlist" triggers (header, hero, CTA band, footer link) open **SignupModal** via shared state in `page.tsx`; standalone pages fall back to `/signup`
+- CTA band: "Releasing Soon" eyebrow, "Stop modeling by hand." h2, button opening SignupModal
+- Partners: Onshape logo (grayscale, colors on hover), below the CTA
+- Footer shows version string (currently `v1.5.1.1`) centered in mono dim text
 
 ### Hero (`Hero.tsx`)
-Hero has three scroll zones:
 
-**1 — Initial viewport (above fold)**
-- Left column: h1 tagline, subtitle "Built by Engineers · For Everyone · Releasing Soon", TEST PROMPT box with typewriter, "Join the waitlist" CTA
-- TEST PROMPT typewriter: `typingPrompts` array of 4 prompts, driven by `typingPhase` / `charPos` / `promptIdx` state + `useEffect` chain; invisible spacer prevents mobile reflow
-- Right column: description paragraph + image card (`OnshapeRaw.png` / `OnshapeDemo.png` crossfade via `demoView` state toggled every 3200ms by `setInterval`; status bar overlay inside image)
-- Scroll nudge: `showNudge` state — `setTimeout(4000)` shows it, scroll listener hides it at `scrollY > 60`; renders as `fixed bottom-8` chevron
+**Zone 1 — hero fold**: eyebrow "Parametra · v1.0 · Releasing Soon"; h1 "One prompt. Real CAD." (`text-4xl sm:text-5xl lg:text-6xl font-black`); "Try a prompt" typewriter box (4 prompts — main holds 5000ms, others 2200ms; 36ms/char typing, 14ms/char erasing; invisible spacer locks height); green waitlist button + "How it works →" link. Right column: description + Onshape image card crossfading `/OnshapeRaw.png` ↔ `/OnshapeDemo.png` every 3200ms with status bar overlay. Scroll nudge (`fixed bottom-8` chevron) appears after 4s idle, hides at `scrollY > 60`.
 
-**2 — Pinned terminal demo** (`#generation-demo`, `ref={demoRef}`, `min-h-[500vh]`)
-- 4 stages (`stages` array): Prompt intake → Sketch solver → Feature build → Ready in Onshape
-- `activeIndex` driven by scroll progress through `demoRef` height
-- Desktop: `TerminalAccumulator` — terminals accumulate in a 2×2 grid as you scroll
-- Mobile: `TerminalSwap` — one terminal visible at a time, fades in/out
-- Stage dots use per-stage `accent` color class
+**Zone 2 — DemoSection** (imported into Hero, wrapped in `relative z-10`): see below.
 
-**3 — Platform tree section** (`ref={treeRef}`, `min-h-[600vh]`)
-- 6 stages (`platformStages`): Generated in Onshape → Persisted in Fusion 360 → Persisted in SolidWorks → Fusion 360 · Simulation → SolidWorks · Simulation → One prompt. Every tool.
-- `platformIndex` driven by scroll progress through `treeRef` height
-- `PlatformTree` component:
-  - Root: Onshape card (always visible), `[done]` line turns emerald at stage 5
-  - Trunk → crossbar (`mx-[25%]`) → drops → 2-column grid with Fusion 360 (stage 1) and SolidWorks (stage 2) branch cards
-  - `LeafList` component below each branch: vertical trunk with left-border rail + horizontal tick connectors to leaf cards
-  - Fusion 360 leaves (stage 3): `[cam]`, `[gen-design]`, `[static-fea]`, `[thermal]`, `[event-sim]`
-  - SolidWorks leaves (stage 4): `[config]`, `[static-sim]`, `[flow-sim]`, `[drop-test]`, `[motion]`
-- Mobile stability: section header `h2` + `p` use invisible-spacer pattern; entire `PlatformTree` is wrapped in `relative` with an invisible `activeIndex=5` copy below and the real tree `absolute inset-0` on top — prevents any reflow/jump as tree builds
-- Background gradients: both top and bottom radial gradients use `rgba(37,99,235,...)` (blue-600)
+**Zone 3 — platform tree** (`treeRef`, `min-h-[300vh]`, sticky inner): 6 `platformStages` driven by scroll progress — Onshape root card → Fusion 360 + SolidWorks branch cards → per-branch `LeafList` capability leaves → "One prompt. Every tool." finale. Invisible-copy + `absolute inset-0` overlay pattern prevents reflow as the tree builds. Header h2/p use the invisible-spacer pattern.
 
-### Header (`Header.tsx`)
-- Fixed at `top-8` (below the 32px DevBanner at `top-0`, `z-[60]`)
-- Scrolled state adds `header-glass` (backdrop blur) + border
-- Mobile: "About Us" hidden (`hidden sm:block`), "Join the waitlist" shortens to "Waitlist"
-- Logo: plain `<img>` tag (NOT Next.js `<Image>`) with `style={{ width: 32, height: 32, display: "block" }}` — Next.js Image caused vertical displacement bugs with the SVG
+> The old Zone-2 pinned terminal simulation ("How it generates", `TerminalAccumulator`/`TerminalSwap`, `#generation-demo`) was **removed** — redundant with the real demo video and `/how-it-works`.
 
-### About (`/about`)
-- Andrew Yang — Mechanical Engineering, image left / text right on desktop
-- Sandeep Sawhney — Computer Engineering, image right / text left on desktop
-- Both: University of Michigan, Class of 2029, from New York
-- Mobile: cards stack, text centered, major on line 1 / university+class on line 2 (`sm:hidden` / `hidden sm:block`)
-- Images: `/AndyHeadshot.png`, `/SandeepHeashot.jpg` (note typo in filename — keep as-is)
-- Andy's photo: `objectPosition: center 15%` — shifted slightly down from top
-- Andy's card has `mt-6` to offset it lower toward Sandeep's card
-- Cards are clickable via stretched link pattern (`absolute inset-0 z-10`) — Andy → LinkedIn, Sandeep → personal website; works on mobile and desktop
-- Social buttons at `z-20` so they intercept their own taps above the card link
-- Social links: Andy has LinkedIn only; Sandeep has LinkedIn + Website
-- Mobile: social buttons show inline SVG icons (LinkedIn logo, globe); desktop: text labels
-- `icons` map at top of file holds SVGs keyed by label string (`"LinkedIn"`, `"Website"`)
-- `primaryHref` field on each team member drives the card click destination
+### DemoSection (`DemoSection.tsx`)
 
-### Overview (`/overview`)
-- Two sections:
-  1. **The Vision for CADen** — pipeline flow tree (ASME Drawing + Direct Prompt → CADen Pipeline → Onshape model)
-  2. **Beyond Onshape** — two cards:
-     - Universal CAD Translation: SolidWorks / Fusion 360 / CATIA / FreeCAD → any target platform
-     - Onshape Native Integration: prompt-to-CAD in Onshape (labeled "Phase 1 — Coming Soon", NOT live yet)
+Scroll-locked demo video ("See it in action" / "Prompt to part, in real time"):
 
-### Waitlist (`/signup`)
-- Two tabs: Individual | Team / Organization
-- Individual fields: Name, Email, Role (Student/Instructor/Freelancer/Hobbyist), University/Institution/School (shown if Role === "Student" or "Instructor", with role-specific placeholder), Why CADen
-- Team fields: Rep Name, Email, Organization, Role (text input), Intended Usage
-- Cloudflare Turnstile widget — submit button disabled until token received
-- Four success states:
-  - `"success"` — "You're on the list." (new user)
-  - `"welcome_back"` — "Welcome back to the list." (previously removed user re-registering)
-  - `"duplicate"` — "Already registered." (email already active in DB)
-  - `"error"` — generic error
-- All success states show spam notice: "If this is your first time receiving an email from developers@projcaden.dev, please unmark us as spam if applicable."
-- Clears `document.body.style.overflow` on mount (prevents scroll lock bleed from home page)
+- IntersectionObserver at threshold 0.6. A scroll listener tracks direction; the lock **only triggers on a downward pass**.
+- **Once per page load** (ref state, resets on refresh — intentionally NOT sessionStorage): locks body scroll via shared `lockScroll()`, centers the section, plays the video once. Lock engages synchronously before `video.play()` resolves so fling-scrolling can't skip it.
+- On `ended`: unlocks, then the video switches to muted looping.
+- After the one-time locked run: video loops while ≥60% in view, pauses out of view.
+- Autoplay blocked → releases the lock immediately (never traps the user).
 
-### Contact (`/contact`)
-- Two tabs: Individual | Team / Organization (same tab pattern as waitlist)
-- Individual fields: Name, Email, Role (Student/Instructor/Freelancer/Hobbyist/Other), University (if Student), Subject, Message
-- Team fields: Rep Name, Email, Organization, Your Role (text input), Subject, Message
-- Same Turnstile setup as waitlist
-- On success: "Message received." state + spam notice
-- Clears `document.body.style.overflow` on mount
+### scrollLock (`lib/scrollLock.ts`)
 
----
+Reference-counted `document.body.style.overflow` lock shared by IntroAnimation, SignupModal, and DemoSection — prevents one consumer's unlock from clobbering another's lock. Always pair lock/unlock and release on unmount.
 
-## Database & sync
+## Forms
 
-The Postgres schema (`waitlist_entries`, `pending_verifications`, `contact_rate_limits`), the double opt-in verification flow, dedup/soft-delete logic, Google Sheet sync, and EF Core migrations all now live in the **C# backend** (`parametra-infra-api`). This front end has **no** database access. See that repo for schema and sync details.
+Both forms share the pattern: `noValidate`, `errors` record + `validate()` + `clearError(field)`, tab switch clears errors, `inputClass(error?)` swaps border color, email regex `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`, Turnstile widget (`theme: "dark"`), submit disabled until `allFieldsFilled && captchaToken`. Tab content swaps are animated by **MorphSwitch**. Both flows are **two-step**: submit → backend emails a 6-digit code → verify screen (`inputMode="numeric"`, `autoComplete="one-time-code"`) → success. On success, `consumeExpired()` fires and (standalone page) `introPlayed` is cleared + redirect home.
 
-> Note: the backend syncs the sheet inline on each waitlist request/verify. A nightly safety rebase also runs at 00:00 UTC: Vercel Cron → `app/api/cron/sync-waitlist` (proxy) → backend `POST /api/admin/sync-waitlist`. This catches manual sheet edits/deletions on days with no signups. Crons run on **production only**, not preview.
+### SignupForm
+- Individual: Name, Email, Role (Student/Instructor/Freelancer/Hobbyist), School (required for Student **and** Instructor, role-specific placeholder), Why. Team: Rep Name, Email, Org, Role (text), Intended Usage.
+- Live email dedup: debounced 300ms `GET /api/waitlist/check-cache?email=` with request-id guard → `EmailCheckBadge` ("Checking…" / green "Can register" / red "Already registered"); registered emails block submit.
+- Status states: `verify`, `success` ("You're on the list."), `welcome_back`, `duplicate`, `error`; success screens show the unmark-as-spam notice.
 
----
+### ContactForm
+- Individual adds Subject + Message (2000-char counter, amber >1600, red at max) and an "Other" role option; University required only for Student.
+- Extra `cooldown` state for backend rate limits (429 → "Slow down." screen with retry minutes).
 
-## Form Validation
+## Other pages
 
-Both `/signup` and `/contact` use the same validation pattern:
-
-- `noValidate` on the form element — disables browser native validation
-- `errors` state: `Record<string, string>`
-- `validate()` — checks all required fields, returns boolean, sets all errors at once
-- `clearError(field)` — removes a single field's error as soon as the user starts correcting it
-- Tab switching clears all errors: `onClick={() => { setType(t); setErrors({}); }}`
-- `inputClass(error?: string)` is a function — passes `"border-red-500/60"` when error present, `"border-white/10"` otherwise
-- Inline error messages under each field: `errorClass = "text-xs text-red-400/80 mt-1.5"`
-- Email validation: regex `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` — shows "Please enter a valid email address."
-- Captcha error shown if Turnstile not completed before submit
-
-### Select Dropdown Styling
-- `appearance-none` removes native browser arrow
-- Custom SVG chevron via inline `backgroundImage` (URL-encoded), positioned `right 14px center`
-- `pr-10` prevents text overlapping the chevron
-- `font-sans` forces Geist Sans (select elements don't inherit font by default)
-- Placeholder color: `rgba(255,255,255,0.25)` when no value selected, `rgba(255,255,255,1)` when value chosen — set via inline `style` since Tailwind can't conditionally override `text-white`
-
----
+- **About**: full-viewport scroll-snap card per co-founder inside a scroll container (`scrollSnapAlign: start`, `scrollSnapStop: always`), scroll nudge, three members (Andrew Yang, Sandeep Sawhney — ME/CE, Michigan '29; Abhijeet Chopra — CS, NYU '29), `icons` map with inline LinkedIn/Website SVGs, socials per member.
+- **How It Works**: vision heading, flow tree (ASME Drawing + Direct Prompt → pipeline → Onshape), 4 processing layers (NLM Processor, Interpreter, Reasoning Engine, Execution Layer) with per-layer accent colors.
 
 ## Backend API (api.parametra.ai)
 
-The front end calls the C# backend through `apiUrl()` (`lib/api.ts`), which prefixes `NEXT_PUBLIC_API_URL`. All endpoints below live in the `parametra-infra-api` repo, **not** in this project. The two-step flow (request a code → verify it) is now **two distinct paths** instead of a `body.step` discriminator.
+All calls go through `apiUrl()`. Endpoints used by this front end:
 
-| Method & path | Called from | Body / query | Notes |
-|---|---|---|---|
-| `POST /api/waitlist/request` | `signup` submit | `{ type, ...fields, captchaToken }` | captcha + validation + dedup, emails a 6-digit code. `{success, pending}` / 409 `already_registered` |
-| `POST /api/waitlist/verify` | `signup` verify | `{ email, code }` | confirms code, completes signup. `{success, returning}`. Errors: 400 mismatch/not_found, 410 expired, 429 too_many_attempts |
-| `GET /api/waitlist/check?email=` | `signup` debounced dedup | — | `{status: "available" \| "registered" \| "returning" \| "invalid"}` |
-| `POST /api/contact/request` | `contact` submit | `{ type, ...fields, captchaToken }` | captcha + validation + rate-limit (IP 5/10min, email 2/30min), emails code. 429 `{retryAfter}` when limited |
-| `POST /api/contact/verify` | `contact` verify | `{ email, code }` | confirms code, sends the message. Same error-status mapping as waitlist |
+| Method & path | Called from | Notes |
+|---|---|---|
+| `POST /api/waitlist/request` | SignupForm submit | captcha + validation + dedup, emails 6-digit code |
+| `POST /api/waitlist/verify` | SignupForm verify | `{email, code}` → `{success, returning}`; 400 mismatch, 410 expired, 429 attempts |
+| `GET /api/waitlist/check-cache?email=` | SignupForm debounced dedup | `{canRegister, status}` |
+| `POST /api/contact/request` | ContactForm submit | captcha + rate-limit (429 → `{retryAfter}`) |
+| `POST /api/contact/verify` | ContactForm verify | same error mapping as waitlist |
+| `POST /api/{waitlist\|contact}/consume-expired` | `lib/consumeExpired.ts` after verify | keepalive fire-and-forget |
+| `GET /api/health` | BackgroundSync | API warm-up on page load |
+| `POST /api/cookies/is-sync-ready` / `POST /api/cookies/sync-waitlist` | BackgroundSync | hourly per-browser sync, throttled by `waitlistSynced` cookie |
+| `POST /api/admin/sync-waitlist` | cron proxy route | requires `X-Admin-Secret` |
 
-Response JSON shapes and HTTP status codes match what the client already branches on, so no client-side response handling changed — only the URLs and the dropped `step` field.
-
-**CORS:** the backend allowlists `https://parametra.ai` and `https://www.parametra.ai`. If a new front-end origin is added (preview domains, etc.), it must be added to the backend's CORS policy.
-
----
-
-## Styling Notes
-
-- **Color palette**: Black base (`#000`), blue-600 (`rgba(37,99,235,...)`) and sky-400 (`rgba(14,165,233,...)`)
-- **No violet/cyan** — was replaced with blue/sky throughout (violet is used only in PlatformTree for SolidWorks node color)
-- **`gradient-text`**: `linear-gradient(135deg, #ffffff 0%, #93c5fd 40%, #38bdf8 100%)`
-- **`glow-button`**: animated box-shadow pulse in blue
-- **`badge-shimmer`**: sweeping gradient animation on hero badge
-- **`grid-bg`**: subtle white grid lines with pulsing opacity
-- **`header-glass`**: `rgba(0,0,0,0.6)` + `backdrop-filter: blur(16px)`
-- **`particle`**: uses CSS custom properties `--duration` and `--delay` for per-particle timing
-- **`cursor-blink`**: `step-end` animation at 1s — used for typewriter cursor in hero prompt box
-- All keyframes defined in `globals.css`
-
----
+**CORS:** backend allowlists only `https://parametra.ai` and `https://www.parametra.ai`. Localhost and Vercel preview domains are blocked — forms can't submit from them without adding origins to the backend CORS policy (and the Turnstile site-key hostname list in Cloudflare).
 
 ## Known Quirks
 
+- No `.env.local` locally → Turnstile widget won't render and submit buttons stay disabled (greyed) when testing forms locally
+- `public/demo.mp4` is ~60 KB — verify it's the real demo recording before launch
+- `AbhijeetHeadshot.png` (6 MB) and `AndyHeadshot.png` (2.7 MB) are uncompressed — should become WebP/`next/image` eventually
 - `SandeepHeashot.jpg` — filename typo (missing 'd'), keep as-is
-- Logo is `/public/logo.svg` — referenced as `"/logo.svg"` via plain `<img>` tag in Header and Next.js `<Image>` in IntroAnimation
-- `GOOGLE_PRIVATE_KEY` in `.env.local` has `\n` escaped as `\\n` — code does `.replace(/\\n/g, "\n")` to restore newlines at runtime
-- Resend client in `contact/route.ts` initialized **inside** the handler; in `waitlist/route.ts` initialized at module level — both work, keep as-is
-- `tabIndex={-1}` on `<body>` in `layout.tsx` — makes body programmatically focusable for scroll restoration after intro animation completes
-- About page uses explicit `lg:items-start lg:text-left` / `lg:items-end lg:text-right` instead of dynamic Tailwind class names (v4 purges dynamic template literal classes)
-- Turnstile widget requires network access to Cloudflare — may not appear on poor mobile connections
-- Select `color` can't be conditionally overridden via Tailwind utility classes when `text-white` is already set by `inputClass` — use inline `style` instead
-- `WAITLIST_STORAGE_POSTGRES_URL` is the env var name (not `POSTGRES_URL`) — Vercel prefixed it based on the database name when connecting
-- `CRON_SECRET` is auto-generated by Vercel but must be manually added to env vars and set equal to `SYNC_SECRET` for the cron auth to work
+- Header logo is a plain `<img>` (NOT Next `<Image>`) — Image caused vertical displacement with the SVG
+- `tabIndex={-1}` on `<body>` — programmatically focusable for scroll restoration after the intro
+- Select `color` can't be overridden via Tailwind when `text-white` is set — placeholder color uses inline `style`
+- Turnstile needs Cloudflare network access — may not appear on poor connections
+- Dead assets in `public/`: `logo copy.png`, `next.svg`, `vercel.svg`, `file.svg`, `globe.svg`, `window.svg`
+- Footer version string (`v1.5.1.1` in `page.tsx`) is updated manually
+- Commit messages in this repo must contain **no Claude/AI references** (no Co-Authored-By or session trailers)

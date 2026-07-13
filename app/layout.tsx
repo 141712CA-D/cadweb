@@ -39,7 +39,7 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       className={`${lato.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body tabIndex={-1} className="min-h-full flex flex-col bg-[#F5F0E8] text-[#1E293B]">
+      <body tabIndex={-1} className="min-h-full flex flex-col bg-[#0f0f0f] text-[#e8e8e8]">
         <BackgroundSync />
         {children}
         <SpeedInsights />

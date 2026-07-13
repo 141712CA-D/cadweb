@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import SignupForm from "./SignupForm";
+import { lockScroll, unlockScroll } from "@/lib/scrollLock";
 
 interface SignupModalProps {
   isOpen: boolean;
@@ -9,16 +10,26 @@ interface SignupModalProps {
 }
 
 export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
+  const lockedRef = useRef(false);
+
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+    if (isOpen && !lockedRef.current) {
+      lockedRef.current = true;
+      lockScroll();
+    } else if (!isOpen && lockedRef.current) {
+      lockedRef.current = false;
+      unlockScroll();
     }
-    return () => {
-      document.body.style.overflow = "";
-    };
   }, [isOpen]);
+
+  useEffect(() => {
+    return () => {
+      if (lockedRef.current) {
+        lockedRef.current = false;
+        unlockScroll();
+      }
+    };
+  }, []);
 
   return (
     <>
@@ -33,17 +44,17 @@ export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
 
       {/* Modal - overlays over DevBanner (z-60) */}
       <div
-        className="fixed right-0 top-0 h-full w-full max-w-2xl bg-white shadow-2xl overflow-y-auto transition-transform duration-500 ease-out"
+        className="fixed right-0 top-0 h-full w-full max-w-2xl bg-[#0f0f0f] border-l border-[#262626] overflow-y-auto transition-transform duration-500 ease-out"
         style={{
           zIndex: 70,
           transform: isOpen ? "translateX(0)" : "translateX(100%)",
         }}
       >
         {/* Close button - sticky so it stays visible */}
-        <div className="sticky top-0 flex items-center justify-end p-4 border-b border-slate-200 bg-white/95 backdrop-blur-sm z-10">
+        <div className="sticky top-0 flex items-center justify-end p-4 border-b border-[#262626] bg-[#0f0f0f]/95 backdrop-blur-sm z-10">
           <button
             onClick={onClose}
-            className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-all duration-150"
+            className="cursor-pointer p-2 text-[#555] hover:text-[#00ff41] hover:bg-[#161616] transition-all duration-150"
             aria-label="Close"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

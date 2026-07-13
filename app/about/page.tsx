@@ -111,20 +111,12 @@ export default function AboutPage() {
   return (
     <div
       ref={containerRef}
-      className="h-screen overflow-y-scroll"
+      className="h-screen overflow-y-scroll bg-[#0f0f0f]"
       style={{ scrollSnapType: "y mandatory" }}
     >
-      {/* Background */}
-      <div className="grid-bg fixed inset-0 pointer-events-none z-0" />
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="orb-1 absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(199,226,255,0.5) 0%, transparent 70%)", filter: "blur(40px)" }} />
-        <div className="orb-2 absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(199,226,255,0.35) 0%, transparent 70%)", filter: "blur(40px)" }} />
-      </div>
-
       {/* Page background */}
-      <div className="fixed inset-0 bg-[#F5F0E8] -z-10" />
+      <div className="fixed inset-0 bg-[#0f0f0f] -z-10" />
+      <div className="grid-bg fixed inset-0 pointer-events-none z-0" />
 
       <DevBanner />
       <Header />
@@ -138,11 +130,11 @@ export default function AboutPage() {
           <React.Fragment key={member.name}>
             <button onClick={() => scrollToMember(i)} className="py-1 cursor-pointer">
               <div
-                className={`w-2 h-2 rounded-full transition-all duration-500 ${activeIndex === i ? "bg-blue-600" : "bg-slate-300"}`}
+                className={`w-2 h-2 transition-all duration-500 ${activeIndex === i ? "bg-[#00ff41]" : "bg-[#333]"}`}
               />
             </button>
             {i < team.length - 1 && (
-              <div className="w-px ml-[3px] bg-slate-200" style={{ height: "32px" }} />
+              <div className="w-px ml-[3px] bg-[#333]" style={{ height: "32px" }} />
             )}
           </React.Fragment>
         ))}
@@ -157,7 +149,7 @@ export default function AboutPage() {
           <button
             key={i}
             onClick={() => scrollToMember(i)}
-            className={`h-1.5 rounded-full transition-all duration-500 ${activeIndex === i ? "bg-blue-600" : "bg-slate-300"}`}
+            className={`h-1.5 transition-all duration-500 ${activeIndex === i ? "bg-[#00ff41]" : "bg-[#333]"}`}
             style={{ width: activeIndex === i ? "16px" : "6px" }}
           />
         ))}
@@ -166,12 +158,13 @@ export default function AboutPage() {
       {/* ── Section 1: Heading ── */}
       <div className="h-screen flex items-center justify-center relative z-10" style={snap}>
         <div className="text-center px-4">
-          <p className="text-xs text-slate-500 tracking-widest uppercase font-mono mb-4">The team</p>
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#00ff41] mb-4">The team</p>
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight">
-            <span className="gradient-text">Meet the brains</span>
+            <span className="gradient-text">Meet the builders</span>
             <br />
-            <span className="text-slate-800">behind Parametra.</span>
+            <span className="text-[#e8e8e8]">behind Parametra.</span>
           </h1>
+          <p className="mt-6 text-sm sm:text-base text-[#888] max-w-sm mx-auto leading-relaxed">Three engineers from New York. One goal: make CAD accessible to everyone.</p>
         </div>
 
         <div
@@ -179,8 +172,8 @@ export default function AboutPage() {
             showNudge ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3 pointer-events-none"
           }`}
         >
-          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-slate-400">scroll</span>
-          <svg className="h-4 w-4 animate-bounce text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#555]">scroll</span>
+          <svg className="h-4 w-4 animate-bounce text-[#555]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
         </div>
@@ -201,7 +194,7 @@ export default function AboutPage() {
         {/* Sticky card display */}
         <div className="sticky top-0 h-screen flex items-center justify-center px-4 sm:px-20 pt-24 sm:pt-0" style={{ overflow: "visible" }}>
 
-          <div className="relative w-full max-w-4xl h-[650px] sm:h-[450px] pb-16">
+          <div className="relative w-full max-w-4xl h-[700px] sm:h-[520px] pb-16">
             {team.map((member, cardIndex) => {
               const diff = cardIndex - deckIndex;
 
@@ -225,16 +218,15 @@ export default function AboutPage() {
                   style={cardStyle}
                 >
                   <div
-                    className={`w-full h-[520px] sm:h-[380px] rounded-2xl border p-5 sm:p-8 flex flex-col sm:flex-row items-center gap-5 sm:gap-10 ${
+                    className={`w-full h-[570px] sm:h-[440px] border p-5 sm:p-8 flex flex-col sm:flex-row items-center gap-5 sm:gap-10 ${
                       diff === 0
-                        ? "bg-white border-slate-200"
-                        : "bg-white border-slate-200/60"
+                        ? "bg-[#161616] border-[#262626]"
+                        : "bg-[#161616] border-[#1a1a1a]"
                     }`}
                   >
                     {/* Photo */}
                     <div
-                      className="relative w-32 h-36 sm:w-44 sm:h-52 rounded-xl overflow-hidden border border-indigo-300/50 flex-shrink-0"
-                      style={{ boxShadow: "0 0 30px rgba(199,226,255,0.5)" }}
+                      className="relative w-40 h-48 sm:w-56 sm:h-72 overflow-hidden border border-[#262626] flex-shrink-0"
                     >
                       {member.image ? (
                         <Image
@@ -246,8 +238,8 @@ export default function AboutPage() {
                         />
                       ) : (
                         <div
-                          className="w-full h-full flex items-center justify-center text-3xl font-bold text-indigo-500"
-                          style={{ background: "linear-gradient(145deg, rgba(199,226,255,0.4) 0%, rgba(199,226,255,0.2) 100%)" }}
+                          className="w-full h-full flex items-center justify-center text-3xl font-bold text-[#00ff41]"
+                          style={{ background: "#1a1a1a" }}
                         >
                           {member.name.split(" ").map((n) => n[0]).join("")}
                         </div>
@@ -257,16 +249,16 @@ export default function AboutPage() {
                     {/* Text */}
                     <div className="flex flex-col gap-3 items-center text-center sm:items-start sm:text-left flex-1 min-w-0">
                       <div>
-                        <p className="text-xs text-blue-600 font-semibold tracking-widest uppercase font-mono mb-1.5">{member.role}</p>
-                        <h2 className="text-xl sm:text-3xl font-bold text-slate-900">{member.name}</h2>
+                        <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#00ff41] mb-1.5">{member.role}</p>
+                        <h2 className="text-xl sm:text-3xl font-bold text-[#e8e8e8]">{member.name}</h2>
                         <div className="flex flex-col items-center sm:flex-row sm:flex-wrap sm:items-start gap-y-0.5 sm:gap-y-0 sm:gap-x-0 mt-1">
-                          <span className="text-xs text-slate-500 font-mono whitespace-nowrap">{member.major}</span>
-                          <span className="hidden sm:inline text-xs text-slate-400 font-mono mx-1.5">·</span>
-                          <span className="text-xs text-slate-500 font-mono whitespace-nowrap">{member.university}</span>
+                          <span className="font-mono text-xs text-[#555] whitespace-nowrap">{member.major}</span>
+                          <span className="hidden sm:inline font-mono text-xs text-[#333] mx-1.5">·</span>
+                          <span className="font-mono text-xs text-[#555] whitespace-nowrap">{member.university}</span>
                         </div>
                       </div>
-                      <div className="w-10 h-px bg-gradient-to-r from-blue-600 to-sky-400" />
-                      <p className="text-sm text-slate-600 leading-relaxed max-w-md">{member.bio}</p>
+                      <div className="w-10 h-px bg-[#00ff41]" />
+                      <p className="text-sm text-[#888] leading-relaxed">{member.bio}</p>
                       <div className="flex items-center gap-3">
                         {member.socials.map((s) => (
                           <Link
@@ -274,7 +266,7 @@ export default function AboutPage() {
                             href={s.href}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 text-xs font-mono text-slate-500 border border-slate-200 hover:text-blue-600 hover:border-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded-full transition-all duration-200"
+                            className="inline-flex items-center gap-2 font-mono text-xs text-[#555] border border-[#262626] hover:text-[#00ff41] hover:border-[#00ff41] px-3 py-1.5 transition-all duration-200"
                           >
                             <span className="sm:hidden">{icons[s.label]}</span>
                             <span className="hidden sm:inline">{s.label}</span>
@@ -295,14 +287,14 @@ export default function AboutPage() {
         <div className="flex-1 flex items-center justify-center px-4 sm:px-6 py-16">
           <div className="w-full max-w-2xl">
             <div className="text-center mb-8">
-              <p className="text-xs text-slate-500 tracking-widest uppercase font-mono mb-4">Our mission</p>
+              <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#00ff41] mb-4">Our mission</p>
               <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight">
                 <span className="gradient-text">Why we built</span>
                 <br />
-                <span className="text-slate-800">Parametra.</span>
+                <span className="text-[#e8e8e8]">Parametra.</span>
               </h2>
             </div>
-            <div className="space-y-4 text-sm sm:text-base text-slate-600 leading-relaxed">
+            <div className="space-y-4 text-sm sm:text-base text-[#888] leading-relaxed">
               <p>
                 Most engineers learn the same lesson early: having a great idea is the easy part. Turning it into a real model — one that&apos;s parameterized, constrained, and ready to manufacture — is where the time goes. Hours in tutorials. Days rebuilding sketches from scratch. Weeks learning software that changes with every version.
               </p>
@@ -316,14 +308,14 @@ export default function AboutPage() {
           </div>
         </div>
 
-        <footer className="bg-[#F5F0E8] border-t border-slate-300 py-6 px-4 sm:px-6">
+        <footer className="bg-[#0f0f0f] border-t border-[#262626] py-6 px-4 sm:px-6">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-slate-700">© {new Date().getFullYear()} Parametra. All rights reserved.</p>
+            <p className="font-mono text-xs text-[#555]">© {new Date().getFullYear()} Parametra</p>
             <div className="grid grid-cols-2 gap-x-6 gap-y-3 sm:flex sm:items-center sm:gap-6">
-              <Link href="/contact" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Contact Us</Link>
-              <Link href="/signup" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Join Waitlist</Link>
-              <Link href="/terms" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Terms</Link>
-              <Link href="/privacy-policy" className="text-xs text-slate-800 hover:text-slate-900 transition-colors">Privacy</Link>
+              <Link href="/contact" className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">Contact Us</Link>
+              <Link href="/signup" className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">Join Waitlist</Link>
+              <Link href="/terms" className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">Terms</Link>
+              <Link href="/privacy-policy" className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">Privacy</Link>
             </div>
           </div>
         </footer>
