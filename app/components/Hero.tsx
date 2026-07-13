@@ -164,13 +164,39 @@ interface HeroProps {
 
 export default function Hero({ onJoinWaitlist }: HeroProps) {
   const treeRef = useRef<HTMLDivElement>(null);
+  const demoVideoRef = useRef<HTMLVideoElement>(null);
   const [platformIndex, setPlatformIndex] = useState(0);
   const activePlatformStage = platformStages[platformIndex];
   const [showNudge, setShowNudge] = useState(false);
+  const [demoInView, setDemoInView] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowNudge(true), 4000);
     return () => clearTimeout(timer);
+  }, []);
+
+  // Force the hero video to behave like a GIF: always playing, even when the
+  // tab is backgrounded or the browser tries to pause it. Muted + playsInline
+  // keeps autoplay policy happy; we re-issue play() on any pause/visibility change.
+  useEffect(() => {
+    const video = demoVideoRef.current;
+    if (!video) return;
+
+    const forcePlay = () => {
+      const p = video.play();
+      if (p) p.catch(() => {});
+    };
+
+    forcePlay();
+    video.addEventListener("pause", forcePlay);
+    video.addEventListener("loadeddata", forcePlay);
+    document.addEventListener("visibilitychange", forcePlay);
+
+    return () => {
+      video.removeEventListener("pause", forcePlay);
+      video.removeEventListener("loadeddata", forcePlay);
+      document.removeEventListener("visibilitychange", forcePlay);
+    };
   }, []);
 
   useEffect(() => {
@@ -179,6 +205,20 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Track whether the live-demo section is on screen. Uses IntersectionObserver
+  // (not scroll events) so it still fires while DemoSection has the body scroll
+  // locked — otherwise the nudge could get stranded on top of the locked demo.
+  useEffect(() => {
+    const el = document.getElementById("live-demo");
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setDemoInView(entry.isIntersecting),
+      { threshold: 0.01 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
   }, []);
 
   const [typedText, setTypedText] = useState("");
@@ -291,16 +331,21 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
             Every model comes back as a native Onshape part studio — sketches, features, and dimensions fully intact. Export to Fusion 360 or SolidWorks when the job calls for it.
           </p>
           <div className="border border-[#262626] bg-[#161616] p-4">
-            <div className="relative overflow-hidden bg-[#0f0f0f]">
+            <div className="bg-[#0f0f0f]">
               <video
+                ref={demoVideoRef}
                 src="/demoVideo.mp4"
                 autoPlay
                 loop
                 muted
                 playsInline
-                className="block w-full"
+                preload="auto"
+                disablePictureInPicture
+                controls={false}
+                tabIndex={-1}
+                className="block h-auto w-full object-contain"
               />
-              <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between border-t border-[#262626] bg-[#161616] px-3 py-2">
+              <div className="flex items-center justify-between border-t border-[#262626] bg-[#161616] px-3 py-2">
               <button
                 onClick={() => { setShowNudge(false); document.getElementById("live-demo")?.scrollIntoView({ behavior: "smooth" }); }}
                 className="flex items-center gap-2 group"
@@ -324,7 +369,7 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
       {/* ── Scroll nudge ── */}
       <div
         className={`fixed bottom-8 left-1/2 z-30 -translate-x-1/2 flex flex-col items-center gap-1.5 transition-all duration-700 ${
-          showNudge ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3 pointer-events-none"
+          showNudge && !demoInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3 pointer-events-none"
         }`}
       >
         <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#555]">scroll</span>
