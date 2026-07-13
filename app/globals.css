@@ -91,11 +91,6 @@ html {
 }
 
 /* ── Gradient text (flattened to solid white) ── */
-.gradient-text {
-  color: #e8e8e8;
-  -webkit-text-fill-color: #e8e8e8;
-}
-
 /* ── Rotating wireframe ── */
 @keyframes spin-slow {
   from { transform: rotateX(20deg) rotateY(0deg) rotateZ(0deg); }

@@ -51,7 +51,7 @@ export default function HowItWorksPage() {
         <div className="text-center mb-16 sm:mb-24">
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#00ff41] mb-4">How it works</p>
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight">
-            <span className="gradient-text">The Vision</span>
+            <span className="text-[#e8e8e8]">The Vision</span>
             <br />
             <span className="text-[#e8e8e8]">for Parametra.</span>
           </h1>
@@ -166,7 +166,7 @@ export default function HowItWorksPage() {
           <div className="text-center mb-12 sm:mb-16">
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#00ff41] mb-4">Where we&apos;re headed</p>
             <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight">
-              <span className="gradient-text">Beyond Onshape.</span>
+              <span className="text-[#e8e8e8]">Beyond Onshape.</span>
               <br />
               <span className="text-[#e8e8e8]">Every CAD tool, one platform.</span>
             </h2>

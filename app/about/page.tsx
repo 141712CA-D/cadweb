@@ -160,7 +160,7 @@ export default function AboutPage() {
         <div className="text-center px-4">
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#00ff41] mb-4">The team</p>
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight">
-            <span className="gradient-text">Meet the builders</span>
+            <span className="text-[#e8e8e8]">Meet the builders</span>
             <br />
             <span className="text-[#e8e8e8]">behind Parametra.</span>
           </h1>
@@ -289,7 +289,7 @@ export default function AboutPage() {
             <div className="text-center mb-8">
               <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#00ff41] mb-4">Our mission</p>
               <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight">
-                <span className="gradient-text">Why we built</span>
+                <span className="text-[#e8e8e8]">Why we built</span>
                 <br />
                 <span className="text-[#e8e8e8]">Parametra.</span>
               </h2>

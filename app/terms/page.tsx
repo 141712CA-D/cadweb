@@ -9,7 +9,7 @@ export default function TermsPage() {
       <Header />
 
       <main className="flex-1 max-w-3xl mx-auto px-6 py-32 sm:py-40 w-full">
-        <h1 className="text-3xl sm:text-4xl font-bold mb-2 gradient-text">Terms of Service</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold mb-2">Terms of Service</h1>
         <p className="font-mono text-xs text-[#555] mb-12">Last updated: June 30, 2026</p>
 
         <div className="space-y-10 text-sm text-[#888] leading-relaxed">
