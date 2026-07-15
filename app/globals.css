@@ -133,6 +133,16 @@ html {
   animation: cad-pulse 2.4s ease-in-out infinite;
 }
 
+/* ── Inter-CAD import hint: breathes blue until clicked, then solid ── */
+@keyframes breathe-blue {
+  0%, 100% { border-color: rgba(59,130,246,0.35); box-shadow: 0 0 0 rgba(59,130,246,0); }
+  50%      { border-color: rgba(59,130,246,0.9);  box-shadow: 0 0 14px rgba(59,130,246,0.35); }
+}
+
+.breathe-blue {
+  animation: breathe-blue 2.2s ease-in-out infinite;
+}
+
 /* ── Typewriter cursor ── */
 @keyframes cursor-blink {
   0%, 100% { opacity: 1; }

@@ -5,10 +5,11 @@ import dynamic from "next/dynamic";
 import { lockScroll, unlockScroll } from "../../lib/scrollLock";
 
 const MugModelViewer = dynamic(() => import("./MugModelViewer"), { ssr: false });
+const InterCadPanel  = dynamic(() => import("./InterCadPanel"),  { ssr: false });
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type MsgType = "user" | "thinking" | "assistant" | "result";
+type MsgType = "user" | "thinking" | "assistant" | "result" | "status";
 interface Msg {
   id: string;
   type: MsgType;
@@ -128,6 +129,8 @@ const HISTORY = [
   { id: "clamp",   label: "shaft_clamp_30mm", sub: "Part Studio", active: false },
 ];
 
+const INTER_CAD = { id: "intercad", label: "DailyMug.f3d", sub: "Fusion 360 · Ready to import" };
+
 const SCRIPT: Step[] = [
   { delay: 700,   show: ["u1"] },
   { delay: 1500,  typing: true },
@@ -187,6 +190,48 @@ const LOG_LINES: LogLine[] = [
   { t: 13400, level: "ok",   text: "[DONE]  12 features · 9 variables · total=4.2s" },
 ];
 
+// ── Inter-CAD transfer conversation ──────────────────────────────────────────
+
+const TRANSFER_MESSAGES: Msg[] = [
+  {
+    id: "tu1",
+    type: "user",
+    text: "transfer my Daily Mug model from Fusion360 to Onshape",
+  },
+  {
+    id: "tstatus",
+    type: "status",
+    lines: [
+      "finding project",
+      "gathering intent web",
+      'mapping direct feature conversions into new onshape document called "Daily Mug"',
+      "replicating non-direct features",
+      "processed model",
+    ],
+  },
+  {
+    id: "ta1",
+    type: "assistant",
+    text: "Daily Mug is now live in Onshape — 7 features carried over directly, 6 replicated to match Onshape's feature set.\n\nOpen the breakdown on the left to see exactly how each Fusion feature translated, and drag through the intent web to explore the mapping.",
+  },
+  { id: "tresult", type: "result" },
+];
+
+interface TransferStep { delay: number; show?: string[]; statusLines?: number; typing?: boolean }
+
+const TRANSFER_SCRIPT: TransferStep[] = [
+  { delay: 400,  show: ["tu1"] },
+  { delay: 1200, typing: true },
+  { delay: 2400, show: ["tstatus"], typing: false },
+  { delay: 2500, statusLines: 1 },
+  { delay: 3600, statusLines: 2 },
+  { delay: 5000, statusLines: 3 },
+  { delay: 6300, statusLines: 4 },
+  { delay: 7500, statusLines: 5 },
+  { delay: 8300, show: ["ta1"] },
+  { delay: 9200, show: ["tresult"] },
+];
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function DemoSection() {
@@ -208,20 +253,39 @@ export default function DemoSection() {
   const [expandedVars, setExpandedVars] = useState<Set<string>>(new Set(["Body"]));
   const [shelfOpen,    setShelfOpen]    = useState(false);
 
+  // Inter-CAD transfer flow
+  const [transferState,      setTransferState]      = useState<"idle" | "playing" | "done">("idle");
+  const [visibleTransferMsgs, setVisibleTransferMsgs] = useState<Set<string>>(new Set());
+  const [transferTyping,     setTransferTyping]     = useState(false);
+  const [statusLineCount,    setStatusLineCount]    = useState(0);
+  // Which middle-panel view is showing — independent of whether the transfer
+  // has ever run, so the user can flip back to mug_v1 and return to the
+  // Inter-CAD breakdown without re-playing the transfer conversation.
+  const [activePanel,        setActivePanel]        = useState<"partStudio" | "interCad">("partStudio");
+  const showInterCad = activePanel === "interCad";
+  // Gates the "breathe blue" hint on the Inter-CAD button — on desktop this only
+  // flips true once the cursor-hint sequence has finished pointing at it, so the
+  // two hints never compete; on mobile (no cursor hint) it flips true immediately.
+  const [cursorHintDone,     setCursorHintDone]     = useState(false);
+
   const logsRef       = useRef<HTMLDivElement>(null);
   const logsTabRef    = useRef<HTMLButtonElement>(null);
   const convTabRef    = useRef<HTMLButtonElement>(null);
   const meshBtnRef    = useRef<HTMLButtonElement>(null);
+  const interCadRef   = useRef<HTMLButtonElement>(null);
   const cursorRunning = useRef(false);
+  const transferLockedRef = useRef(false);
 
   // Refs mirror state so the async cursor animation reads fresh values
   // even if the user interacts between animDone and the animation starting.
   const activeTabRef   = useRef(activeTab);
   const expandedSetRef = useRef(expandedSet);
   const showMeshRef    = useRef(showMesh);
+  const transferStateRef = useRef(transferState);
   useEffect(() => { activeTabRef.current   = activeTab;   }, [activeTab]);
   useEffect(() => { expandedSetRef.current = expandedSet; }, [expandedSet]);
   useEffect(() => { showMeshRef.current    = showMesh;    }, [showMesh]);
+  useEffect(() => { transferStateRef.current = transferState; }, [transferState]);
 
   // Cursor animation state (desktop-only hint)
   const [cursor, setCursor] = useState({ x: 0, y: 0, visible: false, tooltip: "", clicking: false });
@@ -241,7 +305,7 @@ export default function DemoSection() {
   useEffect(() => {
     const el = chatRef.current;
     if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-  }, [visibleMsgs, showTyping]);
+  }, [visibleMsgs, showTyping, visibleTransferMsgs, transferTyping, statusLineCount]);
 
   // Scroll logs pane to bottom
   useEffect(() => {
@@ -335,10 +399,19 @@ export default function DemoSection() {
   // Cursor hint animation — desktop only, runs once on first demo completion
   useEffect(() => {
     if (!animDone) return;
-    if (typeof window !== "undefined" && window.innerWidth < 1024) return;
+    // Phones have no cursor hint at all (sidebar/mesh targets live behind the
+    // hamburger shelf there) — let the Inter-CAD button start breathing
+    // immediately instead of waiting on a sequence that never runs.
+    if (typeof window !== "undefined" && window.innerWidth < 640) {
+      setCursorHintDone(true);
+      return;
+    }
     if (cursorRunning.current) return;
     // Only show cursor hint on the very first playthrough
-    if (sessionStorage.getItem("cursorHintPlayed") === "true") return;
+    if (sessionStorage.getItem("cursorHintPlayed") === "true") {
+      setCursorHintDone(true);
+      return;
+    }
 
     const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 
@@ -367,6 +440,28 @@ export default function DemoSection() {
       setCursor(c => ({ ...c, clicking: false }));
       action();
       await sleep(opts.dwellAfter ?? 2000);
+    };
+
+    // Like clickPhase, but only points + shows the tooltip — never clicks and
+    // never runs an action. The real transfer must be a genuine user click.
+    const hoverPhase = async (
+      el: HTMLElement | null,
+      tooltip: string,
+      opts: { firstMove?: boolean; dwellAfter?: number } = {},
+    ) => {
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      setCursor(c => ({
+        ...c,
+        tooltip: "",
+        x: r.left - 80,
+        y: r.top + r.height / 2 + 20,
+        visible: true,
+        clicking: false,
+      }));
+      await sleep(opts.firstMove ? 300 : 400);
+      setCursor(c => ({ ...c, x: r.left + r.width / 2, y: r.top + r.height / 2, tooltip }));
+      await sleep(opts.dwellAfter ?? 2400);
     };
 
     const run = async () => {
@@ -419,6 +514,11 @@ export default function DemoSection() {
             1500,
           );
         }
+        // Phase D: point at Inter-CAD import — hover only, never auto-clicked
+        if (transferStateRef.current === "idle") {
+          await hoverPhase(interCadRef.current, "View Inter-Cad Project", { firstMove: first });
+          first = false;
+        }
       } else {
         // Phase A: expand thinking (if not already)
         if (!thinkingAlreadyOpen) {
@@ -444,10 +544,16 @@ export default function DemoSection() {
             1500,
           );
         }
+        // Phase D: point at Inter-CAD import — hover only, never auto-clicked
+        if (transferStateRef.current === "idle") {
+          await hoverPhase(interCadRef.current, "View Inter-Cad Project", { firstMove: first });
+          first = false;
+        }
       }
 
       setCursor(c => ({ ...c, visible: false, tooltip: "" }));
       sessionStorage.setItem("cursorHintPlayed", "true");
+      setCursorHintDone(true);
     };
 
     run();
@@ -468,46 +574,89 @@ export default function DemoSection() {
       return n;
     });
 
+  // Real user click (never auto-triggered by the cursor hint) — re-snaps the
+  // page back onto the live demo, locks scroll, and replays the transfer
+  // conversation in the same chat pane before swapping the middle panel.
+  // Once the transfer has already run, clicking again just flips the middle
+  // panel back to the Inter-CAD breakdown instead of re-playing the chat.
+  const startTransfer = () => {
+    if (transferState === "playing") return;
+    if (transferState === "done") { setActivePanel("interCad"); return; }
+    setTransferState("playing");
+
+    // Snap instantly — "auto" would defer to the global `scroll-behavior: smooth`
+    // CSS rule, and locking scroll right after would freeze body overflow
+    // mid-animation, stranding the page wherever the smooth scroll had reached.
+    sectionRef.current?.scrollIntoView({ behavior: "instant", block: "start" });
+    setActiveTab("conversation");
+    setShelfOpen(false);
+
+    lockScroll();
+    transferLockedRef.current = true;
+
+    const lastDelay = Math.max(...TRANSFER_SCRIPT.map(s => s.delay));
+
+    TRANSFER_SCRIPT.forEach(step => {
+      setTimeout(() => {
+        if (step.typing !== undefined) setTransferTyping(step.typing);
+        if (step.show?.length) {
+          setVisibleTransferMsgs(prev => {
+            const n = new Set(prev);
+            step.show!.forEach(id => n.add(id));
+            return n;
+          });
+        }
+        if (step.statusLines !== undefined) setStatusLineCount(step.statusLines);
+      }, step.delay);
+    });
+
+    setTimeout(() => {
+      if (transferLockedRef.current) {
+        unlockScroll();
+        transferLockedRef.current = false;
+      }
+      setTransferState("done");
+      setActivePanel("interCad");
+    }, lastDelay + 400);
+  };
+
   const visibleItems = MESSAGES.filter(m => visibleMsgs.has(m.id));
+  const visibleTransferItems = TRANSFER_MESSAGES.filter(m => visibleTransferMsgs.has(m.id));
 
   return (
-    <section id="live-demo" ref={sectionRef} className="relative bg-[#080808] border-t border-[#1a1a1a] overflow-hidden" style={{ height: "100svh" }}>
+    <section id="live-demo" ref={sectionRef} className="relative bg-[#080808] border-t border-[#1a1a1a]" style={{ height: "100svh" }}>
 
-      {/* ── Browser chrome frame — exact viewport height ── */}
-      <div className="flex flex-col w-full overflow-hidden" style={{ height: "100svh" }}>
-        {/* Title bar */}
-        <div className="flex items-center gap-4 px-4 py-2.5 border-b border-[#121212] bg-[#090909] flex-shrink-0">
-          {/* Mobile: hamburger */}
-          <button
-            className="flex lg:hidden items-center gap-1.5 flex-shrink-0"
-            onClick={() => setShelfOpen(true)}
-            aria-label="Open file panel"
-          >
-            <span className="flex flex-col gap-[3px]">
-              <span className="block h-px w-4 bg-[#3a3a3a]" />
-              <span className="block h-px w-4 bg-[#3a3a3a]" />
-              <span className="block h-px w-3 bg-[#3a3a3a]" />
-            </span>
-          </button>
-          {/* Desktop: traffic lights */}
-          <div className="hidden lg:flex items-center gap-1.5 flex-shrink-0">
-            <div className="h-3 w-3 rounded-full bg-[#ff5f57]" />
-            <div className="h-3 w-3 rounded-full bg-[#febc2e]" />
-            <div className="h-3 w-3 rounded-full bg-[#28c840]" />
-          </div>
-          <div className="flex-1 flex justify-center">
-            <div className="flex items-center border border-[#181818] bg-[#0c0c0c] px-4 py-1 min-w-44 justify-center">
-              <span className="font-mono text-[10px] text-[#3a3a3a]">parametra.ai</span>
+      {/* ── Solid-bg stage — the window floats inside this, inset with padding ── */}
+      <div className="flex h-full w-full items-center justify-center p-3 sm:p-6 lg:p-10">
+        <div className="relative flex h-full w-full max-w-[1400px] flex-col overflow-hidden rounded-2xl border border-[#1c1c1c] bg-[#0b0b0b] shadow-2xl">
+          {/* Title bar */}
+          <div className="flex items-center gap-4 px-4 py-2.5 border-b border-[#121212] bg-[#090909] flex-shrink-0">
+            {/* Phone only: hamburger */}
+            <button
+              className="flex sm:hidden items-center gap-1.5 flex-shrink-0"
+              onClick={() => setShelfOpen(true)}
+              aria-label="Open file panel"
+            >
+              <span className="flex flex-col gap-[3px]">
+                <span className="block h-px w-4 bg-[#3a3a3a]" />
+                <span className="block h-px w-4 bg-[#3a3a3a]" />
+                <span className="block h-px w-3 bg-[#3a3a3a]" />
+              </span>
+            </button>
+            {/* Tablet and up: traffic lights */}
+            <div className="hidden sm:flex items-center gap-1.5 flex-shrink-0">
+              <div className="h-3 w-3 rounded-full bg-[#ff5f57]" />
+              <div className="h-3 w-3 rounded-full bg-[#febc2e]" />
+              <div className="h-3 w-3 rounded-full bg-[#28c840]" />
             </div>
           </div>
-          <div className="w-8 lg:w-16 flex-shrink-0" />
-        </div>
 
-        {/* App body — fills remaining viewport */}
-        <div className="flex flex-1 min-h-0" style={{ height: "calc(100svh - 41px)" }}>
+          {/* App body — fills remaining window height; scrolls horizontally if the
+              sidebar + middle panel + chat can't all fit (e.g. iPad widths) */}
+          <div className="flex flex-1 min-h-0 overflow-x-auto">
 
-          {/* ── Left sidebar ── */}
-          <aside className="hidden lg:flex w-52 flex-shrink-0 flex-col border-r border-[#121212] bg-[#080808]">
+            {/* ── Left sidebar ── */}
+            <aside className="hidden sm:flex w-52 flex-shrink-0 flex-col border-r border-[#121212] bg-[#080808]">
             {/* Brand */}
             <div className="px-4 py-3 border-b border-[#121212] flex items-center gap-2">
               <span className="font-mono text-xs text-[#00ff41] tracking-[0.1em]">Parametra</span>
@@ -517,21 +666,29 @@ export default function DemoSection() {
             {/* Nav */}
             <nav className="px-2 pt-3 space-y-px">
               {[
-                { label: "Part Studios", active: true  },
-                { label: "Documents",    active: false },
-                { label: "Assemblies",   active: false },
-                { label: "Variables",    active: false },
+                { label: "Part Studios",       active: !showInterCad, accent: "#00ff41", onClick: () => setActivePanel("partStudio") },
+                { label: "Documents",          active: false,         accent: "#00ff41", onClick: undefined },
+                { label: "Assemblies",         active: false,         accent: "#00ff41", onClick: undefined },
+                { label: "Variables",          active: false,         accent: "#00ff41", onClick: undefined },
+                {
+                  label: "Inter-CAD Transfer",
+                  active: showInterCad,
+                  accent: "#4a9eff",
+                  onClick: transferState === "done" ? () => setActivePanel("interCad") : undefined,
+                },
               ].map(item => (
                 <div
                   key={item.label}
+                  onClick={item.onClick}
                   className={`flex items-center gap-2 px-3 py-2 text-xs select-none ${
+                    item.onClick ? "cursor-pointer hover:bg-[#0c0c0c]" : ""
+                  } ${
                     item.active ? "bg-[#0e0e0e] text-[#bbb]" : "text-[#2e2e2e]"
                   }`}
                 >
                   <span
-                    className={`h-1 w-1 rounded-full flex-shrink-0 ${
-                      item.active ? "bg-[#00ff41]" : "bg-[#1c1c1c]"
-                    }`}
+                    className="h-1 w-1 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: item.active ? item.accent : "#1c1c1c" }}
                   />
                   {item.label}
                 </div>
@@ -543,29 +700,64 @@ export default function DemoSection() {
               <p className="px-3 pb-2 font-mono text-[8px] text-[#1c1c1c] uppercase tracking-[0.2em]">
                 Recent
               </p>
-              {HISTORY.map(h => (
-                <div
-                  key={h.id}
-                  className={`px-3 py-2.5 ${
-                    h.active ? "bg-[#0e0e0e] border-l-2 border-[#00ff41]" : ""
-                  }`}
-                >
-                  <p
-                    className={`text-xs truncate ${
-                      h.active ? "text-[#bbb]" : "text-[#252525]"
+              {HISTORY.map(h => {
+                const active = h.active && !showInterCad;
+                const clickable = h.id === "mug";
+                return (
+                  <div
+                    key={h.id}
+                    onClick={clickable ? () => setActivePanel("partStudio") : undefined}
+                    className={`px-3 py-2.5 ${clickable ? "cursor-pointer hover:bg-[#0c0c0c]" : ""} ${
+                      active ? "bg-[#0e0e0e] border-l-2 border-[#00ff41]" : ""
                     }`}
                   >
-                    {h.label}
-                  </p>
-                  <p
-                    className={`font-mono text-[9px] ${
-                      h.active ? "text-[#333]" : "text-[#181818]"
-                    }`}
-                  >
-                    {h.sub}
-                  </p>
-                </div>
-              ))}
+                    <p
+                      className={`text-xs truncate ${
+                        active ? "text-[#bbb]" : "text-[#252525]"
+                      }`}
+                    >
+                      {h.label}
+                    </p>
+                    <p
+                      className={`font-mono text-[9px] ${
+                        active ? "text-[#333]" : "text-[#181818]"
+                      }`}
+                    >
+                      {h.sub}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Inter-CAD import entry — user-initiated only, never auto-clicked */}
+            <div className="px-2 pt-2 pb-2 border-t border-[#121212]">
+              <p className="px-3 pb-2 pt-2 font-mono text-[8px] text-[#1c1c1c] uppercase tracking-[0.2em]">
+                Inter-CAD
+              </p>
+              <button
+                ref={interCadRef}
+                onClick={startTransfer}
+                disabled={transferState === "playing"}
+                className={`w-full text-left px-3 py-2.5 border transition-colors group ${
+                  showInterCad
+                    ? "border-blue-500 bg-blue-500/10"
+                    : transferState === "idle" && cursorHintDone
+                      ? "breathe-blue border-blue-900"
+                      : "border-[#161616] hover:border-blue-900"
+                }`}
+              >
+                <p className={`text-xs truncate transition-colors ${
+                  showInterCad ? "text-[#bbb]" : "text-[#484848] group-hover:text-[#888]"
+                }`}>
+                  {INTER_CAD.label}
+                </p>
+                <p className={`font-mono text-[9px] transition-colors ${
+                  showInterCad ? "text-blue-400" : "text-[#2a2a2a] group-hover:text-blue-500"
+                }`}>
+                  {INTER_CAD.sub}
+                </p>
+              </button>
             </div>
 
             <div className="mt-auto p-4 border-t border-[#121212]">
@@ -578,13 +770,37 @@ export default function DemoSection() {
             className="hidden sm:flex flex-col border-r border-[#121212] bg-[#090909]"
             style={{ width: "clamp(200px, 32%, 320px)", flexShrink: 0 }}
           >
-            <div className="px-4 py-3 border-b border-[#121212]">
-              <p className="font-mono text-[9px] text-[#2a2a2a] uppercase tracking-[0.2em]">
-                Part Studio
-              </p>
-              <p className="text-sm text-[#777] mt-0.5">mug_v1</p>
+            {/* Tabs — Inter-CAD only exists once the transfer has been triggered */}
+            <div className="flex items-end border-b border-[#121212] px-4 flex-shrink-0">
+              <button
+                onClick={() => setActivePanel("partStudio")}
+                className={`py-3 mr-5 font-mono text-[10px] uppercase tracking-widest transition-colors ${
+                  !showInterCad
+                    ? "text-[#888] border-b border-[#00ff41]"
+                    : "text-[#242424] hover:text-[#333]"
+                }`}
+              >
+                Model Gen
+              </button>
+              {transferState !== "idle" && (
+                <button
+                  onClick={() => setActivePanel("interCad")}
+                  className={`py-3 font-mono text-[10px] uppercase tracking-widest transition-colors ${
+                    showInterCad
+                      ? "text-[#888] border-b border-blue-500"
+                      : "text-[#242424] hover:text-[#333]"
+                  }`}
+                >
+                  Inter-CAD
+                </button>
+              )}
             </div>
 
+            {showInterCad ? (
+              <div className="flex-1 overflow-y-auto px-4 py-3">
+                <InterCadPanel />
+              </div>
+            ) : (
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
               {/* Feature tree */}
               <div>
@@ -665,7 +881,7 @@ export default function DemoSection() {
                     <div className="border border-[#00ff41]" style={{ boxShadow: "0 0 20px rgba(0,255,65,0.04)" }}>
                       <div className="flex items-center justify-between px-3 py-1.5 border-b border-[#0e0e0e]">
                         <span className="font-mono text-[8px] text-[#00ff41] uppercase tracking-widest">
-                          mug_v1.stl
+                          local model
                         </span>
                         <button
                           onClick={() => setShowMesh(false)}
@@ -685,22 +901,25 @@ export default function DemoSection() {
                 </>
               )}
             </div>
+            )}
 
             {/* Status bar */}
             <div className="flex items-center gap-2 px-4 py-2 border-t border-[#121212]">
               <span
                 className={`h-1.5 w-1.5 flex-shrink-0 ${
-                  animDone ? "bg-[#00ff41]" : "bg-[#222] animate-pulse"
+                  (showInterCad ? transferState === "done" : animDone) ? "bg-[#00ff41]" : "bg-[#222] animate-pulse"
                 }`}
               />
               <span className="font-mono text-[9px] text-[#222]">
-                {animDone ? "complete · 6 features · 9 variables" : "generating…"}
+                {showInterCad
+                  ? "transferred · 13 features mapped"
+                  : animDone ? "complete · 6 features · 9 variables" : "generating…"}
               </span>
             </div>
           </div>
 
           {/* ── Right: Chat panel ── */}
-          <div className="flex flex-col flex-1 min-w-0 bg-[#080808]">
+          <div className="flex flex-col flex-1 min-w-[300px] bg-[#080808]">
             {/* Tabs */}
             <div className="flex items-end border-b border-[#121212] px-5 flex-shrink-0">
               <button
@@ -743,6 +962,36 @@ export default function DemoSection() {
                     onToggle={() => toggleThink(item.id)}
                   />
                 ))}
+                {transferState !== "idle" && visibleTransferItems.length > 0 && (
+                  <div className="flex items-center gap-2 py-1">
+                    <div className="h-px flex-1 bg-[#141414]" />
+                    <span className="font-mono text-[8px] text-[#242424] uppercase tracking-widest">inter-cad transfer</span>
+                    <div className="h-px flex-1 bg-[#141414]" />
+                  </div>
+                )}
+                {visibleTransferItems.map(item => (
+                  <ChatMessage
+                    key={item.id}
+                    item={item}
+                    expanded={expandedSet.has(item.id)}
+                    onToggle={() => toggleThink(item.id)}
+                    statusLineCount={statusLineCount}
+                  />
+                ))}
+                {transferTyping && (
+                  <div className="flex items-center gap-2.5">
+                    <PAvatar />
+                    <div className="flex gap-1 pt-0.5">
+                      {[0, 120, 240].map(d => (
+                        <span
+                          key={d}
+                          className="h-1.5 w-1.5 rounded-full bg-[#00ff41] animate-bounce"
+                          style={{ animationDelay: `${d}ms` }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {showTyping && (
                   <div className="flex items-center gap-2.5">
                     <PAvatar />
@@ -792,10 +1041,11 @@ export default function DemoSection() {
             </div>
           </div>
         </div>
+        </div>
       </div>
 
-      {/* ── Fake cursor hint (desktop only) ── */}
-      <div className="hidden lg:block pointer-events-none">
+      {/* ── Fake cursor hint (tablet and up) ── */}
+      <div className="hidden sm:block pointer-events-none">
         <div
           className="fixed z-[999] transition-[left,top] duration-700 ease-out"
           style={{
@@ -828,14 +1078,14 @@ export default function DemoSection() {
       {/* ── Mobile slide-in shelf ── */}
       {/* Backdrop */}
       <div
-        className={`absolute inset-0 z-40 bg-black/60 transition-opacity duration-300 lg:hidden ${
+        className={`absolute inset-0 z-40 bg-black/60 transition-opacity duration-300 sm:hidden ${
           shelfOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setShelfOpen(false)}
       />
       {/* Shelf panel */}
       <div
-        className={`absolute top-0 left-0 z-50 h-full w-72 flex flex-col bg-[#080808] border-r border-[#1c1c1c] transition-transform duration-300 ease-out lg:hidden ${
+        className={`absolute top-0 left-0 z-50 h-full w-72 flex flex-col bg-[#080808] border-r border-[#1c1c1c] transition-transform duration-300 ease-out sm:hidden ${
           shelfOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -851,18 +1101,25 @@ export default function DemoSection() {
           {/* Nav */}
           <nav className="px-2 pt-3 space-y-px border-b border-[#141414] pb-3">
             {[
-              { label: "Part Studios", active: true  },
-              { label: "Documents",    active: false },
-              { label: "Assemblies",   active: false },
-              { label: "Variables",    active: false },
+              { label: "Part Studios",       active: !showInterCad, accent: "#00ff41", onClick: () => setActivePanel("partStudio") },
+              { label: "Documents",          active: false,         accent: "#00ff41", onClick: undefined },
+              { label: "Assemblies",         active: false,         accent: "#00ff41", onClick: undefined },
+              { label: "Variables",          active: false,         accent: "#00ff41", onClick: undefined },
+              {
+                label: "Inter-CAD Transfer",
+                active: showInterCad,
+                accent: "#4a9eff",
+                onClick: transferState === "done" ? () => setActivePanel("interCad") : undefined,
+              },
             ].map(item => (
               <div
                 key={item.label}
-                className={`flex items-center gap-2 px-3 py-2 text-xs select-none ${
+                onClick={item.onClick}
+                className={`flex items-center gap-2 px-3 py-2 text-xs select-none ${item.onClick ? "cursor-pointer" : ""} ${
                   item.active ? "bg-[#0e0e0e] text-[#bbb]" : "text-[#2e2e2e]"
                 }`}
               >
-                <span className={`h-1 w-1 rounded-full flex-shrink-0 ${item.active ? "bg-[#00ff41]" : "bg-[#1c1c1c]"}`} />
+                <span className="h-1 w-1 rounded-full flex-shrink-0" style={{ backgroundColor: item.active ? item.accent : "#1c1c1c" }} />
                 {item.label}
               </div>
             ))}
@@ -871,14 +1128,73 @@ export default function DemoSection() {
           {/* History */}
           <div className="px-2 pt-4 border-b border-[#141414] pb-4">
             <p className="px-3 pb-2 font-mono text-[8px] text-[#1c1c1c] uppercase tracking-[0.2em]">Recent</p>
-            {HISTORY.map(h => (
-              <div key={h.id} className={`px-3 py-2.5 ${h.active ? "bg-[#0e0e0e] border-l-2 border-[#00ff41]" : ""}`}>
-                <p className={`text-xs truncate ${h.active ? "text-[#bbb]" : "text-[#252525]"}`}>{h.label}</p>
-                <p className={`font-mono text-[9px] ${h.active ? "text-[#333]" : "text-[#181818]"}`}>{h.sub}</p>
-              </div>
-            ))}
+            {HISTORY.map(h => {
+              const active = h.active && !showInterCad;
+              const clickable = h.id === "mug";
+              return (
+                <div
+                  key={h.id}
+                  onClick={clickable ? () => setActivePanel("partStudio") : undefined}
+                  className={`px-3 py-2.5 ${clickable ? "cursor-pointer" : ""} ${active ? "bg-[#0e0e0e] border-l-2 border-[#00ff41]" : ""}`}
+                >
+                  <p className={`text-xs truncate ${active ? "text-[#bbb]" : "text-[#252525]"}`}>{h.label}</p>
+                  <p className={`font-mono text-[9px] ${active ? "text-[#333]" : "text-[#181818]"}`}>{h.sub}</p>
+                </div>
+              );
+            })}
           </div>
 
+          {/* Inter-CAD import entry */}
+          <div className="px-2 pt-4 border-b border-[#141414] pb-4">
+            <p className="px-3 pb-2 font-mono text-[8px] text-[#1c1c1c] uppercase tracking-[0.2em]">Inter-CAD</p>
+            <button
+              onClick={startTransfer}
+              disabled={transferState === "playing"}
+              className={`w-full text-left px-3 py-2.5 border transition-colors group ${
+                showInterCad
+                  ? "border-blue-500 bg-blue-500/10"
+                  : transferState === "idle" && cursorHintDone
+                    ? "breathe-blue border-blue-900"
+                    : "border-[#161616]"
+              }`}
+            >
+              <p className={`text-xs truncate ${showInterCad ? "text-[#bbb]" : "text-[#484848]"}`}>
+                {INTER_CAD.label}
+              </p>
+              <p className={`font-mono text-[9px] ${showInterCad ? "text-blue-400" : "text-[#2a2a2a]"}`}>
+                {INTER_CAD.sub}
+              </p>
+            </button>
+          </div>
+
+          {/* Tabs — Inter-CAD only exists once the transfer has been triggered */}
+          <div className="flex items-end border-b border-[#141414] px-4">
+            <button
+              onClick={() => setActivePanel("partStudio")}
+              className={`py-3 mr-5 font-mono text-[10px] uppercase tracking-widest transition-colors ${
+                !showInterCad ? "text-[#888] border-b border-[#00ff41]" : "text-[#242424]"
+              }`}
+            >
+              Model Gen
+            </button>
+            {transferState !== "idle" && (
+              <button
+                onClick={() => setActivePanel("interCad")}
+                className={`py-3 font-mono text-[10px] uppercase tracking-widest transition-colors ${
+                  showInterCad ? "text-[#888] border-b border-blue-500" : "text-[#242424]"
+                }`}
+              >
+                Inter-CAD
+              </button>
+            )}
+          </div>
+
+          {showInterCad ? (
+            <div className="px-4 pt-4 pb-6">
+              <InterCadPanel />
+            </div>
+          ) : (
+          <>
           {/* Feature tree */}
           <div className="px-4 pt-4 border-b border-[#141414] pb-4">
             <p className="font-mono text-[8px] text-[#202020] uppercase tracking-[0.2em] mb-2">Feature Tree · mug_v1</p>
@@ -939,7 +1255,7 @@ export default function DemoSection() {
               ) : (
                 <div className="border border-[#00ff41]">
                   <div className="flex items-center justify-between px-3 py-1.5 border-b border-[#0e0e0e]">
-                    <span className="font-mono text-[8px] text-[#00ff41] uppercase tracking-widest">mug_v1.stl</span>
+                    <span className="font-mono text-[8px] text-[#00ff41] uppercase tracking-widest">local model</span>
                     <button onClick={() => setShowMesh(false)} className="font-mono text-sm text-[#2e2e2e] hover:text-[#888] transition-colors leading-none">×</button>
                   </div>
                   <div className="overflow-hidden" style={{ height: 220 }}>
@@ -949,6 +1265,8 @@ export default function DemoSection() {
                 </div>
               )}
             </div>
+          )}
+          </>
           )}
         </div>
       </div>
@@ -971,10 +1289,12 @@ function ChatMessage({
   item,
   expanded,
   onToggle,
+  statusLineCount = 0,
 }: {
   item: Msg;
   expanded: boolean;
   onToggle: () => void;
+  statusLineCount?: number;
 }) {
   if (item.type === "user") {
     return (
@@ -1017,6 +1337,26 @@ function ChatMessage({
     );
   }
 
+  if (item.type === "status") {
+    return (
+      <div className="flex items-start gap-2.5">
+        <PAvatar />
+        <div className="flex-1 space-y-0.5 pt-0.5">
+          {item.lines?.slice(0, statusLineCount).map((line, i) => (
+            <p key={i} className="font-mono text-[10px] text-[#4a4a4a] leading-5">
+              <span className="text-[#00ff41]">✓</span> {line}
+            </p>
+          ))}
+          {statusLineCount < (item.lines?.length ?? 0) && (
+            <p className="font-mono text-[10px] text-[#2a2a2a] leading-5">
+              <span className="text-[#00ff41] animate-pulse">▌</span>
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   if (item.type === "assistant") {
     return (
       <div className="flex items-start gap-2.5">
@@ -1033,19 +1373,34 @@ function ChatMessage({
   }
 
   if (item.type === "result") {
+    const isTransfer = item.id === "tresult";
     return (
       <div className="flex items-start gap-2.5">
         <PAvatar />
         <div className="flex-1">
           <div className="border border-[#161616] bg-[#080808] p-3 space-y-2">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-[10px] text-[#00ff41]">✓ built</span>
-              <span className="font-mono text-[9px] text-[#282828]">mug_v1 · Part Studio</span>
+              <span className="font-mono text-[10px] text-[#00ff41]">
+                {isTransfer ? "✓ transferred" : "✓ built"}
+              </span>
+              <span className="font-mono text-[9px] text-[#282828]">
+                {isTransfer ? "Daily Mug · Part Studio" : "mug_v1 · Part Studio"}
+              </span>
             </div>
             <p className="font-mono text-[9px] text-[#2e2e2e] leading-5">
-              12 features · 9 live variables
-              <br />
-              ↳ edit any variable in Onshape and the part rebuilds.
+              {isTransfer ? (
+                <>
+                  7 direct · 6 replicated features
+                  <br />
+                  ↳ breakdown and intent web are in the panel to the left.
+                </>
+              ) : (
+                <>
+                  12 features · 9 live variables
+                  <br />
+                  ↳ edit any variable in Onshape and the part rebuilds.
+                </>
+              )}
             </p>
           </div>
         </div>
