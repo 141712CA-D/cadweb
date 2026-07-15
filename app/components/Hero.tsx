@@ -350,7 +350,7 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
                 onClick={() => { setShowNudge(false); document.getElementById("live-demo")?.scrollIntoView({ behavior: "smooth" }); }}
                 className="flex items-center gap-2 group"
               >
-                <span className="text-left font-mono text-[9px] text-[#00ff41] group-hover:underline underline-offset-2 sm:whitespace-nowrap">
+                <span className="text-left font-mono text-[11px] sm:text-[9px] text-[#00ff41] group-hover:underline underline-offset-2 sm:whitespace-nowrap">
                   like what you see? scroll down to see Parametra in action
                 </span>
                 <span className="text-[#00ff41] animate-bounce inline-block">↓</span>
