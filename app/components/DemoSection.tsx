@@ -638,9 +638,9 @@ export default function DemoSection() {
               aria-label="Open file panel"
             >
               <span className="flex flex-col gap-[3px]">
-                <span className="block h-px w-4 bg-[#3a3a3a]" />
-                <span className="block h-px w-4 bg-[#3a3a3a]" />
-                <span className="block h-px w-3 bg-[#3a3a3a]" />
+                <span className="block h-px w-4 bg-[#555]" />
+                <span className="block h-px w-4 bg-[#555]" />
+                <span className="block h-px w-3 bg-[#555]" />
               </span>
             </button>
             {/* Tablet and up: traffic lights */}
@@ -660,7 +660,7 @@ export default function DemoSection() {
             {/* Brand */}
             <div className="px-4 py-3 border-b border-[#121212] flex items-center gap-2">
               <span className="font-mono text-sm sm:text-xs text-[#00ff41] tracking-[0.1em]">Parametra</span>
-              <span className="font-mono text-[10px] sm:text-[8px] text-[#222]">v1.0</span>
+              <span className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">v1.0</span>
             </div>
 
             {/* Nav */}
@@ -683,7 +683,7 @@ export default function DemoSection() {
                   className={`flex items-center gap-2 px-3 py-2 text-sm sm:text-xs select-none ${
                     item.onClick ? "cursor-pointer hover:bg-[#0c0c0c]" : ""
                   } ${
-                    item.active ? "bg-[#0e0e0e] text-[#bbb]" : "text-[#2e2e2e]"
+                    item.active ? "bg-[#0e0e0e] text-[#bbb]" : "text-[#555]"
                   }`}
                 >
                   <span
@@ -697,7 +697,7 @@ export default function DemoSection() {
 
             {/* Design history */}
             <div className="px-2 pt-4">
-              <p className="px-3 pb-2 font-mono text-[10px] sm:text-[8px] text-[#1c1c1c] uppercase tracking-[0.2em]">
+              <p className="px-3 pb-2 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em]">
                 Recent
               </p>
               {HISTORY.map(h => {
@@ -713,14 +713,14 @@ export default function DemoSection() {
                   >
                     <p
                       className={`text-sm sm:text-xs truncate ${
-                        active ? "text-[#bbb]" : "text-[#252525]"
+                        active ? "text-[#bbb]" : "text-[#555]"
                       }`}
                     >
                       {h.label}
                     </p>
                     <p
                       className={`font-mono text-[11px] sm:text-[9px] ${
-                        active ? "text-[#333]" : "text-[#181818]"
+                        active ? "text-[#666]" : "text-[#444]"
                       }`}
                     >
                       {h.sub}
@@ -732,7 +732,7 @@ export default function DemoSection() {
 
             {/* Inter-CAD import entry — user-initiated only, never auto-clicked */}
             <div className="px-2 pt-2 pb-2 border-t border-[#121212]">
-              <p className="px-3 pb-2 pt-2 font-mono text-[10px] sm:text-[8px] text-[#1c1c1c] uppercase tracking-[0.2em]">
+              <p className="px-3 pb-2 pt-2 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em]">
                 Inter-CAD
               </p>
               <button
@@ -748,12 +748,12 @@ export default function DemoSection() {
                 }`}
               >
                 <p className={`text-sm sm:text-xs truncate transition-colors ${
-                  showInterCad ? "text-[#bbb]" : "text-[#484848] group-hover:text-[#888]"
+                  showInterCad ? "text-[#bbb]" : "text-[#777] group-hover:text-[#a0a0a0]"
                 }`}>
                   {INTER_CAD.label}
                 </p>
                 <p className={`font-mono text-[11px] sm:text-[9px] transition-colors ${
-                  showInterCad ? "text-blue-400" : "text-[#2a2a2a] group-hover:text-blue-500"
+                  showInterCad ? "text-blue-400" : "text-[#555] group-hover:text-blue-500"
                 }`}>
                   {INTER_CAD.sub}
                 </p>
@@ -761,7 +761,7 @@ export default function DemoSection() {
             </div>
 
             <div className="mt-auto p-4 border-t border-[#121212]">
-              <p className="font-mono text-[10px] sm:text-[8px] text-[#1c1c1c] uppercase tracking-widest">Settings</p>
+              <p className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-widest">Settings</p>
             </div>
           </aside>
 
@@ -776,8 +776,8 @@ export default function DemoSection() {
                 onClick={() => setActivePanel("partStudio")}
                 className={`py-3 mr-5 font-mono text-xs sm:text-[10px] uppercase tracking-widest transition-colors ${
                   !showInterCad
-                    ? "text-[#888] border-b border-[#00ff41]"
-                    : "text-[#242424] hover:text-[#333]"
+                    ? "text-[#a0a0a0] border-b border-[#00ff41]"
+                    : "text-[#4a4a4a] hover:text-[#666]"
                 }`}
               >
                 Model Gen
@@ -787,8 +787,8 @@ export default function DemoSection() {
                   onClick={() => setActivePanel("interCad")}
                   className={`py-3 font-mono text-xs sm:text-[10px] uppercase tracking-widest transition-colors ${
                     showInterCad
-                      ? "text-[#888] border-b border-blue-500"
-                      : "text-[#242424] hover:text-[#333]"
+                      ? "text-[#a0a0a0] border-b border-blue-500"
+                      : "text-[#4a4a4a] hover:text-[#666]"
                   }`}
                 >
                   Inter-CAD
@@ -804,7 +804,7 @@ export default function DemoSection() {
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
               {/* Feature tree */}
               <div>
-                <p className="font-mono text-[10px] sm:text-[8px] text-[#202020] uppercase tracking-[0.2em] mb-2">
+                <p className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em] mb-2">
                   Feature Tree
                 </p>
                 <div className="space-y-0.5">
@@ -818,7 +818,7 @@ export default function DemoSection() {
                       }`}
                     >
                       <FeatureIcon type={f.icon} />
-                      <span className="font-mono text-xs sm:text-[10px] text-[#686868]">{f.name}</span>
+                      <span className="font-mono text-xs sm:text-[10px] text-[#8a8a8a]">{f.name}</span>
                     </div>
                   ))}
                 </div>
@@ -827,7 +827,7 @@ export default function DemoSection() {
               {/* Variables — drill-down accordion */}
               {visibleMsgs.has("result") && (
                 <div className="border border-[#141414] bg-[#070707]">
-                  <p className="px-3 pt-2.5 pb-1.5 font-mono text-[10px] sm:text-[8px] text-[#222] uppercase tracking-[0.2em] border-b border-[#111]">
+                  <p className="px-3 pt-2.5 pb-1.5 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em] border-b border-[#111]">
                     Live Variables
                   </p>
                   {VAR_GROUPS.map(group => (
@@ -837,15 +837,15 @@ export default function DemoSection() {
                         className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-[#0c0c0c] transition-colors"
                       >
                         <span
-                          className="font-mono text-[10px] sm:text-[8px] text-[#2e2e2e] flex-shrink-0 transition-transform duration-150"
+                          className="font-mono text-[10px] sm:text-[8px] text-[#555] flex-shrink-0 transition-transform duration-150"
                           style={{ display: "inline-block", transform: expandedVars.has(group.label) ? "rotate(90deg)" : "rotate(0deg)" }}
                         >
                           ▶
                         </span>
-                        <span className="font-mono text-[11px] sm:text-[9px] text-[#484848] uppercase tracking-widest">
+                        <span className="font-mono text-[11px] sm:text-[9px] text-[#777] uppercase tracking-widest">
                           {group.label}
                         </span>
-                        <span className="ml-auto font-mono text-[10px] sm:text-[8px] text-[#222]">
+                        <span className="ml-auto font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">
                           {group.vars.length}
                         </span>
                       </button>
@@ -853,9 +853,9 @@ export default function DemoSection() {
                         <div className="px-3 pb-2 space-y-1 border-t border-[#0e0e0e]">
                           {group.vars.map(([name, val, unit]) => (
                             <div key={name} className="flex items-center justify-between py-0.5">
-                              <span className="font-mono text-[11px] sm:text-[9px] text-[#383838]">{name}</span>
+                              <span className="font-mono text-[11px] sm:text-[9px] text-[#666]">{name}</span>
                               <span className="font-mono text-[11px] sm:text-[9px] text-[#00ff41]">
-                                {val} <span className="text-[#242424]">{unit}</span>
+                                {val} <span className="text-[#4a4a4a]">{unit}</span>
                               </span>
                             </div>
                           ))}
@@ -873,7 +873,7 @@ export default function DemoSection() {
                     <button
                       ref={meshBtnRef}
                       onClick={() => setShowMesh(true)}
-                      className="w-full border border-[#1c1c1c] hover:border-[#00ff41] py-2 font-mono text-[11px] sm:text-[9px] text-[#333] hover:text-[#00ff41] transition-colors uppercase tracking-widest"
+                      className="w-full border border-[#1c1c1c] hover:border-[#00ff41] py-2 font-mono text-[11px] sm:text-[9px] text-[#666] hover:text-[#00ff41] transition-colors uppercase tracking-widest"
                     >
                       ↗ view mesh model
                     </button>
@@ -885,7 +885,7 @@ export default function DemoSection() {
                         </span>
                         <button
                           onClick={() => setShowMesh(false)}
-                          className="font-mono text-sm text-[#2e2e2e] hover:text-[#888] transition-colors leading-none"
+                          className="font-mono text-sm text-[#555] hover:text-[#a0a0a0] transition-colors leading-none"
                         >
                           ×
                         </button>
@@ -893,7 +893,7 @@ export default function DemoSection() {
                       <div className="overflow-hidden" style={{ height: 240 }}>
                         <MugModelViewer />
                       </div>
-                      <p className="px-3 py-1.5 font-mono text-[10px] sm:text-[8px] text-[#222]">
+                      <p className="px-3 py-1.5 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">
                         drag to rotate · scroll to zoom
                       </p>
                     </div>
@@ -910,7 +910,7 @@ export default function DemoSection() {
                   (showInterCad ? transferState === "done" : animDone) ? "bg-[#00ff41]" : "bg-[#222] animate-pulse"
                 }`}
               />
-              <span className="font-mono text-[11px] sm:text-[9px] text-[#222]">
+              <span className="font-mono text-[11px] sm:text-[9px] text-[#4a4a4a]">
                 {showInterCad
                   ? "transferred · 13 features mapped"
                   : animDone ? "complete · 6 features · 9 variables" : "generating…"}
@@ -927,8 +927,8 @@ export default function DemoSection() {
                 onClick={() => setActiveTab("conversation")}
                 className={`py-3 mr-5 font-mono text-xs sm:text-[10px] uppercase tracking-widest transition-colors ${
                   activeTab === "conversation"
-                    ? "text-[#888] border-b border-[#00ff41]"
-                    : "text-[#242424] hover:text-[#333]"
+                    ? "text-[#a0a0a0] border-b border-[#00ff41]"
+                    : "text-[#4a4a4a] hover:text-[#666]"
                 }`}
               >
                 Conversation
@@ -938,13 +938,13 @@ export default function DemoSection() {
                 onClick={() => setActiveTab("logs")}
                 className={`py-3 font-mono text-xs sm:text-[10px] uppercase tracking-widest transition-colors ${
                   activeTab === "logs"
-                    ? "text-[#888] border-b border-[#00ff41]"
-                    : "text-[#242424] hover:text-[#333]"
+                    ? "text-[#a0a0a0] border-b border-[#00ff41]"
+                    : "text-[#4a4a4a] hover:text-[#666]"
                 }`}
               >
                 Logs
                 {visibleLogs.length > 0 && (
-                  <span className="ml-1.5 font-mono text-[10px] sm:text-[8px] text-[#2a2a2a]">
+                  <span className="ml-1.5 font-mono text-[10px] sm:text-[8px] text-[#555]">
                     {visibleLogs.length}
                   </span>
                 )}
@@ -965,7 +965,7 @@ export default function DemoSection() {
                 {transferState !== "idle" && visibleTransferItems.length > 0 && (
                   <div className="flex items-center gap-2 py-1">
                     <div className="h-px flex-1 bg-[#141414]" />
-                    <span className="font-mono text-[10px] sm:text-[8px] text-[#242424] uppercase tracking-widest">inter-cad transfer</span>
+                    <span className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-widest">inter-cad transfer</span>
                     <div className="h-px flex-1 bg-[#141414]" />
                   </div>
                 )}
@@ -1017,7 +1017,7 @@ export default function DemoSection() {
                     line.level === "ok"   ? "text-[#00ff41]" :
                     line.level === "api"  ? "text-[#4a9eff]" :
                     line.level === "warn" ? "text-[#f5a623]" :
-                                           "text-[#383838]"
+                                           "text-[#666]"
                   }>
                     {line.text}
                   </p>
@@ -1031,10 +1031,10 @@ export default function DemoSection() {
             {/* Decorative input */}
             <div className="px-5 py-3 border-t border-[#121212] flex-shrink-0">
               <div className="flex items-center gap-2 border border-[#141414] bg-[#0b0b0b] px-3 py-2.5">
-                <span className="flex-1 font-mono text-xs sm:text-[10px] text-[#1c1c1c] select-none">
+                <span className="flex-1 font-mono text-xs sm:text-[10px] text-[#4a4a4a] select-none">
                   {animDone ? "design complete — ask a follow-up" : "demo in progress…"}
                 </span>
-                <span className="font-mono text-[11px] sm:text-[9px] text-[#1a1a1a] border border-[#181818] px-2 py-0.5 uppercase tracking-widest">
+                <span className="font-mono text-[11px] sm:text-[9px] text-[#444] border border-[#181818] px-2 py-0.5 uppercase tracking-widest">
                   ↑
                 </span>
               </div>
@@ -1092,9 +1092,9 @@ export default function DemoSection() {
         <div className="flex items-center justify-between px-4 py-3 border-b border-[#141414]">
           <div className="flex items-center gap-2">
             <span className="font-mono text-sm sm:text-xs text-[#00ff41] tracking-[0.1em]">Parametra</span>
-            <span className="font-mono text-[10px] sm:text-[8px] text-[#222]">v1.0</span>
+            <span className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">v1.0</span>
           </div>
-          <button onClick={() => setShelfOpen(false)} className="font-mono text-lg text-[#333] hover:text-[#888] leading-none">×</button>
+          <button onClick={() => setShelfOpen(false)} className="font-mono text-lg text-[#666] hover:text-[#a0a0a0] leading-none">×</button>
         </div>
 
         <div className="flex-1 min-h-0 overflow-y-auto">
@@ -1116,7 +1116,7 @@ export default function DemoSection() {
                 key={item.label}
                 onClick={item.onClick}
                 className={`flex items-center gap-2 px-3 py-2 text-sm sm:text-xs select-none ${item.onClick ? "cursor-pointer" : ""} ${
-                  item.active ? "bg-[#0e0e0e] text-[#bbb]" : "text-[#2e2e2e]"
+                  item.active ? "bg-[#0e0e0e] text-[#bbb]" : "text-[#555]"
                 }`}
               >
                 <span className="h-1 w-1 rounded-full flex-shrink-0" style={{ backgroundColor: item.active ? item.accent : "#1c1c1c" }} />
@@ -1127,7 +1127,7 @@ export default function DemoSection() {
 
           {/* History */}
           <div className="px-2 pt-4 border-b border-[#141414] pb-4">
-            <p className="px-3 pb-2 font-mono text-[10px] sm:text-[8px] text-[#1c1c1c] uppercase tracking-[0.2em]">Recent</p>
+            <p className="px-3 pb-2 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em]">Recent</p>
             {HISTORY.map(h => {
               const active = h.active && !showInterCad;
               const clickable = h.id === "mug";
@@ -1137,8 +1137,8 @@ export default function DemoSection() {
                   onClick={clickable ? () => setActivePanel("partStudio") : undefined}
                   className={`px-3 py-2.5 ${clickable ? "cursor-pointer" : ""} ${active ? "bg-[#0e0e0e] border-l-2 border-[#00ff41]" : ""}`}
                 >
-                  <p className={`text-sm sm:text-xs truncate ${active ? "text-[#bbb]" : "text-[#252525]"}`}>{h.label}</p>
-                  <p className={`font-mono text-[11px] sm:text-[9px] ${active ? "text-[#333]" : "text-[#181818]"}`}>{h.sub}</p>
+                  <p className={`text-sm sm:text-xs truncate ${active ? "text-[#bbb]" : "text-[#555]"}`}>{h.label}</p>
+                  <p className={`font-mono text-[11px] sm:text-[9px] ${active ? "text-[#666]" : "text-[#444]"}`}>{h.sub}</p>
                 </div>
               );
             })}
@@ -1146,7 +1146,7 @@ export default function DemoSection() {
 
           {/* Inter-CAD import entry */}
           <div className="px-2 pt-4 border-b border-[#141414] pb-4">
-            <p className="px-3 pb-2 font-mono text-[10px] sm:text-[8px] text-[#1c1c1c] uppercase tracking-[0.2em]">Inter-CAD</p>
+            <p className="px-3 pb-2 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em]">Inter-CAD</p>
             <button
               onClick={startTransfer}
               disabled={transferState === "playing"}
@@ -1158,10 +1158,10 @@ export default function DemoSection() {
                     : "border-[#161616]"
               }`}
             >
-              <p className={`text-sm sm:text-xs truncate ${showInterCad ? "text-[#bbb]" : "text-[#484848]"}`}>
+              <p className={`text-sm sm:text-xs truncate ${showInterCad ? "text-[#bbb]" : "text-[#777]"}`}>
                 {INTER_CAD.label}
               </p>
-              <p className={`font-mono text-[11px] sm:text-[9px] ${showInterCad ? "text-blue-400" : "text-[#2a2a2a]"}`}>
+              <p className={`font-mono text-[11px] sm:text-[9px] ${showInterCad ? "text-blue-400" : "text-[#555]"}`}>
                 {INTER_CAD.sub}
               </p>
             </button>
@@ -1172,7 +1172,7 @@ export default function DemoSection() {
             <button
               onClick={() => setActivePanel("partStudio")}
               className={`py-3 mr-5 font-mono text-xs sm:text-[10px] uppercase tracking-widest transition-colors ${
-                !showInterCad ? "text-[#888] border-b border-[#00ff41]" : "text-[#242424]"
+                !showInterCad ? "text-[#a0a0a0] border-b border-[#00ff41]" : "text-[#4a4a4a]"
               }`}
             >
               Model Gen
@@ -1181,7 +1181,7 @@ export default function DemoSection() {
               <button
                 onClick={() => setActivePanel("interCad")}
                 className={`py-3 font-mono text-xs sm:text-[10px] uppercase tracking-widest transition-colors ${
-                  showInterCad ? "text-[#888] border-b border-blue-500" : "text-[#242424]"
+                  showInterCad ? "text-[#a0a0a0] border-b border-blue-500" : "text-[#4a4a4a]"
                 }`}
               >
                 Inter-CAD
@@ -1197,12 +1197,12 @@ export default function DemoSection() {
           <>
           {/* Feature tree */}
           <div className="px-4 pt-4 border-b border-[#141414] pb-4">
-            <p className="font-mono text-[10px] sm:text-[8px] text-[#202020] uppercase tracking-[0.2em] mb-2">Feature Tree · mug_v1</p>
+            <p className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em] mb-2">Feature Tree · mug_v1</p>
             <div className="space-y-0.5">
               {FEATURES.map(f => (
                 <div key={f.id} className={`flex items-center gap-2 py-0.5 transition-all duration-300 ${visibleFeat.has(f.id) ? "opacity-100" : "opacity-0"}`}>
                   <FeatureIcon type={f.icon} />
-                  <span className="font-mono text-xs sm:text-[10px] text-[#686868]">{f.name}</span>
+                  <span className="font-mono text-xs sm:text-[10px] text-[#8a8a8a]">{f.name}</span>
                 </div>
               ))}
             </div>
@@ -1211,7 +1211,7 @@ export default function DemoSection() {
           {/* Variables */}
           {visibleMsgs.has("result") && (
             <div className="px-4 pt-4 border-b border-[#141414] pb-4">
-              <p className="font-mono text-[10px] sm:text-[8px] text-[#202020] uppercase tracking-[0.2em] mb-2">Live Variables</p>
+              <p className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em] mb-2">Live Variables</p>
               <div className="border border-[#141414] bg-[#070707]">
                 {VAR_GROUPS.map(group => (
                   <div key={group.label} className="border-b border-[#111] last:border-0">
@@ -1220,18 +1220,18 @@ export default function DemoSection() {
                       className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-[#0c0c0c] transition-colors"
                     >
                       <span
-                        className="font-mono text-[10px] sm:text-[8px] text-[#2e2e2e] flex-shrink-0 transition-transform duration-150"
+                        className="font-mono text-[10px] sm:text-[8px] text-[#555] flex-shrink-0 transition-transform duration-150"
                         style={{ display: "inline-block", transform: expandedVars.has(group.label) ? "rotate(90deg)" : "rotate(0deg)" }}
                       >▶</span>
-                      <span className="font-mono text-[11px] sm:text-[9px] text-[#484848] uppercase tracking-widest">{group.label}</span>
-                      <span className="ml-auto font-mono text-[10px] sm:text-[8px] text-[#222]">{group.vars.length}</span>
+                      <span className="font-mono text-[11px] sm:text-[9px] text-[#777] uppercase tracking-widest">{group.label}</span>
+                      <span className="ml-auto font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">{group.vars.length}</span>
                     </button>
                     {expandedVars.has(group.label) && (
                       <div className="px-3 pb-2 space-y-1 border-t border-[#0e0e0e]">
                         {group.vars.map(([name, val, unit]) => (
                           <div key={name} className="flex items-center justify-between py-0.5">
-                            <span className="font-mono text-[11px] sm:text-[9px] text-[#383838]">{name}</span>
-                            <span className="font-mono text-[11px] sm:text-[9px] text-[#00ff41]">{val} <span className="text-[#242424]">{unit}</span></span>
+                            <span className="font-mono text-[11px] sm:text-[9px] text-[#666]">{name}</span>
+                            <span className="font-mono text-[11px] sm:text-[9px] text-[#00ff41]">{val} <span className="text-[#4a4a4a]">{unit}</span></span>
                           </div>
                         ))}
                       </div>
@@ -1248,7 +1248,7 @@ export default function DemoSection() {
               {!showMesh ? (
                 <button
                   onClick={() => setShowMesh(true)}
-                  className="w-full border border-[#1c1c1c] hover:border-[#00ff41] py-2 font-mono text-[11px] sm:text-[9px] text-[#333] hover:text-[#00ff41] transition-colors uppercase tracking-widest"
+                  className="w-full border border-[#1c1c1c] hover:border-[#00ff41] py-2 font-mono text-[11px] sm:text-[9px] text-[#666] hover:text-[#00ff41] transition-colors uppercase tracking-widest"
                 >
                   ↗ view mesh model
                 </button>
@@ -1256,12 +1256,12 @@ export default function DemoSection() {
                 <div className="border border-[#00ff41]">
                   <div className="flex items-center justify-between px-3 py-1.5 border-b border-[#0e0e0e]">
                     <span className="font-mono text-[10px] sm:text-[8px] text-[#00ff41] uppercase tracking-widest">local model</span>
-                    <button onClick={() => setShowMesh(false)} className="font-mono text-sm text-[#2e2e2e] hover:text-[#888] transition-colors leading-none">×</button>
+                    <button onClick={() => setShowMesh(false)} className="font-mono text-sm text-[#555] hover:text-[#a0a0a0] transition-colors leading-none">×</button>
                   </div>
                   <div className="overflow-hidden" style={{ height: 220 }}>
                     <MugModelViewer />
                   </div>
-                  <p className="px-3 py-1.5 font-mono text-[10px] sm:text-[8px] text-[#222]">drag to rotate · scroll to zoom</p>
+                  <p className="px-3 py-1.5 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">drag to rotate · scroll to zoom</p>
                 </div>
               )}
             </div>
@@ -1300,7 +1300,7 @@ function ChatMessage({
     return (
       <div className="flex justify-end">
         <div className="max-w-[78%] border border-[#1c1c1c] bg-[#0e0e0e] px-3 py-2">
-          <p className="text-sm sm:text-xs text-[#c0c0c0] leading-relaxed">{item.text}</p>
+          <p className="text-sm sm:text-xs text-[#d0d0d0] leading-relaxed">{item.text}</p>
         </div>
       </div>
     );
@@ -1314,19 +1314,19 @@ function ChatMessage({
         className="flex items-start gap-2 text-left w-full group"
       >
         <span
-          className="font-mono text-[11px] sm:text-[9px] text-[#282828] group-hover:text-[#555] transition-colors mt-px flex-shrink-0"
+          className="font-mono text-[11px] sm:text-[9px] text-[#555] group-hover:text-[#999] transition-colors mt-px flex-shrink-0"
           style={{ display: "inline-block", transform: expanded ? "rotate(90deg)" : "rotate(0deg)" }}
         >
           ▶
         </span>
         <div>
-          <span className="font-mono text-[11px] sm:text-[9px] text-[#282828] group-hover:text-[#555] uppercase tracking-widest transition-colors">
+          <span className="font-mono text-[11px] sm:text-[9px] text-[#555] group-hover:text-[#999] uppercase tracking-widest transition-colors">
             thinking ({item.lines?.length} steps)
           </span>
           {expanded && (
             <div className="mt-1.5 border-l-2 border-[#131313] pl-2.5 space-y-0.5">
               {item.lines?.map((line, i) => (
-                <p key={i} className="font-mono text-[11px] sm:text-[9px] text-[#303030] leading-5">
+                <p key={i} className="font-mono text-[11px] sm:text-[9px] text-[#5a5a5a] leading-5">
                   {line}
                 </p>
               ))}
@@ -1343,12 +1343,12 @@ function ChatMessage({
         <PAvatar />
         <div className="flex-1 space-y-0.5 pt-0.5">
           {item.lines?.slice(0, statusLineCount).map((line, i) => (
-            <p key={i} className="font-mono text-xs sm:text-[10px] text-[#4a4a4a] leading-5">
+            <p key={i} className="font-mono text-xs sm:text-[10px] text-[#7a7a7a] leading-5">
               <span className="text-[#00ff41]">✓</span> {line}
             </p>
           ))}
           {statusLineCount < (item.lines?.length ?? 0) && (
-            <p className="font-mono text-xs sm:text-[10px] text-[#2a2a2a] leading-5">
+            <p className="font-mono text-xs sm:text-[10px] text-[#555] leading-5">
               <span className="text-[#00ff41] animate-pulse">▌</span>
             </p>
           )}
@@ -1363,7 +1363,7 @@ function ChatMessage({
         <PAvatar />
         <div className="flex-1 max-w-[85%] space-y-2">
           {item.text?.split("\n\n").map((para, i) => (
-            <p key={i} className="text-sm sm:text-xs text-[#888] leading-relaxed">
+            <p key={i} className="text-sm sm:text-xs text-[#a0a0a0] leading-relaxed">
               {para}
             </p>
           ))}
@@ -1383,11 +1383,11 @@ function ChatMessage({
               <span className="font-mono text-xs sm:text-[10px] text-[#00ff41]">
                 {isTransfer ? "✓ transferred" : "✓ built"}
               </span>
-              <span className="font-mono text-[11px] sm:text-[9px] text-[#282828]">
+              <span className="font-mono text-[11px] sm:text-[9px] text-[#555]">
                 {isTransfer ? "Daily Mug · Part Studio" : "mug_v1 · Part Studio"}
               </span>
             </div>
-            <p className="font-mono text-[11px] sm:text-[9px] text-[#2e2e2e] leading-5">
+            <p className="font-mono text-[11px] sm:text-[9px] text-[#6a6a6a] leading-5">
               {isTransfer ? (
                 <>
                   7 direct · 6 replicated features

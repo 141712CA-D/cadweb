@@ -31,11 +31,11 @@ export default function InterCadPanel() {
   return (
     <div className="space-y-4">
       <div>
-        <p className="font-mono text-[10px] sm:text-[8px] text-[#202020] uppercase tracking-[0.2em] mb-2">
+        <p className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em] mb-2">
           Inter-CAD Transfer
         </p>
-        <p className="text-sm text-[#777]">Daily Mug</p>
-        <p className="font-mono text-[11px] sm:text-[9px] text-[#333] mt-0.5">from Fusion 360 → Onshape</p>
+        <p className="text-sm text-[#999]">Daily Mug</p>
+        <p className="font-mono text-[11px] sm:text-[9px] text-[#666] mt-0.5">from Fusion 360 → Onshape</p>
       </div>
 
       {/* A — Direct feature map */}
@@ -45,22 +45,22 @@ export default function InterCadPanel() {
           className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-[#0c0c0c] transition-colors"
         >
           <span
-            className="font-mono text-[10px] sm:text-[8px] text-[#2e2e2e] flex-shrink-0 transition-transform duration-150"
+            className="font-mono text-[10px] sm:text-[8px] text-[#555] flex-shrink-0 transition-transform duration-150"
             style={{ display: "inline-block", transform: openDirect ? "rotate(90deg)" : "rotate(0deg)" }}
           >
             ▶
           </span>
-          <span className="font-mono text-[11px] sm:text-[9px] text-[#484848] uppercase tracking-widest">
+          <span className="font-mono text-[11px] sm:text-[9px] text-[#777] uppercase tracking-widest">
             Direct Feature Map
           </span>
-          <span className="ml-auto font-mono text-[10px] sm:text-[8px] text-[#222]">{DIRECT_MAP.length}</span>
+          <span className="ml-auto font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">{DIRECT_MAP.length}</span>
         </button>
         {openDirect && (
           <div className="px-3 pb-2.5 space-y-1.5 border-t border-[#0e0e0e] pt-2">
             {DIRECT_MAP.map(([fusion, onshape]) => (
               <div key={fusion} className="flex items-center gap-1.5 py-0.5">
                 <span className="font-mono text-[11px] sm:text-[9px] text-[#4a9eff] truncate">{fusion}</span>
-                <span className="font-mono text-[11px] sm:text-[9px] text-[#242424] flex-shrink-0">→</span>
+                <span className="font-mono text-[11px] sm:text-[9px] text-[#4a4a4a] flex-shrink-0">→</span>
                 <span className="font-mono text-[11px] sm:text-[9px] text-[#00ff41] truncate">{onshape}</span>
               </div>
             ))}
@@ -75,15 +75,15 @@ export default function InterCadPanel() {
           className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-[#0c0c0c] transition-colors"
         >
           <span
-            className="font-mono text-[10px] sm:text-[8px] text-[#2e2e2e] flex-shrink-0 transition-transform duration-150"
+            className="font-mono text-[10px] sm:text-[8px] text-[#555] flex-shrink-0 transition-transform duration-150"
             style={{ display: "inline-block", transform: openDerived ? "rotate(90deg)" : "rotate(0deg)" }}
           >
             ▶
           </span>
-          <span className="font-mono text-[11px] sm:text-[9px] text-[#484848] uppercase tracking-widest">
+          <span className="font-mono text-[11px] sm:text-[9px] text-[#777] uppercase tracking-widest">
             Derived / Non-Direct Map
           </span>
-          <span className="ml-auto font-mono text-[10px] sm:text-[8px] text-[#222]">{DERIVED_MAP.length}</span>
+          <span className="ml-auto font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">{DERIVED_MAP.length}</span>
         </button>
         {openDerived && (
           <div className="px-3 pb-2.5 space-y-2.5 border-t border-[#0e0e0e] pt-2">
@@ -91,10 +91,10 @@ export default function InterCadPanel() {
               <div key={fusion} className="space-y-0.5">
                 <div className="flex items-center gap-1.5">
                   <span className="font-mono text-[11px] sm:text-[9px] text-[#4a9eff] truncate">{fusion}</span>
-                  <span className="font-mono text-[11px] sm:text-[9px] text-[#242424] flex-shrink-0">⇢</span>
+                  <span className="font-mono text-[11px] sm:text-[9px] text-[#4a4a4a] flex-shrink-0">⇢</span>
                   <span className="font-mono text-[11px] sm:text-[9px] text-[#f5a623] truncate">{onshape}</span>
                 </div>
-                <p className="font-mono text-[10px] sm:text-[8px] text-[#333] leading-4">{note}</p>
+                <p className="font-mono text-[10px] sm:text-[8px] text-[#666] leading-4">{note}</p>
               </div>
             ))}
           </div>
@@ -103,13 +103,13 @@ export default function InterCadPanel() {
 
       {/* C — Interactive intent web */}
       <div className="border border-[#141414] bg-[#070707]">
-        <p className="px-3 pt-2.5 pb-1.5 font-mono text-[10px] sm:text-[8px] text-[#222] uppercase tracking-[0.2em] border-b border-[#111]">
+        <p className="px-3 pt-2.5 pb-1.5 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em] border-b border-[#111]">
           Intent Web
         </p>
         <div className="overflow-hidden" style={{ height: 260 }}>
           <IntentWebViewer />
         </div>
-        <p className="px-3 py-1.5 font-mono text-[10px] sm:text-[8px] text-[#222]">
+        <p className="px-3 py-1.5 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">
           drag a node to move it · drag background to rotate · scroll to zoom
         </p>
       </div>
