@@ -1041,6 +1041,202 @@ export default function DemoSection() {
             </div>
           </div>
         </div>
+
+          {/* ── Mobile slide-in shelf ── */}
+          {/* Backdrop */}
+          <div
+            className={`absolute inset-0 z-40 bg-black/60 transition-opacity duration-300 sm:hidden ${
+              shelfOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+            }`}
+            onClick={() => setShelfOpen(false)}
+          />
+          {/* Shelf panel */}
+          <div
+            className={`absolute top-0 left-0 z-50 h-full w-72 flex flex-col bg-[#080808] border-r border-[#1c1c1c] transition-transform duration-300 ease-out sm:hidden ${
+              shelfOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#141414]">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-sm sm:text-xs text-[#00ff41] tracking-[0.1em]">Parametra</span>
+                <span className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">v1.0</span>
+              </div>
+              <button onClick={() => setShelfOpen(false)} className="font-mono text-lg text-[#666] hover:text-[#a0a0a0] leading-none">×</button>
+            </div>
+
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              {/* Nav */}
+              <nav className="px-2 pt-3 space-y-px border-b border-[#141414] pb-3">
+                {[
+                  { label: "Part Studios",       active: !showInterCad, accent: "#00ff41", onClick: () => setActivePanel("partStudio") },
+                  { label: "Documents",          active: false,         accent: "#00ff41", onClick: undefined },
+                  { label: "Assemblies",         active: false,         accent: "#00ff41", onClick: undefined },
+                  { label: "Variables",          active: false,         accent: "#00ff41", onClick: undefined },
+                  {
+                    label: "Inter-CAD Transfer",
+                    active: showInterCad,
+                    accent: "#4a9eff",
+                    onClick: transferState === "done" ? () => setActivePanel("interCad") : undefined,
+                  },
+                ].map(item => (
+                  <div
+                    key={item.label}
+                    onClick={item.onClick}
+                    className={`flex items-center gap-2 px-3 py-2 text-sm sm:text-xs select-none ${item.onClick ? "cursor-pointer" : ""} ${
+                      item.active ? "bg-[#0e0e0e] text-[#bbb]" : "text-[#555]"
+                    }`}
+                  >
+                    <span className="h-1 w-1 rounded-full flex-shrink-0" style={{ backgroundColor: item.active ? item.accent : "#1c1c1c" }} />
+                    {item.label}
+                  </div>
+                ))}
+              </nav>
+
+              {/* History */}
+              <div className="px-2 pt-4 border-b border-[#141414] pb-4">
+                <p className="px-3 pb-2 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em]">Recent</p>
+                {HISTORY.map(h => {
+                  const active = h.active && !showInterCad;
+                  const clickable = h.id === "mug";
+                  return (
+                    <div
+                      key={h.id}
+                      onClick={clickable ? () => setActivePanel("partStudio") : undefined}
+                      className={`px-3 py-2.5 ${clickable ? "cursor-pointer" : ""} ${active ? "bg-[#0e0e0e] border-l-2 border-[#00ff41]" : ""}`}
+                    >
+                      <p className={`text-sm sm:text-xs truncate ${active ? "text-[#bbb]" : "text-[#555]"}`}>{h.label}</p>
+                      <p className={`font-mono text-[11px] sm:text-[9px] ${active ? "text-[#666]" : "text-[#444]"}`}>{h.sub}</p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Inter-CAD import entry */}
+              <div className="px-2 pt-4 border-b border-[#141414] pb-4">
+                <p className="px-3 pb-2 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em]">Inter-CAD</p>
+                <button
+                  onClick={startTransfer}
+                  disabled={transferState === "playing"}
+                  className={`w-full text-left px-3 py-2.5 border transition-colors group ${
+                    showInterCad
+                      ? "border-blue-500 bg-blue-500/10"
+                      : transferState === "idle" && cursorHintDone
+                        ? "breathe-blue border-blue-900"
+                        : "border-[#161616]"
+                  }`}
+                >
+                  <p className={`text-sm sm:text-xs truncate ${showInterCad ? "text-[#bbb]" : "text-[#777]"}`}>
+                    {INTER_CAD.label}
+                  </p>
+                  <p className={`font-mono text-[11px] sm:text-[9px] ${showInterCad ? "text-blue-400" : "text-[#555]"}`}>
+                    {INTER_CAD.sub}
+                  </p>
+                </button>
+              </div>
+
+              {/* Tabs — Inter-CAD only exists once the transfer has been triggered */}
+              <div className="flex items-end border-b border-[#141414] px-4">
+                <button
+                  onClick={() => setActivePanel("partStudio")}
+                  className={`py-3 mr-5 font-mono text-xs sm:text-[10px] uppercase tracking-widest transition-colors ${
+                    !showInterCad ? "text-[#a0a0a0] border-b border-[#00ff41]" : "text-[#4a4a4a]"
+                  }`}
+                >
+                  Model Gen
+                </button>
+                {transferState !== "idle" && (
+                  <button
+                    onClick={() => setActivePanel("interCad")}
+                    className={`py-3 font-mono text-xs sm:text-[10px] uppercase tracking-widest transition-colors ${
+                      showInterCad ? "text-[#a0a0a0] border-b border-blue-500" : "text-[#4a4a4a]"
+                    }`}
+                  >
+                    Inter-CAD
+                  </button>
+                )}
+              </div>
+
+              {showInterCad ? (
+                <div className="px-4 pt-4 pb-6">
+                  <InterCadPanel />
+                </div>
+              ) : (
+              <>
+              {/* Feature tree */}
+              <div className="px-4 pt-4 border-b border-[#141414] pb-4">
+                <p className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em] mb-2">Feature Tree · mug_v1</p>
+                <div className="space-y-0.5">
+                  {FEATURES.map(f => (
+                    <div key={f.id} className={`flex items-center gap-2 py-0.5 transition-all duration-300 ${visibleFeat.has(f.id) ? "opacity-100" : "opacity-0"}`}>
+                      <FeatureIcon type={f.icon} />
+                      <span className="font-mono text-xs sm:text-[10px] text-[#8a8a8a]">{f.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Variables */}
+              {visibleMsgs.has("result") && (
+                <div className="px-4 pt-4 border-b border-[#141414] pb-4">
+                  <p className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em] mb-2">Live Variables</p>
+                  <div className="border border-[#141414] bg-[#070707]">
+                    {VAR_GROUPS.map(group => (
+                      <div key={group.label} className="border-b border-[#111] last:border-0">
+                        <button
+                          onClick={() => toggleVarGroup(group.label)}
+                          className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-[#0c0c0c] transition-colors"
+                        >
+                          <span
+                            className="font-mono text-[10px] sm:text-[8px] text-[#555] flex-shrink-0 transition-transform duration-150"
+                            style={{ display: "inline-block", transform: expandedVars.has(group.label) ? "rotate(90deg)" : "rotate(0deg)" }}
+                          >▶</span>
+                          <span className="font-mono text-[11px] sm:text-[9px] text-[#777] uppercase tracking-widest">{group.label}</span>
+                          <span className="ml-auto font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">{group.vars.length}</span>
+                        </button>
+                        {expandedVars.has(group.label) && (
+                          <div className="px-3 pb-2 space-y-1 border-t border-[#0e0e0e]">
+                            {group.vars.map(([name, val, unit]) => (
+                              <div key={name} className="flex items-center justify-between py-0.5">
+                                <span className="font-mono text-[11px] sm:text-[9px] text-[#666]">{name}</span>
+                                <span className="font-mono text-[11px] sm:text-[9px] text-[#00ff41]">{val} <span className="text-[#4a4a4a]">{unit}</span></span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Mesh viewer */}
+              {visibleMsgs.has("result") && (
+                <div className="px-4 pt-4 pb-6">
+                  {!showMesh ? (
+                    <button
+                      onClick={() => setShowMesh(true)}
+                      className="w-full border border-[#1c1c1c] hover:border-[#00ff41] py-2 font-mono text-[11px] sm:text-[9px] text-[#666] hover:text-[#00ff41] transition-colors uppercase tracking-widest"
+                    >
+                      ↗ view mesh model
+                    </button>
+                  ) : (
+                    <div className="border border-[#00ff41]">
+                      <div className="flex items-center justify-between px-3 py-1.5 border-b border-[#0e0e0e]">
+                        <span className="font-mono text-[10px] sm:text-[8px] text-[#00ff41] uppercase tracking-widest">local model</span>
+                        <button onClick={() => setShowMesh(false)} className="font-mono text-sm text-[#555] hover:text-[#a0a0a0] transition-colors leading-none">×</button>
+                      </div>
+                      <div className="overflow-hidden" style={{ height: 220 }}>
+                        <MugModelViewer />
+                      </div>
+                      <p className="px-3 py-1.5 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">drag to rotate · scroll to zoom</p>
+                    </div>
+                  )}
+                </div>
+              )}
+              </>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1075,201 +1271,6 @@ export default function DemoSection() {
         </div>
       </div>
 
-      {/* ── Mobile slide-in shelf ── */}
-      {/* Backdrop */}
-      <div
-        className={`absolute inset-0 z-40 bg-black/60 transition-opacity duration-300 sm:hidden ${
-          shelfOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-        onClick={() => setShelfOpen(false)}
-      />
-      {/* Shelf panel */}
-      <div
-        className={`absolute top-0 left-0 z-50 h-full w-72 flex flex-col bg-[#080808] border-r border-[#1c1c1c] transition-transform duration-300 ease-out sm:hidden ${
-          shelfOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[#141414]">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-sm sm:text-xs text-[#00ff41] tracking-[0.1em]">Parametra</span>
-            <span className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">v1.0</span>
-          </div>
-          <button onClick={() => setShelfOpen(false)} className="font-mono text-lg text-[#666] hover:text-[#a0a0a0] leading-none">×</button>
-        </div>
-
-        <div className="flex-1 min-h-0 overflow-y-auto">
-          {/* Nav */}
-          <nav className="px-2 pt-3 space-y-px border-b border-[#141414] pb-3">
-            {[
-              { label: "Part Studios",       active: !showInterCad, accent: "#00ff41", onClick: () => setActivePanel("partStudio") },
-              { label: "Documents",          active: false,         accent: "#00ff41", onClick: undefined },
-              { label: "Assemblies",         active: false,         accent: "#00ff41", onClick: undefined },
-              { label: "Variables",          active: false,         accent: "#00ff41", onClick: undefined },
-              {
-                label: "Inter-CAD Transfer",
-                active: showInterCad,
-                accent: "#4a9eff",
-                onClick: transferState === "done" ? () => setActivePanel("interCad") : undefined,
-              },
-            ].map(item => (
-              <div
-                key={item.label}
-                onClick={item.onClick}
-                className={`flex items-center gap-2 px-3 py-2 text-sm sm:text-xs select-none ${item.onClick ? "cursor-pointer" : ""} ${
-                  item.active ? "bg-[#0e0e0e] text-[#bbb]" : "text-[#555]"
-                }`}
-              >
-                <span className="h-1 w-1 rounded-full flex-shrink-0" style={{ backgroundColor: item.active ? item.accent : "#1c1c1c" }} />
-                {item.label}
-              </div>
-            ))}
-          </nav>
-
-          {/* History */}
-          <div className="px-2 pt-4 border-b border-[#141414] pb-4">
-            <p className="px-3 pb-2 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em]">Recent</p>
-            {HISTORY.map(h => {
-              const active = h.active && !showInterCad;
-              const clickable = h.id === "mug";
-              return (
-                <div
-                  key={h.id}
-                  onClick={clickable ? () => setActivePanel("partStudio") : undefined}
-                  className={`px-3 py-2.5 ${clickable ? "cursor-pointer" : ""} ${active ? "bg-[#0e0e0e] border-l-2 border-[#00ff41]" : ""}`}
-                >
-                  <p className={`text-sm sm:text-xs truncate ${active ? "text-[#bbb]" : "text-[#555]"}`}>{h.label}</p>
-                  <p className={`font-mono text-[11px] sm:text-[9px] ${active ? "text-[#666]" : "text-[#444]"}`}>{h.sub}</p>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Inter-CAD import entry */}
-          <div className="px-2 pt-4 border-b border-[#141414] pb-4">
-            <p className="px-3 pb-2 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em]">Inter-CAD</p>
-            <button
-              onClick={startTransfer}
-              disabled={transferState === "playing"}
-              className={`w-full text-left px-3 py-2.5 border transition-colors group ${
-                showInterCad
-                  ? "border-blue-500 bg-blue-500/10"
-                  : transferState === "idle" && cursorHintDone
-                    ? "breathe-blue border-blue-900"
-                    : "border-[#161616]"
-              }`}
-            >
-              <p className={`text-sm sm:text-xs truncate ${showInterCad ? "text-[#bbb]" : "text-[#777]"}`}>
-                {INTER_CAD.label}
-              </p>
-              <p className={`font-mono text-[11px] sm:text-[9px] ${showInterCad ? "text-blue-400" : "text-[#555]"}`}>
-                {INTER_CAD.sub}
-              </p>
-            </button>
-          </div>
-
-          {/* Tabs — Inter-CAD only exists once the transfer has been triggered */}
-          <div className="flex items-end border-b border-[#141414] px-4">
-            <button
-              onClick={() => setActivePanel("partStudio")}
-              className={`py-3 mr-5 font-mono text-xs sm:text-[10px] uppercase tracking-widest transition-colors ${
-                !showInterCad ? "text-[#a0a0a0] border-b border-[#00ff41]" : "text-[#4a4a4a]"
-              }`}
-            >
-              Model Gen
-            </button>
-            {transferState !== "idle" && (
-              <button
-                onClick={() => setActivePanel("interCad")}
-                className={`py-3 font-mono text-xs sm:text-[10px] uppercase tracking-widest transition-colors ${
-                  showInterCad ? "text-[#a0a0a0] border-b border-blue-500" : "text-[#4a4a4a]"
-                }`}
-              >
-                Inter-CAD
-              </button>
-            )}
-          </div>
-
-          {showInterCad ? (
-            <div className="px-4 pt-4 pb-6">
-              <InterCadPanel />
-            </div>
-          ) : (
-          <>
-          {/* Feature tree */}
-          <div className="px-4 pt-4 border-b border-[#141414] pb-4">
-            <p className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em] mb-2">Feature Tree · mug_v1</p>
-            <div className="space-y-0.5">
-              {FEATURES.map(f => (
-                <div key={f.id} className={`flex items-center gap-2 py-0.5 transition-all duration-300 ${visibleFeat.has(f.id) ? "opacity-100" : "opacity-0"}`}>
-                  <FeatureIcon type={f.icon} />
-                  <span className="font-mono text-xs sm:text-[10px] text-[#8a8a8a]">{f.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Variables */}
-          {visibleMsgs.has("result") && (
-            <div className="px-4 pt-4 border-b border-[#141414] pb-4">
-              <p className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em] mb-2">Live Variables</p>
-              <div className="border border-[#141414] bg-[#070707]">
-                {VAR_GROUPS.map(group => (
-                  <div key={group.label} className="border-b border-[#111] last:border-0">
-                    <button
-                      onClick={() => toggleVarGroup(group.label)}
-                      className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-[#0c0c0c] transition-colors"
-                    >
-                      <span
-                        className="font-mono text-[10px] sm:text-[8px] text-[#555] flex-shrink-0 transition-transform duration-150"
-                        style={{ display: "inline-block", transform: expandedVars.has(group.label) ? "rotate(90deg)" : "rotate(0deg)" }}
-                      >▶</span>
-                      <span className="font-mono text-[11px] sm:text-[9px] text-[#777] uppercase tracking-widest">{group.label}</span>
-                      <span className="ml-auto font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">{group.vars.length}</span>
-                    </button>
-                    {expandedVars.has(group.label) && (
-                      <div className="px-3 pb-2 space-y-1 border-t border-[#0e0e0e]">
-                        {group.vars.map(([name, val, unit]) => (
-                          <div key={name} className="flex items-center justify-between py-0.5">
-                            <span className="font-mono text-[11px] sm:text-[9px] text-[#666]">{name}</span>
-                            <span className="font-mono text-[11px] sm:text-[9px] text-[#00ff41]">{val} <span className="text-[#4a4a4a]">{unit}</span></span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Mesh viewer */}
-          {visibleMsgs.has("result") && (
-            <div className="px-4 pt-4 pb-6">
-              {!showMesh ? (
-                <button
-                  onClick={() => setShowMesh(true)}
-                  className="w-full border border-[#1c1c1c] hover:border-[#00ff41] py-2 font-mono text-[11px] sm:text-[9px] text-[#666] hover:text-[#00ff41] transition-colors uppercase tracking-widest"
-                >
-                  ↗ view mesh model
-                </button>
-              ) : (
-                <div className="border border-[#00ff41]">
-                  <div className="flex items-center justify-between px-3 py-1.5 border-b border-[#0e0e0e]">
-                    <span className="font-mono text-[10px] sm:text-[8px] text-[#00ff41] uppercase tracking-widest">local model</span>
-                    <button onClick={() => setShowMesh(false)} className="font-mono text-sm text-[#555] hover:text-[#a0a0a0] transition-colors leading-none">×</button>
-                  </div>
-                  <div className="overflow-hidden" style={{ height: 220 }}>
-                    <MugModelViewer />
-                  </div>
-                  <p className="px-3 py-1.5 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">drag to rotate · scroll to zoom</p>
-                </div>
-              )}
-            </div>
-          )}
-          </>
-          )}
-        </div>
-      </div>
     </section>
   );
 }
