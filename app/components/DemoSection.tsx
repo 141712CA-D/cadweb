@@ -239,9 +239,9 @@ export default function DemoSection() {
   const chatRef     = useRef<HTMLDivElement>(null);
   const startedRef  = useRef(false);
   const lockedRef   = useRef(false);
-  const lastScrollY = useRef(0);
 
   // Always start empty (SSR-safe) — fast-forward to complete state in useEffect if already played
+  const [started,      setStarted]      = useState(false);
   const [visibleMsgs,  setVisibleMsgs]  = useState<Set<string>>(new Set());
   const [visibleFeat,  setVisibleFeat]  = useState<Set<string>>(new Set());
   const [showTyping,   setShowTyping]   = useState(false);
@@ -294,6 +294,7 @@ export default function DemoSection() {
   useEffect(() => {
     if (sessionStorage.getItem("demoAnimPlayed") !== "true") return;
     startedRef.current = true;
+    setStarted(true);
     setVisibleMsgs(new Set(MESSAGES.map(m => m.id)));
     setVisibleFeat(new Set(FEATURES.map(f => f.id)));
     setVisibleLogs(LOG_LINES);
@@ -313,85 +314,63 @@ export default function DemoSection() {
     if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [visibleLogs]);
 
-  // Start animation + scroll-lock — only on first-ever view (gated by sessionStorage)
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return;
-    // Already played in a previous mount — skip animation and lock entirely
-    if (sessionStorage.getItem("demoAnimPlayed") === "true") {
-      startedRef.current = true;
-      return;
-    }
+  // The demo is gated behind an explicit start button — it never auto-plays on
+  // scroll. Clicking snaps the section into view, locks scroll, and runs the
+  // scripted conversation; scroll unlocks when the run completes.
+  const startDemo = () => {
+    if (startedRef.current) return;
+    startedRef.current = true;
+    setStarted(true);
 
-    lastScrollY.current = window.scrollY;
-    const onScroll = () => { lastScrollY.current = window.scrollY; };
-    window.addEventListener("scroll", onScroll, { passive: true });
+    // Snap instantly — "auto" would defer to the global `scroll-behavior: smooth`
+    // CSS rule, and locking scroll right after would freeze body overflow
+    // mid-animation, stranding the page wherever the smooth scroll had reached.
+    sectionRef.current?.scrollIntoView({ behavior: "instant", block: "start" });
 
-    const runAnimation = () => {
-      if (startedRef.current) return;
-      startedRef.current = true;
+    lockScroll();
+    lockedRef.current = true;
 
-      lockScroll();
-      lockedRef.current = true;
+    const lastDelay = Math.max(...SCRIPT.map(s => s.delay), ...LOG_LINES.map(l => l.t));
 
-      const lastDelay = Math.max(...SCRIPT.map(s => s.delay), ...LOG_LINES.map(l => l.t));
-      const timers: ReturnType<typeof setTimeout>[] = [];
-
-      SCRIPT.forEach((step, i) => {
-        timers.push(
-          setTimeout(() => {
-            if (step.typing !== undefined) setShowTyping(step.typing);
-            if (step.show?.length) {
-              setVisibleMsgs(prev => {
-                const n = new Set(prev);
-                step.show!.forEach(id => n.add(id));
-                return n;
-              });
-            }
-            if (step.features?.length) {
-              setVisibleFeat(prev => {
-                const n = new Set(prev);
-                step.features!.forEach(id => n.add(id));
-                return n;
-              });
-            }
-            if (i === SCRIPT.length - 1) setAnimDone(true);
-          }, step.delay)
-        );
-      });
-
-      LOG_LINES.forEach(line => {
-        timers.push(
-          setTimeout(() => {
-            setVisibleLogs(prev => [...prev, line]);
-          }, line.t)
-        );
-      });
-
-      timers.push(
-        setTimeout(() => {
-          if (lockedRef.current) {
-            unlockScroll();
-            lockedRef.current = false;
-          }
-          sessionStorage.setItem("demoAnimPlayed", "true");
-        }, lastDelay + 200)
-      );
-    };
-
-    const obs = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting && !startedRef.current) {
-          runAnimation();
+    SCRIPT.forEach((step, i) => {
+      setTimeout(() => {
+        if (step.typing !== undefined) setShowTyping(step.typing);
+        if (step.show?.length) {
+          setVisibleMsgs(prev => {
+            const n = new Set(prev);
+            step.show!.forEach(id => n.add(id));
+            return n;
+          });
         }
-      },
-      { threshold: 0.6 }
-    );
-    obs.observe(section);
+        if (step.features?.length) {
+          setVisibleFeat(prev => {
+            const n = new Set(prev);
+            step.features!.forEach(id => n.add(id));
+            return n;
+          });
+        }
+        if (i === SCRIPT.length - 1) setAnimDone(true);
+      }, step.delay);
+    });
 
+    LOG_LINES.forEach(line => {
+      setTimeout(() => {
+        setVisibleLogs(prev => [...prev, line]);
+      }, line.t);
+    });
+
+    setTimeout(() => {
+      if (lockedRef.current) {
+        unlockScroll();
+        lockedRef.current = false;
+      }
+      sessionStorage.setItem("demoAnimPlayed", "true");
+    }, lastDelay + 200);
+  };
+
+  // Never leave the page locked if the section unmounts mid-run
+  useEffect(() => {
     return () => {
-      obs.disconnect();
-      window.removeEventListener("scroll", onScroll);
       if (lockedRef.current) { unlockScroll(); lockedRef.current = false; }
     };
   }, []);
@@ -629,6 +608,22 @@ export default function DemoSection() {
       {/* ── Solid-bg stage — the window floats inside this, inset with padding ── */}
       <div className="flex h-full w-full items-center justify-center p-3 sm:p-6 lg:p-10">
         <div className="relative flex h-full w-full max-w-[1400px] flex-col overflow-hidden rounded-2xl border border-[#1c1c1c] bg-[#0b0b0b] shadow-2xl">
+          {/* Start gate — the demo never auto-plays; the user launches it */}
+          {!started && (
+            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-black/70 backdrop-blur-[3px] px-4">
+              <button
+                onClick={startDemo}
+                className="flex items-center gap-3 border border-[#00ff41] bg-[#080808] px-6 py-3.5 font-mono text-sm sm:text-xs uppercase tracking-widest text-[#00ff41] transition-colors hover:bg-[#00ff41] hover:text-black"
+                style={{ boxShadow: "0 0 24px rgba(0,255,65,0.15)" }}
+              >
+                <span className="text-[10px]">▶</span>
+                start mock application
+              </button>
+              <p className="font-mono text-[11px] sm:text-[10px] text-[#7a7a7a] uppercase tracking-widest text-center">
+                guided run · scrolling locks until it finishes
+              </p>
+            </div>
+          )}
           {/* Title bar */}
           <div className="flex items-center gap-4 px-4 py-2.5 border-b border-[#121212] bg-[#090909] flex-shrink-0">
             {/* Phone only: hamburger */}
@@ -1032,7 +1027,7 @@ export default function DemoSection() {
             <div className="px-5 py-3 border-t border-[#121212] flex-shrink-0">
               <div className="flex items-center gap-2 border border-[#141414] bg-[#0b0b0b] px-3 py-2.5">
                 <span className="flex-1 font-mono text-xs sm:text-[10px] text-[#4a4a4a] select-none">
-                  {animDone ? "design complete — ask a follow-up" : "demo in progress…"}
+                  {animDone ? "design complete — ask a follow-up" : started ? "demo in progress…" : "awaiting input…"}
                 </span>
                 <span className="font-mono text-[11px] sm:text-[9px] text-[#444] border border-[#181818] px-2 py-0.5 uppercase tracking-widest">
                   ↑

@@ -99,13 +99,12 @@ Section order: **hero fold → demo video (scroll-locked) → platform tree → 
 
 ### DemoSection (`DemoSection.tsx`)
 
-Scroll-locked demo video ("See it in action" / "Prompt to part, in real time"):
+Scripted mock-app demo (fake Parametra desktop window: sidebar, Part Studio panel, chat + logs tabs). Entirely data-driven by exported constants (`MESSAGES`/`SCRIPT`/`FEATURES`/`LOG_LINES`/`TRANSFER_*`/`VAR_GROUPS`) — covered by invariant tests, run `npm test` after editing them.
 
-- IntersectionObserver at threshold 0.6. A scroll listener tracks direction; the lock **only triggers on a downward pass**.
-- **Once per page load** (ref state, resets on refresh — intentionally NOT sessionStorage): locks body scroll via shared `lockScroll()`, centers the section, plays the video once. Lock engages synchronously before `video.play()` resolves so fling-scrolling can't skip it.
-- On `ended`: unlocks, then the video switches to muted looping.
-- After the one-time locked run: video loops while ≥60% in view, pauses out of view.
-- Autoplay blocked → releases the lock immediately (never traps the user).
+- **Gated start (all breakpoints)**: the demo never auto-plays. A `!started` overlay ("▶ start mock application") covers the window; clicking `startDemo()` snaps the section into view (`behavior: "instant"` — smooth would strand mid-scroll under the lock), locks body scroll via shared `lockScroll()`, runs the scripted conversation (~14s), then unlocks and sets `sessionStorage("demoAnimPlayed")`.
+- Already played this session → mount effect fast-forwards to the complete state, no gate, no lock.
+- After completion: desktop-only fake-cursor hint tour (once per session, `cursorHintPlayed`), then the Inter-CAD button breathes blue. `startTransfer()` (user click only) replays the same snap+lock pattern for the transfer conversation and swaps the middle panel to `InterCadPanel`.
+- Mobile (<sm): sidebar/panel live in a hamburger slide-in shelf; chat pane is the main view.
 
 ### scrollLock (`lib/scrollLock.ts`)
 
