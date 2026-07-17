@@ -19,6 +19,7 @@ Pre-launch marketing site for Parametra.ai, an AI-powered multi-agent CAD design
 - **Captcha**: Cloudflare Turnstile (`@marsidev/react-turnstile`) — widget only; secret-key verification is in the backend
 - **Analytics**: Vercel Speed Insights, mounted in `layout.tsx`
 - **Deployment**: Vercel (GitHub repo `141712CA-D/cadweb`, production branch `main`)
+- **Tests**: Vitest + React Testing Library (jsdom), config in `vitest.config.mts` / `vitest.setup.ts`. Run `npm test` (or `npm run test:watch`). Suites live in `__tests__/`: `lib/` (scrollLock ref-counting, apiUrl, consumeExpired), `components/` (MorphSwitch phases, SignupForm validation/captcha-gating with a mocked Turnstile + fetch, DemoSection script-data invariants). DemoSection's demo data constants (`MESSAGES`, `SCRIPT`, `FEATURES`, `LOG_LINES`, `TRANSFER_*`, `VAR_GROUPS`) are exported for the data tests — **run `npm test` after editing the demo script**; the tests enforce id references, chronological delays, and the "12 features · 9 variables" copy counts.
 
 ## Environment Variables
 

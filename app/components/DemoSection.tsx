@@ -26,7 +26,7 @@ interface Step {
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
-const MESSAGES: Msg[] = [
+export const MESSAGES: Msg[] = [
   {
     id: "u1",
     type: "user",
@@ -82,7 +82,7 @@ const MESSAGES: Msg[] = [
 ];
 
 // icon: "sketch" | "plane" | "solid"
-const FEATURES: { id: string; name: string; icon: "sketch" | "plane" | "solid" }[] = [
+export const FEATURES: { id: string; name: string; icon: "sketch" | "plane" | "solid" }[] = [
   { id: "f1",  name: "BaseProfile",  icon: "sketch" },
   { id: "f2",  name: "MidPlane",     icon: "plane"  },
   { id: "f3",  name: "MidProfile",   icon: "sketch" },
@@ -97,7 +97,7 @@ const FEATURES: { id: string; name: string; icon: "sketch" | "plane" | "solid" }
   { id: "f12", name: "Handle",       icon: "solid"  },
 ];
 
-const VAR_GROUPS: { label: string; vars: [string, string, string][] }[] = [
+export const VAR_GROUPS: { label: string; vars: [string, string, string][] }[] = [
   {
     label: "Body",
     vars: [
@@ -131,7 +131,7 @@ const HISTORY = [
 
 const INTER_CAD = { id: "intercad", label: "DailyMug.f3d", sub: "Fusion 360 · Ready to import" };
 
-const SCRIPT: Step[] = [
+export const SCRIPT: Step[] = [
   { delay: 700,   show: ["u1"] },
   { delay: 1500,  typing: true },
   { delay: 3200,  show: ["think1", "a1"], typing: false },
@@ -148,7 +148,7 @@ const SCRIPT: Step[] = [
 
 // ── Log lines (timed to match the script) ────────────────────────────────────
 interface LogLine { t: number; level: "info" | "api" | "ok" | "warn"; text: string }
-const LOG_LINES: LogLine[] = [
+export const LOG_LINES: LogLine[] = [
   { t: 700,   level: "info", text: '[NLM]  parsing → intent=new_part_studio, object="mug"' },
   { t: 900,   level: "info", text: "[NLM]  geometry class → revolve_with_handle" },
   { t: 1100,  level: "info", text: "[NLM]  missing params: height, base_dia, wall, handle" },
@@ -192,7 +192,7 @@ const LOG_LINES: LogLine[] = [
 
 // ── Inter-CAD transfer conversation ──────────────────────────────────────────
 
-const TRANSFER_MESSAGES: Msg[] = [
+export const TRANSFER_MESSAGES: Msg[] = [
   {
     id: "tu1",
     type: "user",
@@ -219,7 +219,7 @@ const TRANSFER_MESSAGES: Msg[] = [
 
 interface TransferStep { delay: number; show?: string[]; statusLines?: number; typing?: boolean }
 
-const TRANSFER_SCRIPT: TransferStep[] = [
+export const TRANSFER_SCRIPT: TransferStep[] = [
   { delay: 400,  show: ["tu1"] },
   { delay: 1200, typing: true },
   { delay: 2400, show: ["tstatus"], typing: false },
