@@ -603,7 +603,12 @@ export default function DemoSection() {
   const visibleTransferItems = TRANSFER_MESSAGES.filter(m => visibleTransferMsgs.has(m.id));
 
   return (
-    <section id="live-demo" ref={sectionRef} className="relative bg-[#080808] border-t border-[#1a1a1a]" style={{ height: "100svh" }}>
+    <section
+      id="live-demo"
+      ref={sectionRef}
+      className="relative bg-[#080808] border-t border-[#1a1a1a]"
+      style={{ height: "100svh" }}
+    >
 
       {/* ── Solid-bg stage — the window floats inside this, inset with padding ── */}
       <div className="flex h-full w-full items-center justify-center p-3 sm:p-6 lg:p-10">
@@ -1027,7 +1032,11 @@ export default function DemoSection() {
             <div className="px-5 py-3 border-t border-[#121212] flex-shrink-0">
               <div className="flex items-center gap-2 border border-[#141414] bg-[#0b0b0b] px-3 py-2.5">
                 <span className="flex-1 font-mono text-xs sm:text-[10px] text-[#4a4a4a] select-none">
-                  {animDone ? "design complete — ask a follow-up" : started ? "demo in progress…" : "awaiting input…"}
+                  {animDone
+                    ? "design complete — scroll or swipe to return to the site"
+                    : started
+                      ? "demo in progress…"
+                      : "awaiting input…"}
                 </span>
                 <span className="font-mono text-[11px] sm:text-[9px] text-[#444] border border-[#181818] px-2 py-0.5 uppercase tracking-widest">
                   ↑
