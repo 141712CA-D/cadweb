@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import DevBanner from "./components/DevBanner";
@@ -8,34 +8,6 @@ import SignupModal from "./components/SignupModal";
 
 export default function Home() {
   const [signupModalOpen, setSignupModalOpen] = useState(false);
-
-  // First-visit demo snap — once per session, separate from animation gate
-  useEffect(() => {
-    if (sessionStorage.getItem("demoSnapped") === "true") return;
-    sessionStorage.setItem("demoSnapped", "true");
-
-    let active = true;
-
-    const snap = (e: Event) => {
-      if (!active) return;
-      e.preventDefault();
-      active = false;
-      window.removeEventListener("wheel",     snap);
-      window.removeEventListener("touchmove", snap);
-      const demo = document.getElementById("live-demo");
-      if (!demo) return;
-      window.scrollTo({ top: demo.getBoundingClientRect().top, behavior: "smooth" });
-    };
-
-    window.addEventListener("wheel",     snap, { passive: false });
-    window.addEventListener("touchmove", snap, { passive: false });
-
-    return () => {
-      active = false;
-      window.removeEventListener("wheel",     snap);
-      window.removeEventListener("touchmove", snap);
-    };
-  }, []);
 
   return (
     <>
