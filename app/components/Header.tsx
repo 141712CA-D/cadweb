@@ -90,12 +90,6 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
             >
               How It Works
             </Link>
-            <Link
-              href="/about"
-              className="hidden sm:block font-mono text-xs uppercase tracking-widest px-4 py-2 border border-[#262626] text-[#888] hover:border-[#00ff41] hover:text-[#00ff41] transition-all duration-200"
-            >
-              About Us
-            </Link>
 
             {/* Waitlist button */}
             <button
@@ -139,14 +133,6 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
                     className="flex items-center gap-3 px-4 py-3 font-mono text-xs uppercase tracking-widest text-[#888] hover:text-[#00ff41] hover:bg-[#161616] transition-colors"
                   >
                     How It Works
-                  </Link>
-                  <div className="h-px bg-[#262626]" />
-                  <Link
-                    href="/about"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 font-mono text-xs uppercase tracking-widest text-[#888] hover:text-[#00ff41] hover:bg-[#161616] transition-colors"
-                  >
-                    About Us
                   </Link>
                 </div>
               )}

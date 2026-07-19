@@ -59,7 +59,6 @@ export default function Home() {
             <p className="font-mono text-xs text-[#333] sm:absolute sm:left-1/2 sm:-translate-x-1/2">v1.5.1.1</p>
             <div className="grid grid-cols-3 justify-items-center gap-x-6 gap-y-3 sm:flex sm:items-center sm:gap-6">
               <a href="/how-it-works" className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">How It Works</a>
-              <a href="/about" className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">About</a>
               <a href="/contact" className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">Contact Us</a>
               <button
                 type="button"
