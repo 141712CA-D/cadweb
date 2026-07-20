@@ -267,6 +267,10 @@ export default function DemoSection() {
   // flips true once the cursor-hint sequence has finished pointing at it, so the
   // two hints never compete; on mobile (no cursor hint) it flips true immediately.
   const [cursorHintDone,     setCursorHintDone]     = useState(false);
+  // Phone-only equivalent of the desktop cursor hint — the mesh view and
+  // Inter-CAD nav live behind the hamburger shelf on mobile, so instead of a
+  // click-through sequence we just point at the hamburger once.
+  const [showMobileHint,     setShowMobileHint]     = useState(false);
 
   const logsRef       = useRef<HTMLDivElement>(null);
   const logsTabRef    = useRef<HTMLButtonElement>(null);
@@ -380,9 +384,16 @@ export default function DemoSection() {
     if (!animDone) return;
     // Phones have no cursor hint at all (sidebar/mesh targets live behind the
     // hamburger shelf there) — let the Inter-CAD button start breathing
-    // immediately instead of waiting on a sequence that never runs.
+    // immediately, and point at the hamburger once instead of running the
+    // desktop click-through sequence.
     if (typeof window !== "undefined" && window.innerWidth < 640) {
       setCursorHintDone(true);
+      if (sessionStorage.getItem("mobileHamburgerHintPlayed") !== "true") {
+        sessionStorage.setItem("mobileHamburgerHintPlayed", "true");
+        setShowMobileHint(true);
+        const t = setTimeout(() => setShowMobileHint(false), 6000);
+        return () => clearTimeout(t);
+      }
       return;
     }
     if (cursorRunning.current) return;
@@ -631,18 +642,32 @@ export default function DemoSection() {
           )}
           {/* Title bar */}
           <div className="flex items-center gap-4 px-4 py-2.5 border-b border-[#121212] bg-[#090909] flex-shrink-0">
-            {/* Phone only: hamburger */}
-            <button
-              className="flex sm:hidden items-center gap-1.5 flex-shrink-0"
-              onClick={() => setShelfOpen(true)}
-              aria-label="Open file panel"
-            >
-              <span className="flex flex-col gap-[3px]">
-                <span className="block h-px w-4 bg-[#555]" />
-                <span className="block h-px w-4 bg-[#555]" />
-                <span className="block h-px w-3 bg-[#555]" />
-              </span>
-            </button>
+            {/* Phone only: hamburger + inline hint — fixed row height so the
+                hint appearing/disappearing never nudges the title bar's height */}
+            <div className="flex sm:hidden h-5 min-w-0 flex-1 items-center gap-2.5 overflow-hidden">
+              <button
+                className="flex flex-shrink-0 items-center gap-1.5"
+                onClick={() => { setShelfOpen(true); setShowMobileHint(false); }}
+                aria-label="Open file panel"
+              >
+                <span className="flex flex-col gap-1">
+                  <span className={`block h-0.5 w-5 transition-colors ${showMobileHint ? "bg-[#00ff41]" : "bg-[#555]"}`} />
+                  <span className={`block h-0.5 w-5 transition-colors ${showMobileHint ? "bg-[#00ff41]" : "bg-[#555]"}`} />
+                  <span className={`block h-0.5 w-4 transition-colors ${showMobileHint ? "bg-[#00ff41]" : "bg-[#555]"}`} />
+                </span>
+              </button>
+              {showMobileHint && (
+                <button
+                  onClick={() => { setShelfOpen(true); setShowMobileHint(false); }}
+                  className="flex min-w-0 flex-1 items-center gap-1.5 animate-fade-in"
+                >
+                  <span className="flex-shrink-0 text-[#00ff41] leading-none animate-pulse">←</span>
+                  <span className="min-w-0 flex-1 truncate font-mono text-[10px] leading-none text-[#00ff41]">
+                    tap here to view the model & more demos
+                  </span>
+                </button>
+              )}
+            </div>
             {/* Tablet and up: traffic lights */}
             <div className="hidden sm:flex items-center gap-1.5 flex-shrink-0">
               <div className="h-3 w-3 rounded-full bg-[#ff5f57]" />
