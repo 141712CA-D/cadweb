@@ -5,6 +5,7 @@ import Header from "./components/Header";
 import Hero from "./components/Hero";
 import DevBanner from "./components/DevBanner";
 import SignupModal from "./components/SignupModal";
+import SocialLinks from "./components/SocialLinks";
 
 export default function Home() {
   const [signupModalOpen, setSignupModalOpen] = useState(false);
@@ -55,7 +56,10 @@ export default function Home() {
 
         <footer className="bg-[#0f0f0f] border-t border-[#262626] py-6 px-6">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="font-mono text-xs text-[#555]">© {new Date().getFullYear()} Parametra</p>
+            <div className="flex flex-col items-center gap-2 sm:items-start">
+              <p className="font-mono text-xs text-[#555]">© {new Date().getFullYear()} Parametra</p>
+              <SocialLinks />
+            </div>
             <p className="font-mono text-xs text-[#333] sm:absolute sm:left-1/2 sm:-translate-x-1/2">v1.5.1.1</p>
             <div className="grid grid-cols-3 justify-items-center gap-x-6 gap-y-3 sm:flex sm:items-center sm:gap-6">
               <a href="/how-it-works" className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">How It Works</a>

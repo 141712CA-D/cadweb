@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import SignupForm from "@/app/components/SignupForm";
+import SocialLinks from "@/app/components/SocialLinks";
 
 export default function SignupPage() {
   return (
@@ -9,7 +10,10 @@ export default function SignupPage() {
       <SignupForm />
       <footer className="bg-[#0f0f0f] border-t border-[#262626] py-6 px-6">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="font-mono text-xs text-[#555]">© {new Date().getFullYear()} Parametra</p>
+          <div className="flex flex-col items-center gap-2 sm:items-start">
+            <p className="font-mono text-xs text-[#555]">© {new Date().getFullYear()} Parametra</p>
+            <SocialLinks />
+          </div>
           <div className="grid grid-cols-3 gap-x-6 gap-y-3 sm:flex sm:items-center sm:gap-6">
             <Link href="/how-it-works" className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">How It Works</Link>
             <Link href="/contact" className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">Contact Us</Link>
