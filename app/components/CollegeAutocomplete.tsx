@@ -1,11 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-
-interface University {
-  name: string;
-  country: string;
-}
+import { searchUniversities, type University } from "@/lib/collegeSearch";
 
 // Module-level cache — the dataset is ~650KB, so every SignupForm/ContactForm
 // instance on the page shares one fetch instead of re-requesting it.
@@ -61,19 +57,13 @@ export default function CollegeAutocomplete({ value, onChange, placeholder, clas
   }, []);
 
   // Freeform field — the list only ever suggests, it never restricts what
-  // the user can type (some schools won't be in the dataset).
+  // the user can type (some schools won't be in the dataset). Matching
+  // tolerates reordered words ("Stony Brook University" -> "State
+  // University of New York at Stony Brook") and common acronyms/nicknames
+  // ("UCLA", "UMich") — see lib/collegeSearch.ts.
   const matches = useMemo(() => {
-    const query = value.trim().toLowerCase();
-    if (!query || !universities) return [];
-    const starts: University[] = [];
-    const contains: University[] = [];
-    for (const u of universities) {
-      const name = u.name.toLowerCase();
-      if (name.startsWith(query)) starts.push(u);
-      else if (contains.length < MAX_RESULTS && name.includes(query)) contains.push(u);
-      if (starts.length >= MAX_RESULTS) break;
-    }
-    return [...starts, ...contains].slice(0, MAX_RESULTS);
+    if (!value.trim() || !universities) return [];
+    return searchUniversities(value, universities, MAX_RESULTS);
   }, [value, universities]);
 
   const selectMatch = (name: string) => {
