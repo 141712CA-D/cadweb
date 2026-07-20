@@ -1,41 +1,20 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { searchUniversities, type University } from "@/lib/collegeSearch";
-
-// Module-level cache — the dataset is ~650KB, so every SignupForm/ContactForm
-// instance on the page shares one fetch instead of re-requesting it.
-let cachedUniversities: University[] | null = null;
-let inFlightFetch: Promise<University[]> | null = null;
-
-function loadUniversities(): Promise<University[]> {
-  if (cachedUniversities) return Promise.resolve(cachedUniversities);
-  if (!inFlightFetch) {
-    inFlightFetch = fetch("/data/universities.json")
-      .then((res) => (res.ok ? res.json() : []))
-      .then((data: University[]) => {
-        cachedUniversities = data;
-        return data;
-      })
-      .catch(() => {
-        cachedUniversities = [];
-        return [];
-      });
-  }
-  return inFlightFetch;
-}
+import { loadUniversities, searchUniversities, type University } from "@/lib/collegeSearch";
 
 const MAX_RESULTS = 8;
 
 interface CollegeAutocompleteProps {
   value: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
   placeholder: string;
   className: string;
   maxLength?: number;
 }
 
-export default function CollegeAutocomplete({ value, onChange, placeholder, className, maxLength }: CollegeAutocompleteProps) {
+export default function CollegeAutocomplete({ value, onChange, onBlur, placeholder, className, maxLength }: CollegeAutocompleteProps) {
   const [universities, setUniversities] = useState<University[] | null>(null);
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -56,11 +35,12 @@ export default function CollegeAutocomplete({ value, onChange, placeholder, clas
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
-  // Freeform field — the list only ever suggests, it never restricts what
-  // the user can type (some schools won't be in the dataset). Matching
-  // tolerates reordered words ("Stony Brook University" -> "State
-  // University of New York at Stony Brook") and common acronyms/nicknames
-  // ("UCLA", "UMich") — see lib/collegeSearch.ts.
+  // Typing itself is still freeform, but the parent form's validate()/
+  // allFieldsFilled require the final value to exactly match a listed name
+  // (see lib/collegeSearch.ts's isKnownUniversity) — this list is what lets
+  // the user find and select that exact string. Matching here tolerates
+  // reordered words ("Stony Brook University" -> "State University of New
+  // York at Stony Brook") and common acronyms/nicknames ("UCLA", "UMich").
   const matches = useMemo(() => {
     if (!value.trim() || !universities) return [];
     return searchUniversities(value, universities, MAX_RESULTS);
@@ -85,6 +65,7 @@ export default function CollegeAutocomplete({ value, onChange, placeholder, clas
         aria-autocomplete="list"
         onChange={(e) => { onChange(e.target.value); setOpen(true); setActiveIndex(-1); }}
         onFocus={() => setOpen(true)}
+        onBlur={onBlur}
         onKeyDown={(e) => {
           if (!open || matches.length === 0) return;
           if (e.key === "ArrowDown") { e.preventDefault(); setActiveIndex((i) => (i + 1) % matches.length); }

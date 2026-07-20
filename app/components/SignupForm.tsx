@@ -8,12 +8,46 @@ import { apiUrl } from "@/lib/api";
 import { consumeExpired } from "@/lib/consumeExpired";
 import MorphSwitch from "./MorphSwitch";
 import CollegeAutocomplete from "./CollegeAutocomplete";
+import { isKnownUniversity, loadUniversities, type University } from "@/lib/collegeSearch";
 
 type FormType = "individual" | "team";
 type Status = "idle" | "loading" | "verify" | "success" | "welcome_back" | "duplicate" | "error";
 type EmailCheck = "idle" | "checking" | "available" | "registered" | "returning";
 
 const INDIVIDUAL_ROLES = ["Student", "Instructor", "Freelancer", "Hobbyist"];
+
+// Mirrors WaitlistRequest.ValidateBody() on the backend — the frontend's own
+// maxLength/validate() should catch all of these before submit, but the
+// backend is the source of truth (e.g. a bypassed client), so its rejection
+// still needs to land on the right field instead of a generic error.
+function mapWaitlistError(error: string | undefined, type: FormType): { field?: string; message: string } {
+  switch (error) {
+    case "Invalid captcha":
+      return { field: "captcha", message: "Please complete the verification." };
+    case "Name is too long":
+      return { field: type === "individual" ? "indName" : "teamRep", message: "That name is too long." };
+    case "Email is too long":
+      return { field: type === "individual" ? "indEmail" : "teamEmail", message: "That email is too long." };
+    case "University is too long":
+      return { field: "indUniversity", message: "That school name is too long." };
+    case "Reason is too long":
+      return { field: "indReason", message: "Please shorten your answer." };
+    case "University is required for students":
+      return { field: "indUniversity", message: "Please enter where you attend." };
+    case "University is required for instructors":
+      return { field: "indUniversity", message: "Please enter where you teach." };
+    case "Invalid role":
+      return { field: "indRole", message: "Please select a valid role." };
+    case "Invalid university":
+      return { field: "indUniversity", message: "Please select a university from the list." };
+    case "Organization is too long":
+      return { field: "teamOrg", message: "That organization name is too long." };
+    case "Usage is too long":
+      return { field: "teamUsage", message: "Please shorten your answer." };
+    default:
+      return { message: "Something went wrong. Please try again." };
+  }
+}
 
 const inputClass = (error?: string) =>
   `w-full bg-[#161616] border ${error ? "border-red-500/60" : "border-[#262626]"} px-4 py-3 text-sm text-[#e8e8e8] placeholder:text-[#444] focus:outline-none focus:border-[#00ff41] transition-all duration-150 font-mono`;
@@ -49,6 +83,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
   const [status, setStatus] = useState<Status>("idle");
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errorMessage, setErrorMessage] = useState("Something went wrong. Please try again.");
   const turnstileRef = useRef<TurnstileInstance>(null);
   const [emailCheck, setEmailCheck] = useState<EmailCheck>("idle");
   const emailCannotRegister = emailCheck === "registered";
@@ -71,12 +106,35 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
   const [teamRole, setTeamRole] = useState("");
   const [teamUsage, setTeamUsage] = useState("");
 
+  // Loaded once the university field is actually relevant (not on initial
+  // mount) — validate()/allFieldsFilled use it to require an exact match
+  // against a real listed school, same dataset CollegeAutocomplete suggests
+  // from.
+  const [universities, setUniversities] = useState<University[] | null>(null);
+  const needsUniversity = indRole === "Student" || indRole === "Instructor";
+  useEffect(() => {
+    if (needsUniversity) loadUniversities().then(setUniversities);
+  }, [needsUniversity]);
+  const universityIsValid = !needsUniversity || (universities !== null && isKnownUniversity(indUniversity, universities));
+
+  // Surfaces the "not a listed school" error as soon as the user leaves the
+  // field, rather than only on submit — the disabled submit button alone
+  // doesn't explain why.
+  const handleUniversityBlur = () => {
+    if (!indUniversity.trim()) return;
+    if (universities === null) {
+      setErrors((prev) => ({ ...prev, indUniversity: "Still loading schools — please try again in a moment." }));
+    } else if (!isKnownUniversity(indUniversity, universities)) {
+      setErrors((prev) => ({ ...prev, indUniversity: "Please select a university from the list." }));
+    }
+  };
+
   const allFieldsFilled =
     type === "individual"
       ? indName.trim() !== "" &&
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(indEmail.trim()) &&
         indRole !== "" &&
-        ((indRole !== "Student" && indRole !== "Instructor") || indUniversity.trim() !== "") &&
+        universityIsValid &&
         indReason.trim() !== ""
       : teamRep.trim() !== "" &&
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(teamEmail.trim()) &&
@@ -127,7 +185,9 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
       if (!indEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(indEmail)) e.indEmail = "Please enter a valid email address.";
       if (!indRole) e.indRole = "Please select a role.";
       if (indRole === "Student" && !indUniversity.trim()) e.indUniversity = "Please enter where you attend.";
-      if (indRole === "Instructor" && !indUniversity.trim()) e.indUniversity = "Please enter where you teach.";
+      else if (indRole === "Instructor" && !indUniversity.trim()) e.indUniversity = "Please enter where you teach.";
+      else if (needsUniversity && universities === null) e.indUniversity = "Still loading schools — please try again in a moment.";
+      else if (needsUniversity && !universityIsValid) e.indUniversity = "Please select a university from the list.";
       if (!indReason.trim()) e.indReason = "Please tell us why you want to use Parametra.";
     } else {
       if (!teamRep.trim()) e.teamRep = "Name is required.";
@@ -174,7 +234,15 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
       if (!res.ok) {
         turnstileRef.current?.reset();
         setCaptchaToken(null);
-        setStatus("error");
+        const data = await res.json().catch(() => ({}));
+        const mapped = mapWaitlistError(data.error, type);
+        if (mapped.field) {
+          setErrors((prev) => ({ ...prev, [mapped.field as string]: mapped.message }));
+          setStatus("idle");
+        } else {
+          setErrorMessage(mapped.message);
+          setStatus("error");
+        }
         return;
       }
       setPendingEmail(type === "individual" ? indEmail : teamEmail);
@@ -237,6 +305,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
     setStatus("idle");
     setCaptchaToken(null);
     setErrors({});
+    setErrorMessage("Something went wrong. Please try again.");
     setCode("");
     setVerifyError("");
     setPendingEmail("");
@@ -387,7 +456,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
                       <label className={labelClass}>Email</label>
                       <EmailCheckBadge status={emailCheck} />
                     </div>
-                    <input type="email" className={inputClass(errors.indEmail)} placeholder="you@example.com" value={indEmail} maxLength={254}
+                    <input type="email" className={inputClass(errors.indEmail)} placeholder="you@example.com" value={indEmail} maxLength={255}
                       onChange={(e) => { setIndEmail(e.target.value); clearError("indEmail"); }} />
                     {errors.indEmail && <p className={errorClass}>{errors.indEmail}</p>}
                   </div>
@@ -410,7 +479,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
                     <div className="form-field-enter delay-100">
                       <label className={labelClass}>University / Institution / School</label>
                       <CollegeAutocomplete className={inputClass(errors.indUniversity)} placeholder="Where do you attend?" value={indUniversity} maxLength={120}
-                        onChange={(v) => { setIndUniversity(v); clearError("indUniversity"); }} />
+                        onChange={(v) => { setIndUniversity(v); clearError("indUniversity"); }} onBlur={handleUniversityBlur} />
                       {errors.indUniversity && <p className={errorClass}>{errors.indUniversity}</p>}
                     </div>
                   )}
@@ -418,7 +487,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
                     <div className="form-field-enter delay-100">
                       <label className={labelClass}>University / Institution / School</label>
                       <CollegeAutocomplete className={inputClass(errors.indUniversity)} placeholder="Where do you teach?" value={indUniversity} maxLength={120}
-                        onChange={(v) => { setIndUniversity(v); clearError("indUniversity"); }} />
+                        onChange={(v) => { setIndUniversity(v); clearError("indUniversity"); }} onBlur={handleUniversityBlur} />
                       {errors.indUniversity && <p className={errorClass}>{errors.indUniversity}</p>}
                     </div>
                   )}
@@ -445,7 +514,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
                       <label className={labelClass}>Email</label>
                       <EmailCheckBadge status={emailCheck} />
                     </div>
-                    <input type="email" className={inputClass(errors.teamEmail)} placeholder="you@company.com" value={teamEmail} maxLength={254}
+                    <input type="email" className={inputClass(errors.teamEmail)} placeholder="you@company.com" value={teamEmail} maxLength={255}
                       onChange={(e) => { setTeamEmail(e.target.value); clearError("teamEmail"); }} />
                     {errors.teamEmail && <p className={errorClass}>{errors.teamEmail}</p>}
                   </div>
@@ -484,7 +553,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
               {errors.captcha && <p className={errorClass}>{errors.captcha}</p>}
 
               {status === "error" && (
-                <p className={errorClass}>Something went wrong. Please try again.</p>
+                <p className={errorClass}>{errorMessage}</p>
               )}
 
               <button

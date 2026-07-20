@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { Turnstile } from "@marsidev/react-turnstile";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
@@ -8,11 +8,43 @@ import { apiUrl } from "@/lib/api";
 import { consumeExpired } from "@/lib/consumeExpired";
 import MorphSwitch from "./MorphSwitch";
 import CollegeAutocomplete from "./CollegeAutocomplete";
+import { isKnownUniversity, loadUniversities, type University } from "@/lib/collegeSearch";
 
 type FormType = "individual" | "team";
 type Status = "idle" | "loading" | "verify" | "success" | "cooldown" | "error";
 
 const ROLES = ["Student", "Instructor", "Freelancer", "Hobbyist", "Other"];
+
+// Mirrors ContactRequest.ValidateBody() on the backend — the frontend's own
+// maxLength/validate() should catch all of these before submit, but the
+// backend is the source of truth (e.g. a bypassed client), so its rejection
+// still needs to land on the right field instead of a generic error.
+function mapContactError(error: string | undefined, type: FormType): { field?: string; message: string } {
+  switch (error) {
+    case "Invalid captcha":
+      return { field: "captcha", message: "Please complete the verification." };
+    case "Name too long":
+      return { field: type === "individual" ? "name" : "teamRep", message: "That name is too long." };
+    case "Email too long":
+      return { field: type === "individual" ? "email" : "teamEmail", message: "That email is too long." };
+    case "University name too long":
+      return { field: "university", message: "That school name is too long." };
+    case "Subject too long":
+      return { field: type === "individual" ? "subject" : "teamSubject", message: "Please shorten the subject." };
+    case "Message too long":
+      return { field: type === "individual" ? "message" : "teamMessage", message: "Please shorten your message." };
+    case "University required for students":
+      return { field: "university", message: "Please enter where you study." };
+    case "Organization name too long":
+      return { field: "teamOrg", message: "That organization name is too long." };
+    case "Role too long":
+      return { field: "teamRole", message: "Please shorten your role." };
+    case "Invalid university":
+      return { field: "university", message: "Please select a university from the list." };
+    default:
+      return { message: "Something went wrong. Please try again." };
+  }
+}
 
 const inputClass = (error?: string) =>
   `w-full bg-[#161616] border ${error ? "border-red-500/60" : "border-[#262626]"} px-4 py-3 text-sm text-[#e8e8e8] placeholder:text-[#444] focus:outline-none focus:border-[#00ff41] transition-all duration-150 font-mono`;
@@ -31,6 +63,7 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
   const [cooldownMins, setCooldownMins] = useState(0);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errorMessage, setErrorMessage] = useState("Something went wrong. Please try again.");
   const turnstileRef = useRef<TurnstileInstance>(null);
 
   const [code, setCode] = useState("");
@@ -52,12 +85,35 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
   const [teamSubject, setTeamSubject] = useState("");
   const [teamMessage, setTeamMessage] = useState("");
 
+  // Loaded once the university field is actually relevant (not on initial
+  // mount) — validate()/allFieldsFilled use it to require an exact match
+  // against a real listed school, same dataset CollegeAutocomplete suggests
+  // from.
+  const [universities, setUniversities] = useState<University[] | null>(null);
+  const needsUniversity = role === "Student";
+  useEffect(() => {
+    if (needsUniversity) loadUniversities().then(setUniversities);
+  }, [needsUniversity]);
+  const universityIsValid = !needsUniversity || (universities !== null && isKnownUniversity(university, universities));
+
+  // Surfaces the "not a listed school" error as soon as the user leaves the
+  // field, rather than only on submit — the disabled submit button alone
+  // doesn't explain why.
+  const handleUniversityBlur = () => {
+    if (!university.trim()) return;
+    if (universities === null) {
+      setErrors((prev) => ({ ...prev, university: "Still loading schools — please try again in a moment." }));
+    } else if (!isKnownUniversity(university, universities)) {
+      setErrors((prev) => ({ ...prev, university: "Please select a university from the list." }));
+    }
+  };
+
   const allFieldsFilled =
     type === "individual"
       ? name.trim() !== "" &&
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) &&
         role !== "" &&
-        (role !== "Student" || university.trim() !== "") &&
+        universityIsValid &&
         subject.trim() !== "" &&
         message.trim() !== ""
       : teamRep.trim() !== "" &&
@@ -78,6 +134,8 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
       if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = "Please enter a valid email address.";
       if (!role) e.role = "Please select a role.";
       if (role === "Student" && !university.trim()) e.university = "University is required for students.";
+      else if (needsUniversity && universities === null) e.university = "Still loading schools — please try again in a moment.";
+      else if (needsUniversity && !universityIsValid) e.university = "Please select a university from the list.";
       if (!subject.trim()) e.subject = "Subject is required.";
       if (!message.trim()) e.message = "Please enter a message.";
     } else {
@@ -123,7 +181,15 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
       if (!res.ok) {
         turnstileRef.current?.reset();
         setCaptchaToken(null);
-        setStatus("error");
+        const data = await res.json().catch(() => ({}));
+        const mapped = mapContactError(data.error, type);
+        if (mapped.field) {
+          setErrors((prev) => ({ ...prev, [mapped.field as string]: mapped.message }));
+          setStatus("idle");
+        } else {
+          setErrorMessage(mapped.message);
+          setStatus("error");
+        }
         return;
       }
       setPendingEmail(type === "individual" ? email : teamEmail);
@@ -184,6 +250,7 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
     setStatus("idle");
     setCaptchaToken(null);
     setErrors({});
+    setErrorMessage("Something went wrong. Please try again.");
     setCode("");
     setVerifyError("");
     setPendingEmail("");
@@ -346,7 +413,7 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
                     <div className="form-field-enter delay-100">
                       <label className={labelClass}>University</label>
                       <CollegeAutocomplete className={inputClass(errors.university)} placeholder="Your university or institution" value={university} maxLength={120}
-                        onChange={(v) => { setUniversity(v); clearError("university"); }} />
+                        onChange={(v) => { setUniversity(v); clearError("university"); }} onBlur={handleUniversityBlur} />
                       {errors.university && <p className={errorClass}>{errors.university}</p>}
                     </div>
                   )}
@@ -421,7 +488,7 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
               {errors.captcha && <p className={errorClass}>{errors.captcha}</p>}
 
               {status === "error" && (
-                <p className={errorClass}>Something went wrong. Please try again.</p>
+                <p className={errorClass}>{errorMessage}</p>
               )}
 
               <button

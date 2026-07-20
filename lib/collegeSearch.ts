@@ -3,6 +3,36 @@ export interface University {
   country: string;
 }
 
+// Module-level cache — every CollegeAutocomplete instance and every form's
+// own submit-time validation share one fetch instead of re-requesting it.
+let cachedUniversities: University[] | null = null;
+let inFlightFetch: Promise<University[]> | null = null;
+
+export function loadUniversities(): Promise<University[]> {
+  if (cachedUniversities) return Promise.resolve(cachedUniversities);
+  if (!inFlightFetch) {
+    inFlightFetch = fetch("/data/universities.json")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data: University[]) => {
+        cachedUniversities = data;
+        return data;
+      })
+      .catch(() => {
+        cachedUniversities = [];
+        return [];
+      });
+  }
+  return inFlightFetch;
+}
+
+// The autocomplete only ever suggests — this is what actually enforces that
+// a submitted school is one of the real listed names, not just freeform text.
+export function isKnownUniversity(value: string, universities: University[]): boolean {
+  const v = value.trim().toLowerCase();
+  if (!v) return false;
+  return universities.some((u) => u.name.toLowerCase() === v);
+}
+
 // Dropped when building an acronym so "University of Michigan" reduces to
 // "UM", not "UOM" — matches how people actually write initialisms.
 const ACRONYM_STOPWORDS = new Set([
