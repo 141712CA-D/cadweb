@@ -1,6 +1,7 @@
 const GITHUB_URL = "https://github.com/141712CA-D";
 const INSTAGRAM_URL = "https://www.instagram.com/parametra.ai/";
 
+//test test test
 export default function SocialLinks() {
   return (
     <div className="flex items-center gap-4">
