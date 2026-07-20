@@ -50,7 +50,7 @@ afterEach(() => {
 async function fillIndividualForm(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByPlaceholderText("Your full name"), "Ada Lovelace");
   await user.type(screen.getByPlaceholderText("you@example.com"), "ada@example.com");
-  await user.selectOptions(screen.getByRole("combobox"), "Hobbyist");
+  await user.selectOptions(screen.getByRole("combobox", { name: "Role" }), "Hobbyist");
   await user.type(
     screen.getByPlaceholderText("Tell us about your use case..."),
     "CAD from prompts"
@@ -68,13 +68,13 @@ describe("SignupForm", () => {
     const user = userEvent.setup();
     render(<SignupForm isModal />);
 
-    await user.selectOptions(screen.getByRole("combobox"), "Student");
+    await user.selectOptions(screen.getByRole("combobox", { name: "Role" }), "Student");
     expect(screen.getByPlaceholderText("Where do you attend?")).toBeInTheDocument();
 
-    await user.selectOptions(screen.getByRole("combobox"), "Instructor");
+    await user.selectOptions(screen.getByRole("combobox", { name: "Role" }), "Instructor");
     expect(screen.getByPlaceholderText("Where do you teach?")).toBeInTheDocument();
 
-    await user.selectOptions(screen.getByRole("combobox"), "Hobbyist");
+    await user.selectOptions(screen.getByRole("combobox", { name: "Role" }), "Hobbyist");
     expect(screen.queryByPlaceholderText("Where do you attend?")).not.toBeInTheDocument();
   });
 
@@ -84,7 +84,7 @@ describe("SignupForm", () => {
 
     await user.type(screen.getByPlaceholderText("Your full name"), "Ada Lovelace");
     await user.type(screen.getByPlaceholderText("you@example.com"), "not-an-email");
-    await user.selectOptions(screen.getByRole("combobox"), "Hobbyist");
+    await user.selectOptions(screen.getByRole("combobox", { name: "Role" }), "Hobbyist");
     await user.type(
       screen.getByPlaceholderText("Tell us about your use case..."),
       "CAD from prompts"

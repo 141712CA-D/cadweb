@@ -7,6 +7,7 @@ import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { apiUrl } from "@/lib/api";
 import { consumeExpired } from "@/lib/consumeExpired";
 import MorphSwitch from "./MorphSwitch";
+import CollegeAutocomplete from "./CollegeAutocomplete";
 
 type FormType = "individual" | "team";
 type Status = "idle" | "loading" | "verify" | "success" | "welcome_back" | "duplicate" | "error";
@@ -392,7 +393,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
                   </div>
                   <div>
                     <label className={labelClass}>Role</label>
-                    <select className={inputClass(errors.indRole) + " cursor-pointer appearance-none pr-10"} value={indRole}
+                    <select aria-label="Role" className={inputClass(errors.indRole) + " cursor-pointer appearance-none pr-10"} value={indRole}
                       style={{
                         color: indRole ? "rgb(232,232,232)" : "rgb(68,68,68)",
                         backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgb(85,85,85)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
@@ -408,16 +409,16 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
                   {indRole === "Student" && (
                     <div className="form-field-enter delay-100">
                       <label className={labelClass}>University / Institution / School</label>
-                      <input className={inputClass(errors.indUniversity)} placeholder="Where do you attend?" value={indUniversity} maxLength={120}
-                        onChange={(e) => { setIndUniversity(e.target.value); clearError("indUniversity"); }} />
+                      <CollegeAutocomplete className={inputClass(errors.indUniversity)} placeholder="Where do you attend?" value={indUniversity} maxLength={120}
+                        onChange={(v) => { setIndUniversity(v); clearError("indUniversity"); }} />
                       {errors.indUniversity && <p className={errorClass}>{errors.indUniversity}</p>}
                     </div>
                   )}
                   {indRole === "Instructor" && (
                     <div className="form-field-enter delay-100">
                       <label className={labelClass}>University / Institution / School</label>
-                      <input className={inputClass(errors.indUniversity)} placeholder="Where do you teach?" value={indUniversity} maxLength={120}
-                        onChange={(e) => { setIndUniversity(e.target.value); clearError("indUniversity"); }} />
+                      <CollegeAutocomplete className={inputClass(errors.indUniversity)} placeholder="Where do you teach?" value={indUniversity} maxLength={120}
+                        onChange={(v) => { setIndUniversity(v); clearError("indUniversity"); }} />
                       {errors.indUniversity && <p className={errorClass}>{errors.indUniversity}</p>}
                     </div>
                   )}

@@ -7,6 +7,7 @@ import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { apiUrl } from "@/lib/api";
 import { consumeExpired } from "@/lib/consumeExpired";
 import MorphSwitch from "./MorphSwitch";
+import CollegeAutocomplete from "./CollegeAutocomplete";
 
 type FormType = "individual" | "team";
 type Status = "idle" | "loading" | "verify" | "success" | "cooldown" | "error";
@@ -328,7 +329,7 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
                   </div>
                   <div>
                     <label className={labelClass}>Role</label>
-                    <select className={inputClass(errors.role) + " cursor-pointer appearance-none pr-10"} value={role}
+                    <select aria-label="Role" className={inputClass(errors.role) + " cursor-pointer appearance-none pr-10"} value={role}
                       style={{
                         color: role ? "rgb(232, 232, 232)" : "rgba(255,255,255,0.25)",
                         backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
@@ -344,8 +345,8 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
                   {role === "Student" && (
                     <div className="form-field-enter delay-100">
                       <label className={labelClass}>University</label>
-                      <input className={inputClass(errors.university)} placeholder="Your university or institution" value={university} maxLength={120}
-                        onChange={(e) => { setUniversity(e.target.value); clearError("university"); }} />
+                      <CollegeAutocomplete className={inputClass(errors.university)} placeholder="Your university or institution" value={university} maxLength={120}
+                        onChange={(v) => { setUniversity(v); clearError("university"); }} />
                       {errors.university && <p className={errorClass}>{errors.university}</p>}
                     </div>
                   )}
