@@ -6,6 +6,7 @@ import { Turnstile } from "@marsidev/react-turnstile";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { apiUrl } from "@/lib/api";
 import { consumeExpired } from "@/lib/consumeExpired";
+import { isValidEmail } from "@/lib/email";
 import MorphSwitch from "./MorphSwitch";
 import CollegeAutocomplete from "./CollegeAutocomplete";
 import { isKnownUniversity, loadUniversities, type University } from "@/lib/collegeSearch";
@@ -111,13 +112,13 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
   const allFieldsFilled =
     type === "individual"
       ? name.trim() !== "" &&
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) &&
+        isValidEmail(email) &&
         role !== "" &&
         universityIsValid &&
         subject.trim() !== "" &&
         message.trim() !== ""
       : teamRep.trim() !== "" &&
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(teamEmail.trim()) &&
+        isValidEmail(teamEmail) &&
         teamOrg.trim() !== "" &&
         teamRole.trim() !== "" &&
         teamSubject.trim() !== "" &&
@@ -131,7 +132,7 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
     const e: Record<string, string> = {};
     if (type === "individual") {
       if (!name.trim()) e.name = "Name is required.";
-      if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) e.email = "Please enter a valid email address.";
+      if (!email.trim() || !isValidEmail(email)) e.email = "Please enter a valid email address.";
       if (!role) e.role = "Please select a role.";
       if (role === "Student" && !university.trim()) e.university = "University is required for students.";
       else if (needsUniversity && universities === null) e.university = "Still loading schools — please try again in a moment.";
@@ -140,7 +141,7 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
       if (!message.trim()) e.message = "Please enter a message.";
     } else {
       if (!teamRep.trim()) e.teamRep = "Name is required.";
-      if (!teamEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(teamEmail)) e.teamEmail = "Please enter a valid email address.";
+      if (!teamEmail.trim() || !isValidEmail(teamEmail)) e.teamEmail = "Please enter a valid email address.";
       if (!teamOrg.trim()) e.teamOrg = "Organization is required.";
       if (!teamRole.trim()) e.teamRole = "Role is required.";
       if (!teamSubject.trim()) e.teamSubject = "Subject is required.";

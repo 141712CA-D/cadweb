@@ -6,6 +6,7 @@ import { Turnstile } from "@marsidev/react-turnstile";
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { apiUrl } from "@/lib/api";
 import { consumeExpired } from "@/lib/consumeExpired";
+import { isValidEmail } from "@/lib/email";
 import MorphSwitch from "./MorphSwitch";
 import CollegeAutocomplete from "./CollegeAutocomplete";
 import { isKnownUniversity, loadUniversities, type University } from "@/lib/collegeSearch";
@@ -132,19 +133,19 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
   const allFieldsFilled =
     type === "individual"
       ? indName.trim() !== "" &&
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(indEmail.trim()) &&
+        isValidEmail(indEmail) &&
         indRole !== "" &&
         universityIsValid &&
         indReason.trim() !== ""
       : teamRep.trim() !== "" &&
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(teamEmail.trim()) &&
+        isValidEmail(teamEmail) &&
         teamOrg.trim() !== "" &&
         teamRole.trim() !== "" &&
         teamUsage.trim() !== "";
 
   useEffect(() => {
     const email = (type === "individual" ? indEmail : teamEmail).toLowerCase().trim();
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!email || !isValidEmail(email)) {
       setEmailCheck("idle");
       return;
     }
@@ -182,7 +183,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
     const e: Record<string, string> = {};
     if (type === "individual") {
       if (!indName.trim()) e.indName = "Name is required.";
-      if (!indEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(indEmail)) e.indEmail = "Please enter a valid email address.";
+      if (!indEmail.trim() || !isValidEmail(indEmail)) e.indEmail = "Please enter a valid email address.";
       if (!indRole) e.indRole = "Please select a role.";
       if (indRole === "Student" && !indUniversity.trim()) e.indUniversity = "Please enter where you attend.";
       else if (indRole === "Instructor" && !indUniversity.trim()) e.indUniversity = "Please enter where you teach.";
@@ -191,7 +192,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
       if (!indReason.trim()) e.indReason = "Please tell us why you want to use Parametra.";
     } else {
       if (!teamRep.trim()) e.teamRep = "Name is required.";
-      if (!teamEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(teamEmail)) e.teamEmail = "Please enter a valid email address.";
+      if (!teamEmail.trim() || !isValidEmail(teamEmail)) e.teamEmail = "Please enter a valid email address.";
       if (!teamOrg.trim()) e.teamOrg = "Organization is required.";
       if (!teamRole.trim()) e.teamRole = "Role is required.";
       if (!teamUsage.trim()) e.teamUsage = "Please describe your intended usage.";
