@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist_Mono, Lato } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import BackgroundSync from "./components/BackgroundSync";
+import PageTransition from "./components/PageTransition";
 import "./globals.css";
 
 const lato = Lato({
@@ -41,7 +42,7 @@ export default function RootLayout({
     >
       <body tabIndex={-1} className="min-h-full flex flex-col bg-[#0f0f0f] text-[#e8e8e8]">
         <BackgroundSync />
-        {children}
+        <PageTransition>{children}</PageTransition>
         <SpeedInsights />
       </body>
     </html>
