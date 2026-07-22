@@ -57,12 +57,19 @@ export default function PageTransition({ children }: PageTransitionProps) {
       e.preventDefault();
       pendingHrefRef.current = url.pathname + url.search + url.hash;
 
+      // Every route on this site starts at the top. Kick off a smooth scroll
+      // to top right here, tied to the click gesture, so it plays out
+      // alongside the exit animation rather than as a separate jump once the
+      // new page appears.
+      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+
       setFrozen(childrenRef.current);
       setPhase("out");
       setPageTransitioning(true);
 
       setTimeout(() => {
-        if (pendingHrefRef.current) router.push(pendingHrefRef.current);
+        // scroll: false — we're already handling the scroll to top ourselves.
+        if (pendingHrefRef.current) router.push(pendingHrefRef.current, { scroll: false });
       }, EXIT_DURATION);
     };
 
@@ -76,6 +83,8 @@ export default function PageTransition({ children }: PageTransitionProps) {
 
   // Once the navigation we triggered actually resolves (pathname catches up),
   // swap in the live (now-current) children and play the enter animation.
+  // The smooth scroll to top kicked off in the click handler keeps running
+  // on its own and may still be settling into place at this point.
   useLayoutEffect(() => {
     if (phase !== "out" || pathname === displayPathname) return;
 

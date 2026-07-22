@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import SignupModal from "./SignupModal";
+import { isPageTransitioning } from "@/lib/pageTransitionState";
 
 interface HeaderProps {
   onJoinWaitlist?: () => void;
@@ -21,7 +22,7 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
       const demo = document.getElementById("live-demo");
       if (!demo) { setTimeout(attach, 100); return; }
       obs = new IntersectionObserver(
-        ([e]) => setHiddenForDemo(e.isIntersecting),
+        ([e]) => { if (!isPageTransitioning()) setHiddenForDemo(e.isIntersecting); },
         { threshold: 0.1 }
       );
       obs.observe(demo);

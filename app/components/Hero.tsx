@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import DemoSection from "./DemoSection";
+import { isPageTransitioning } from "@/lib/pageTransitionState";
 
 const prompt =
   "make me a base plate with 6 through holes and 4 m6 holes for mounting. The whole base plate should be 15x35cm";
@@ -171,7 +172,12 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
   const [demoInView, setDemoInView] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowNudge(true), 4000);
+    const timer = setTimeout(() => {
+      // Nothing to scroll to (e.g. a very tall viewport where the whole
+      // page already fits) — don't hint at scrolling that goes nowhere.
+      const atBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1;
+      if (!atBottom) setShowNudge(true);
+    }, 4000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -214,7 +220,7 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
     const el = document.getElementById("live-demo");
     if (!el) return;
     const obs = new IntersectionObserver(
-      ([entry]) => setDemoInView(entry.isIntersecting),
+      ([entry]) => { if (!isPageTransitioning()) setDemoInView(entry.isIntersecting); },
       { threshold: 0.01 },
     );
     obs.observe(el);
