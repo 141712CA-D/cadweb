@@ -165,6 +165,17 @@ html {
   100% { opacity: 0; transform: translateY(-10px) scale(0.98); filter: blur(4px); }
 }
 
+/* ── Page transition animations ── */
+@keyframes page-fade-out-down {
+  0%   { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(28px); }
+}
+
+@keyframes page-fade-in-up {
+  0%   { opacity: 0; transform: translateY(28px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
 @keyframes field-morph-in {
   0% {
     opacity: 0;

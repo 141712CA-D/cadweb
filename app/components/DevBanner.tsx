@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { isPageTransitioning } from "@/lib/pageTransitionState";
 
 export default function DevBanner() {
   const [hidden, setHidden] = useState(false);
@@ -11,7 +12,7 @@ export default function DevBanner() {
       const demo = document.getElementById("live-demo");
       if (!demo) { setTimeout(attach, 100); return; }
       obs = new IntersectionObserver(
-        ([e]) => setHidden(e.isIntersecting),
+        ([e]) => { if (!isPageTransitioning()) setHidden(e.isIntersecting); },
         { threshold: 0.1 }
       );
       obs.observe(demo);
