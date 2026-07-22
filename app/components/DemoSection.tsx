@@ -364,7 +364,17 @@ export default function DemoSection() {
     });
 
     setTimeout(() => {
-      if (lockedRef.current) {
+      // On desktop, the fake-cursor hint tour is about to run over this same
+      // locked viewport — keep the lock held through it (it unlocks itself
+      // when the tour finishes below) instead of releasing it here, or the
+      // page could be scrolled away mid-tour while the cursor still points
+      // at now-stale element positions.
+      const willShowCursorHint =
+        typeof window !== "undefined" &&
+        window.innerWidth >= 640 &&
+        sessionStorage.getItem("cursorHintPlayed") !== "true";
+
+      if (!willShowCursorHint && lockedRef.current) {
         unlockScroll();
         lockedRef.current = false;
       }
@@ -544,6 +554,14 @@ export default function DemoSection() {
       setCursor(c => ({ ...c, visible: false, tooltip: "" }));
       sessionStorage.setItem("cursorHintPlayed", "true");
       setCursorHintDone(true);
+
+      // Only unlock now that the tour is done — the finishing timeout in
+      // startDemo deliberately left this locked so the tour's target
+      // elements couldn't scroll out from under the fake cursor.
+      if (lockedRef.current) {
+        unlockScroll();
+        lockedRef.current = false;
+      }
     };
 
     run();
