@@ -12,7 +12,16 @@ import CollegeAutocomplete from "./CollegeAutocomplete";
 import { isKnownUniversity, loadUniversities, type University } from "@/lib/collegeSearch";
 
 type FormType = "individual" | "team";
-type Status = "idle" | "loading" | "verify" | "success" | "welcome_back" | "duplicate" | "error";
+type Status =
+  | "idle"
+  | "loading"
+  | "verify"
+  | "success"
+  | "welcome_back"
+  | "duplicate"
+  | "unsubscribing"
+  | "unsubscribed"
+  | "error";
 type EmailCheck = "idle" | "checking" | "available" | "registered" | "returning";
 
 const INDIVIDUAL_ROLES = ["Student", "Instructor", "Freelancer", "Hobbyist"];
@@ -56,8 +65,16 @@ const inputClass = (error?: string) =>
 const labelClass = "block font-mono text-xs uppercase tracking-[0.2em] text-[#555] mb-1.5";
 const errorClass = "font-mono text-xs text-red-500 mt-1";
 
-function EmailCheckBadge({ status }: { status: EmailCheck }) {
-  const baseClass = "inline-flex w-[120px] h-5 items-center justify-end font-mono text-[11px] normal-case tracking-normal transition-colors duration-150";
+function EmailCheckBadge({
+  status,
+  unsubscribeHref,
+  onUnsubscribe,
+}: {
+  status: EmailCheck;
+  unsubscribeHref?: string;
+  onUnsubscribe?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+}) {
+  const baseClass = "inline-flex h-5 items-center justify-end gap-1 whitespace-nowrap shrink-0 font-mono text-[11px] normal-case tracking-normal transition-colors duration-150";
 
   if (status === "idle") {
     return <span className={`${baseClass} text-transparent`} aria-hidden="true">Can register</span>;
@@ -69,7 +86,20 @@ function EmailCheckBadge({ status }: { status: EmailCheck }) {
     return <span className={`${baseClass} text-[#00ff41]`}>Can register</span>;
   }
   if (status === "registered") {
-    return <span className={`${baseClass} text-red-500`}>Already registered</span>;
+    return (
+      <span className={`${baseClass} text-red-500`}>
+        <span>Already registered</span>
+        {unsubscribeHref ? (
+          <a
+            href={unsubscribeHref}
+            onClick={onUnsubscribe}
+            className="underline decoration-current underline-offset-2 hover:text-[#00ff41]"
+          >
+            Remove?
+          </a>
+        ) : null}
+      </span>
+    );
   }
   return <span className={`${baseClass} text-transparent`} aria-hidden="true">Can register</span>;
 }
@@ -88,6 +118,10 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
   const turnstileRef = useRef<TurnstileInstance>(null);
   const [emailCheck, setEmailCheck] = useState<EmailCheck>("idle");
   const emailCannotRegister = emailCheck === "registered";
+  const statusRef = useRef<Status>("idle");
+  const [unsubscribeToken, setUnsubscribeToken] = useState<string | null>(null);
+  const [unsubscribeError, setUnsubscribeError] = useState("");
+  const [showUnsubscribeConfirm, setShowUnsubscribeConfirm] = useState(false);
 
   const [code, setCode] = useState("");
   const [verifyError, setVerifyError] = useState("");
@@ -144,6 +178,10 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
         teamUsage.trim() !== "";
 
   useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
+
+  useEffect(() => {
     const email = (type === "individual" ? indEmail : teamEmail).toLowerCase().trim();
     if (!email || !isValidEmail(email)) {
       setEmailCheck("idle");
@@ -155,6 +193,12 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
       try {
         const res = await fetch(apiUrl(`/api/waitlist/check-cache?email=${encodeURIComponent(email)}`));
         if (currentRequestId !== emailCheckRequestId.current) return;
+        if (res.status === 409) {
+          const data = await res.json().catch(() => ({}));
+          setEmailCheck("registered");
+          setUnsubscribeToken(typeof data.token === "string" ? data.token : null);
+          return;
+        }
         if (!res.ok) {
           setEmailCheck("idle");
           return;
@@ -162,10 +206,15 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
         const data = await res.json();
         if (!data.canRegister) {
           setEmailCheck("registered");
+          setUnsubscribeToken(typeof data.token === "string" ? data.token : null);
         } else if (data.status === "returning") {
           setEmailCheck("returning");
+          setUnsubscribeToken(null);
         } else {
           setEmailCheck("available");
+          if (statusRef.current !== "duplicate" && statusRef.current !== "unsubscribing" && statusRef.current !== "unsubscribed") {
+            setUnsubscribeToken(null);
+          }
         }
       } catch {
         if (currentRequestId !== emailCheckRequestId.current) return;
@@ -229,6 +278,9 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
         body: JSON.stringify({ ...payload, captchaToken }),
       });
       if (res.status === 409) {
+        const data = await res.json().catch(() => ({}));
+        setUnsubscribeToken(typeof data.token === "string" ? data.token : null);
+        setUnsubscribeError("");
         setStatus("duplicate");
         return;
       }
@@ -297,6 +349,8 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
     setStatus("idle");
     setCode("");
     setVerifyError("");
+    setUnsubscribeToken(null);
+    setUnsubscribeError("");
     turnstileRef.current?.reset();
     setCaptchaToken(null);
   }
@@ -309,6 +363,8 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
     setErrorMessage("Something went wrong. Please try again.");
     setCode("");
     setVerifyError("");
+    setUnsubscribeToken(null);
+    setUnsubscribeError("");
     setPendingEmail("");
     setIndName("");
     setIndEmail("");
@@ -331,6 +387,42 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
       window.location.href = "/";
     }
   };
+
+  const unsubscribeHref = unsubscribeToken
+    ? apiUrl(`/waitlist/unsubscribe?token=${encodeURIComponent(unsubscribeToken)}`)
+    : "";
+
+  function requestUnsubscribe(e?: React.MouseEvent<HTMLAnchorElement>) {
+    e?.preventDefault();
+    if (!unsubscribeHref) return;
+    setUnsubscribeError("");
+    setShowUnsubscribeConfirm(true);
+  }
+
+  function cancelUnsubscribe() {
+    setShowUnsubscribeConfirm(false);
+  }
+
+  async function confirmUnsubscribe() {
+    if (!unsubscribeHref || status === "unsubscribing") return;
+
+    setShowUnsubscribeConfirm(false);
+    setUnsubscribeError("");
+    setStatus("unsubscribing");
+
+    try {
+      const res = await fetch(unsubscribeHref, { method: "GET" });
+      if (!res.ok) {
+        setStatus("duplicate");
+        setUnsubscribeError("That unsubscribe link could not be used right now.");
+        return;
+      }
+      setStatus("unsubscribed");
+    } catch {
+      setStatus("duplicate");
+      setUnsubscribeError("That unsubscribe link could not be used right now.");
+    }
+  }
 
   return (
     <div className={isModal ? "" : "min-h-screen bg-[#0f0f0f] grid-bg flex flex-col items-center justify-center px-4 py-12"}>
@@ -361,15 +453,44 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
               Done
             </button>
           </div>
-        ) : status === "duplicate" ? (
+        ) : status === "duplicate" || status === "unsubscribing" ? (
           <div className="flex flex-col items-center text-center py-8 gap-4">
             <div className="w-12 h-12 border border-[#262626] bg-[#161616] flex items-center justify-center">
               <svg className="w-6 h-6 text-[#888]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-[#e8e8e8]">Already registered.</h2>
+            <h2 className="text-lg font-semibold text-[#e8e8e8]">
+              Already registered.
+              {unsubscribeHref ? (
+                <>
+                  {" "}
+                  <a
+                    href={unsubscribeHref}
+                    onClick={requestUnsubscribe}
+                    className="font-mono text-xs uppercase tracking-widest text-[#00ff41] hover:text-[#00cc33] underline decoration-current underline-offset-2"
+                  >
+                    Remove?
+                  </a>
+                </>
+              ) : null}
+            </h2>
             <p className="font-mono text-sm text-[#888] max-w-sm">This email is already on the waitlist. We&apos;ll be in touch when access opens up.</p>
+            {!unsubscribeHref && <p className="mt-2 font-mono text-xs text-[#555]">Unsubscribe link unavailable.</p>}
+            {unsubscribeError && <p className={errorClass}>{unsubscribeError}</p>}
+            <button onClick={handleSuccess} className="mt-2 font-mono text-xs uppercase tracking-widest text-[#00ff41] hover:text-[#00cc33] transition-colors">
+              Done
+            </button>
+          </div>
+        ) : status === "unsubscribed" ? (
+          <div className="flex flex-col items-center text-center py-8 gap-4">
+            <div className="w-12 h-12 border border-[#00ff41]/40 bg-[#161616] flex items-center justify-center">
+              <svg className="w-6 h-6 text-[#00ff41]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-semibold text-[#e8e8e8]">You&apos;re unsubscribed.</h2>
+            <p className="font-mono text-sm text-[#888] max-w-sm">You won&apos;t receive waitlist emails for this address anymore.</p>
             <button onClick={handleSuccess} className="mt-4 font-mono text-xs uppercase tracking-widest text-[#00ff41] hover:text-[#00cc33] transition-colors">
               Done
             </button>
@@ -455,7 +576,11 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
                   <div>
                     <div className="flex items-center justify-between">
                       <label className={labelClass}>Email</label>
-                      <EmailCheckBadge status={emailCheck} />
+                      <EmailCheckBadge
+                        status={emailCheck}
+                        unsubscribeHref={emailCheck === "registered" ? unsubscribeHref : undefined}
+                        onUnsubscribe={requestUnsubscribe}
+                      />
                     </div>
                     <input type="email" className={inputClass(errors.indEmail)} placeholder="you@example.com" value={indEmail} maxLength={255}
                       onChange={(e) => { setIndEmail(e.target.value); clearError("indEmail"); }} />
@@ -513,7 +638,11 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
                   <div>
                     <div className="flex items-center justify-between">
                       <label className={labelClass}>Email</label>
-                      <EmailCheckBadge status={emailCheck} />
+                      <EmailCheckBadge
+                        status={emailCheck}
+                        unsubscribeHref={emailCheck === "registered" ? unsubscribeHref : undefined}
+                        onUnsubscribe={requestUnsubscribe}
+                      />
                     </div>
                     <input type="email" className={inputClass(errors.teamEmail)} placeholder="you@company.com" value={teamEmail} maxLength={255}
                       onChange={(e) => { setTeamEmail(e.target.value); clearError("teamEmail"); }} />
@@ -566,6 +695,39 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
               </button>
             </form>
           </>
+        )}
+        {showUnsubscribeConfirm && unsubscribeHref && (
+          <div
+            className="fixed inset-0 z-[120] flex items-center justify-center bg-black/70 px-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="unsubscribe-title"
+          >
+            <div className="w-full max-w-sm border border-[#262626] bg-[#161616] p-6 shadow-2xl">
+              <h3 id="unsubscribe-title" className="text-lg font-semibold text-[#e8e8e8]">
+                Are you sure?
+              </h3>
+              <p className="mt-2 font-mono text-sm text-[#888]">
+                Are you sure you want to remove yourself from the waitlist?
+              </p>
+              <div className="mt-6 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={cancelUnsubscribe}
+                  className="font-mono text-xs uppercase tracking-widest text-[#555] hover:text-[#e8e8e8] transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmUnsubscribe}
+                  className="font-mono text-xs uppercase tracking-widest text-[#00ff41] hover:text-[#00cc33] transition-colors"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
