@@ -64,6 +64,7 @@ export default function Home() {
             <div className="grid grid-cols-3 justify-items-center gap-x-6 gap-y-3 sm:flex sm:items-center sm:gap-6">
               <a href="/how-it-works" className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">How It Works</a>
               <a href="/contact" className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">Contact Us</a>
+              <a href="https://discord.gg/4CDr6ZyFd" target="_blank" rel="noopener noreferrer" className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">Join Discord</a>
               <button
                 type="button"
                 onClick={() => setSignupModalOpen(true)}

@@ -91,6 +91,22 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
               How It Works
             </Link>
 
+            <Link
+              href="/contact"
+              className="hidden sm:block font-mono text-xs uppercase tracking-widest px-4 py-2 border border-[#262626] text-[#888] hover:border-[#00ff41] hover:text-[#00ff41] transition-all duration-200"
+            >
+              Contact Us
+            </Link>
+
+            <a
+              href="https://discord.gg/4CDr6ZyFd"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:block font-mono text-xs uppercase tracking-widest px-4 py-2 border border-[#262626] text-[#888] hover:border-[#00ff41] hover:text-[#00ff41] transition-all duration-200"
+            >
+              Join Discord
+            </a>
+
             {/* Waitlist button */}
             <button
               onClick={handleWaitlistClick}
@@ -134,6 +150,22 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
                   >
                     How It Works
                   </Link>
+                  <Link
+                    href="/contact"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 font-mono text-xs uppercase tracking-widest text-[#888] hover:text-[#00ff41] hover:bg-[#161616] transition-colors"
+                  >
+                    Contact Us
+                  </Link>
+                  <a
+                    href="https://discord.gg/4CDr6ZyFd"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 font-mono text-xs uppercase tracking-widest text-[#888] hover:text-[#00ff41] hover:bg-[#161616] transition-colors"
+                  >
+                    Join Discord
+                  </a>
                 </div>
               )}
             </div>
