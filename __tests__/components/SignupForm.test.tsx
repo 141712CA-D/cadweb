@@ -175,7 +175,7 @@ describe("SignupForm", () => {
         );
       }
       if (url.includes("/waitlist/unsubscribe")) {
-        expect(init?.method).toBe("GET");
+        expect(init?.method).toBe("POST");
         return jsonResponse({ success: true });
       }
       throw new Error(`unexpected fetch: ${url}`);

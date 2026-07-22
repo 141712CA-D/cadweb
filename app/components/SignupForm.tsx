@@ -411,7 +411,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
     setStatus("unsubscribing");
 
     try {
-      const res = await fetch(unsubscribeHref, { method: "GET" });
+      const res = await fetch(unsubscribeHref, { method: "POST" });
       if (!res.ok) {
         setStatus("duplicate");
         setUnsubscribeError("That unsubscribe link could not be used right now.");
