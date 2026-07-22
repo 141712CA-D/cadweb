@@ -138,7 +138,10 @@ describe("SignupForm", () => {
     fetchMock.mockImplementation(async (input: RequestInfo | URL) => {
       const url = String(input);
       if (url.includes("/api/waitlist/check-cache")) {
-        return jsonResponse({ canRegister: false, status: "registered" });
+        return jsonResponse(
+          { success: false, error: "already_registered", token: "jwt-from-cache" },
+          409
+        );
       }
       throw new Error(`unexpected fetch: ${url}`);
     });
@@ -150,7 +153,50 @@ describe("SignupForm", () => {
     await user.click(screen.getByRole("button", { name: /solve captcha/i }));
 
     expect(await screen.findByText("Already registered")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /remove\?/i })).toHaveAttribute(
+      "href",
+      expect.stringContaining("jwt-from-cache")
+    );
+    await user.click(screen.getByRole("link", { name: /remove\?/i }));
+    expect(await screen.findByRole("dialog")).toHaveTextContent("Are you sure?");
     expect(screen.getByRole("button", { name: /request access/i })).toBeDisabled();
+  });
+
+  it("shows the unsubscribe success screen when a duplicate token is used from submit", async () => {
+    fetchMock.mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.includes("/api/waitlist/check-cache")) {
+        return jsonResponse({ canRegister: true, status: "new" });
+      }
+      if (url.includes("/api/waitlist/request")) {
+        return jsonResponse(
+          { success: false, error: "already_registered", token: "jwt-from-submit" },
+          409
+        );
+      }
+      if (url.includes("/waitlist/unsubscribe")) {
+        expect(init?.method).toBe("GET");
+        return jsonResponse({ success: true });
+      }
+      throw new Error(`unexpected fetch: ${url}`);
+    });
+
+    const user = userEvent.setup();
+    render(<SignupForm isModal />);
+
+    await fillIndividualForm(user);
+    await user.click(screen.getByRole("button", { name: /solve captcha/i }));
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: /request access/i })).toBeEnabled()
+    );
+    await user.click(screen.getByRole("button", { name: /request access/i }));
+
+    expect(await screen.findByRole("heading", { name: /already registered/i })).toBeInTheDocument();
+    await user.click(screen.getByRole("link", { name: /remove\?/i }));
+    expect(await screen.findByRole("dialog")).toHaveTextContent("Are you sure?");
+    await user.click(screen.getByRole("button", { name: /^remove$/i }));
+
+    expect(await screen.findByText("You're unsubscribed.")).toBeInTheDocument();
   });
 
   it("switches to the team tab and shows team fields", async () => {
