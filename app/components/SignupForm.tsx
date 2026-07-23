@@ -72,7 +72,7 @@ function EmailCheckBadge({
 }: {
   status: EmailCheck;
   unsubscribeHref?: string;
-  onUnsubscribe?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  onUnsubscribe?: (e: React.MouseEvent<HTMLElement>) => void;
 }) {
   const baseClass = "inline-flex h-5 items-center justify-end gap-1 whitespace-nowrap shrink-0 font-mono text-[11px] normal-case tracking-normal transition-colors duration-150";
 
@@ -389,10 +389,10 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
   };
 
   const unsubscribeHref = unsubscribeToken
-    ? apiUrl(`/waitlist/unsubscribe?token=${encodeURIComponent(unsubscribeToken)}`)
+    ? apiUrl(`/api/waitlist/unsubscribe?token=${encodeURIComponent(unsubscribeToken)}`)
     : "";
 
-  function requestUnsubscribe(e?: React.MouseEvent<HTMLAnchorElement>) {
+  function requestUnsubscribe(e?: React.MouseEvent<HTMLElement>) {
     e?.preventDefault();
     if (!unsubscribeHref) return;
     setUnsubscribeError("");
@@ -454,31 +454,47 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
             </button>
           </div>
         ) : status === "duplicate" || status === "unsubscribing" ? (
-          <div className="flex flex-col items-center text-center py-8 gap-4">
+          <div className="flex flex-col items-center text-center py-8 gap-5">
             <div className="w-12 h-12 border border-[#262626] bg-[#161616] flex items-center justify-center">
               <svg className="w-6 h-6 text-[#888]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-[#e8e8e8]">
-              Already registered.
-              {unsubscribeHref ? (
-                <>
-                  {" "}
-                  <a
-                    href={unsubscribeHref}
-                    onClick={requestUnsubscribe}
-                    className="font-mono text-xs uppercase tracking-widest text-[#00ff41] hover:text-[#00cc33] underline decoration-current underline-offset-2"
-                  >
-                    Remove?
-                  </a>
-                </>
-              ) : null}
-            </h2>
-            <p className="font-mono text-sm text-[#888] max-w-sm">This email is already on the waitlist. We&apos;ll be in touch when access opens up.</p>
-            {!unsubscribeHref && <p className="mt-2 font-mono text-xs text-[#555]">Unsubscribe link unavailable.</p>}
-            {unsubscribeError && <p className={errorClass}>{unsubscribeError}</p>}
-            <button onClick={handleSuccess} className="mt-2 font-mono text-xs uppercase tracking-widest text-[#00ff41] hover:text-[#00cc33] transition-colors">
+            <div>
+              <h2 className="text-lg font-semibold text-[#e8e8e8]">Already registered.</h2>
+              <p className="mt-2 font-mono text-sm text-[#888] max-w-sm">
+                This email is already on the waitlist. We&apos;ll be in touch when access opens up.
+              </p>
+            </div>
+
+            {unsubscribeError ? (
+              <div className="w-full max-w-sm border border-red-500/30 bg-red-500/5 px-4 py-3 flex items-start gap-3 text-left">
+                <svg className="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" />
+                </svg>
+                <div className="flex-1">
+                  <p className="font-mono text-xs text-red-400">{unsubscribeError}</p>
+                  {unsubscribeHref && (
+                    <button
+                      onClick={() => { setUnsubscribeError(""); setShowUnsubscribeConfirm(true); }}
+                      className="mt-2 font-mono text-[11px] uppercase tracking-widest text-[#555] hover:text-[#e8e8e8] transition-colors"
+                    >
+                      Try again →
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : unsubscribeHref ? (
+              <button
+                onClick={requestUnsubscribe}
+                disabled={status === "unsubscribing"}
+                className="font-mono text-xs uppercase tracking-widest text-[#555] hover:text-red-400 border border-[#262626] hover:border-red-500/40 px-5 py-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {status === "unsubscribing" ? "Removing..." : "Remove from waitlist"}
+              </button>
+            ) : null}
+
+            <button onClick={handleSuccess} className="mt-1 font-mono text-xs uppercase tracking-widest text-[#00ff41] hover:text-[#00cc33] transition-colors">
               Done
             </button>
           </div>
