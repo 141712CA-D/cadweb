@@ -61,6 +61,19 @@ function mapWaitlistError(error: string | undefined, type: FormType): { field?: 
   }
 }
 
+function mapUnsubscribeError(status: number, error: string | undefined): string {
+  if (error === "User not found on waitlist" || status === 404) {
+    return "This email isn't on the waitlist, so there's nothing to remove.";
+  }
+  if (error === "Invalid or expired token" || error === "Token is required" || status === 400) {
+    return "This unsubscribe link has expired. Request a fresh one and try again.";
+  }
+  if (status >= 500) {
+    return "Something went wrong on our end. Please try again in a moment.";
+  }
+  return "That unsubscribe link could not be used right now.";
+}
+
 const inputClass = (error?: string) =>
   `w-full bg-[#161616] border ${error ? "border-red-500/60" : "border-[#262626]"} px-4 py-3 text-sm text-[#e8e8e8] placeholder:text-[#444] focus:outline-none focus:border-[#00ff41] transition-all duration-150 font-mono`;
 
@@ -425,14 +438,15 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
         return;
       }
       if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
         setStatus("duplicate");
-        setUnsubscribeError("That unsubscribe link could not be used right now.");
+        setUnsubscribeError(mapUnsubscribeError(res.status, data.error));
         return;
       }
       setStatus("unsubscribed");
     } catch {
       setStatus("duplicate");
-      setUnsubscribeError("That unsubscribe link could not be used right now.");
+      setUnsubscribeError("Couldn't reach the server. Check your connection and try again.");
     }
   }
 
