@@ -162,7 +162,7 @@ describe("SignupForm", () => {
     expect(screen.getByRole("button", { name: /request access/i })).toBeDisabled();
   });
 
-  it("shows the unsubscribe success screen when a duplicate token is used from submit", async () => {
+  it("shows the unsubscribe success screen after requesting and confirming a code", async () => {
     fetchMock.mockImplementation(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
       if (url.includes("/api/waitlist/check-cache")) {
@@ -174,8 +174,16 @@ describe("SignupForm", () => {
           409
         );
       }
-      if (url.includes("/waitlist/unsubscribe")) {
+      if (url.includes("/api/waitlist/unsubscribe-request")) {
         expect(init?.method).toBe("POST");
+        const body = JSON.parse(init?.body as string);
+        expect(body).toMatchObject({ token: "jwt-from-submit" });
+        return jsonResponse({ success: true });
+      }
+      if (url.includes("/api/waitlist/unsubscribe")) {
+        expect(init?.method).toBe("POST");
+        const body = JSON.parse(init?.body as string);
+        expect(body).toMatchObject({ email: "ada@example.com", code: "123456" });
         return jsonResponse({ success: true });
       }
       throw new Error(`unexpected fetch: ${url}`);
@@ -192,9 +200,13 @@ describe("SignupForm", () => {
     await user.click(screen.getByRole("button", { name: /request access/i }));
 
     expect(await screen.findByRole("heading", { name: /already registered/i })).toBeInTheDocument();
-    await user.click(screen.getByRole("link", { name: /remove\?/i }));
+    await user.click(screen.getByRole("button", { name: /remove from waitlist/i }));
     expect(await screen.findByRole("dialog")).toHaveTextContent("Are you sure?");
     await user.click(screen.getByRole("button", { name: /^remove$/i }));
+
+    expect(await screen.findByText("Check your email.")).toBeInTheDocument();
+    await user.type(screen.getByPlaceholderText("000000"), "123456");
+    await user.click(screen.getByRole("button", { name: /confirm removal/i }));
 
     expect(await screen.findByText("You're unsubscribed.")).toBeInTheDocument();
   });

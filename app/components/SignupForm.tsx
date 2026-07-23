@@ -20,6 +20,7 @@ type Status =
   | "welcome_back"
   | "duplicate"
   | "unsubscribing"
+  | "unsubscribe_verify"
   | "unsubscribed"
   | "unsubscribe_rate_limited"
   | "rate_limited"
@@ -135,8 +136,12 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
   const emailCannotRegister = emailCheck === "registered";
   const statusRef = useRef<Status>("idle");
   const [unsubscribeToken, setUnsubscribeToken] = useState<string | null>(null);
+  const [unsubscribeEmail, setUnsubscribeEmail] = useState<string | null>(null);
   const [unsubscribeError, setUnsubscribeError] = useState("");
   const [showUnsubscribeConfirm, setShowUnsubscribeConfirm] = useState(false);
+  const [unsubscribeCode, setUnsubscribeCode] = useState("");
+  const [unsubscribeCodeError, setUnsubscribeCodeError] = useState("");
+  const [unsubscribeVerifying, setUnsubscribeVerifying] = useState(false);
 
   const [code, setCode] = useState("");
   const [verifyError, setVerifyError] = useState("");
@@ -212,6 +217,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
           const data = await res.json().catch(() => ({}));
           setEmailCheck("registered");
           setUnsubscribeToken(typeof data.token === "string" ? data.token : null);
+          setUnsubscribeEmail(email);
           return;
         }
         if (!res.ok) {
@@ -222,12 +228,18 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
         if (!data.canRegister) {
           setEmailCheck("registered");
           setUnsubscribeToken(typeof data.token === "string" ? data.token : null);
+          setUnsubscribeEmail(email);
         } else if (data.status === "returning") {
           setEmailCheck("returning");
           setUnsubscribeToken(null);
         } else {
           setEmailCheck("available");
-          if (statusRef.current !== "duplicate" && statusRef.current !== "unsubscribing" && statusRef.current !== "unsubscribed") {
+          if (
+            statusRef.current !== "duplicate" &&
+            statusRef.current !== "unsubscribing" &&
+            statusRef.current !== "unsubscribe_verify" &&
+            statusRef.current !== "unsubscribed"
+          ) {
             setUnsubscribeToken(null);
           }
         }
@@ -295,6 +307,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
       if (res.status === 409) {
         const data = await res.json().catch(() => ({}));
         setUnsubscribeToken(typeof data.token === "string" ? data.token : null);
+        setUnsubscribeEmail(type === "individual" ? indEmail : teamEmail);
         setUnsubscribeError("");
         setStatus("duplicate");
         return;
@@ -371,9 +384,20 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
     setCode("");
     setVerifyError("");
     setUnsubscribeToken(null);
+    setUnsubscribeEmail(null);
     setUnsubscribeError("");
+    setUnsubscribeCode("");
+    setUnsubscribeCodeError("");
     turnstileRef.current?.reset();
     setCaptchaToken(null);
+  }
+
+  // Backs out of the code-entry step to the "already registered" screen so
+  // the user can request a fresh unsubscribe code without losing the token.
+  function cancelUnsubscribeVerify() {
+    setStatus("duplicate");
+    setUnsubscribeCode("");
+    setUnsubscribeCodeError("");
   }
 
   function reset() {
@@ -385,7 +409,10 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
     setCode("");
     setVerifyError("");
     setUnsubscribeToken(null);
+    setUnsubscribeEmail(null);
     setUnsubscribeError("");
+    setUnsubscribeCode("");
+    setUnsubscribeCodeError("");
     setPendingEmail("");
     setIndName("");
     setIndEmail("");
@@ -410,12 +437,12 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
   };
 
   const unsubscribeHref = unsubscribeToken
-    ? apiUrl(`/api/waitlist/unsubscribe?token=${encodeURIComponent(unsubscribeToken)}`)
+    ? apiUrl(`/api/waitlist/unsubscribe-request?token=${encodeURIComponent(unsubscribeToken)}`)
     : "";
 
   function requestUnsubscribe(e?: React.MouseEvent<HTMLElement>) {
     e?.preventDefault();
-    if (!unsubscribeHref) return;
+    if (!unsubscribeToken) return;
     setUnsubscribeError("");
     setShowUnsubscribeConfirm(true);
   }
@@ -424,15 +451,21 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
     setShowUnsubscribeConfirm(false);
   }
 
+  // Step 1: exchange the JWT (captured from the check-cache/duplicate
+  // response) for a 6-digit code sent to the user's email.
   async function confirmUnsubscribe() {
-    if (!unsubscribeHref || status === "unsubscribing") return;
+    if (!unsubscribeToken || status === "unsubscribing") return;
 
     setShowUnsubscribeConfirm(false);
     setUnsubscribeError("");
     setStatus("unsubscribing");
 
     try {
-      const res = await fetch(unsubscribeHref, { method: "POST" });
+      const res = await fetch(apiUrl("/api/waitlist/unsubscribe-request"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: unsubscribeToken }),
+      });
       if (res.status === 429) {
         setStatus("unsubscribe_rate_limited");
         return;
@@ -443,10 +476,47 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
         setUnsubscribeError(mapUnsubscribeError(res.status, data.error));
         return;
       }
-      setStatus("unsubscribed");
+      setUnsubscribeCode("");
+      setUnsubscribeCodeError("");
+      setStatus("unsubscribe_verify");
     } catch {
       setStatus("duplicate");
       setUnsubscribeError("Couldn't reach the server. Check your connection and try again.");
+    }
+  }
+
+  // Step 2: complete the unsubscribe with the emailed code.
+  async function submitUnsubscribeCode(e: React.FormEvent) {
+    e.preventDefault();
+    if (!/^\d{6}$/.test(unsubscribeCode.trim())) {
+      setUnsubscribeCodeError("Enter the 6-digit code from your email.");
+      return;
+    }
+    setUnsubscribeVerifying(true);
+    setUnsubscribeCodeError("");
+    try {
+      const res = await fetch(apiUrl("/api/waitlist/unsubscribe"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: unsubscribeEmail, code: unsubscribeCode.trim() }),
+      });
+      if (res.ok) {
+        void consumeExpired("waitlist");
+        setStatus("unsubscribed");
+        return;
+      }
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 410 || data.error === "expired") {
+        setUnsubscribeCodeError("That code expired. Start over to get a new one.");
+      } else if (res.status === 429 || data.error === "too_many_attempts") {
+        setUnsubscribeCodeError("Too many attempts. Start over to get a new code.");
+      } else {
+        setUnsubscribeCodeError("Incorrect code. Please try again.");
+      }
+    } catch {
+      setUnsubscribeCodeError("Something went wrong. Please try again.");
+    } finally {
+      setUnsubscribeVerifying(false);
     }
   }
 
@@ -549,7 +619,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
               </svg>
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-[#e8e8e8]">Removing from waitlist...</h2>
+              <h2 className="text-lg font-semibold text-[#e8e8e8]">Sending code...</h2>
               <p className="mt-2 font-mono text-sm text-[#888] max-w-sm">Just a moment.</p>
             </div>
           </div>
@@ -568,6 +638,38 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
             </div>
             <button onClick={handleSuccess} className="mt-1 font-mono text-xs uppercase tracking-widest text-[#00ff41] hover:text-[#00cc33] transition-colors">
               Done
+            </button>
+          </div>
+        ) : status === "unsubscribe_verify" ? (
+          <div className="flex flex-col items-center text-center py-4 gap-4">
+            <div className="w-12 h-12 border border-[#262626] bg-[#161616] flex items-center justify-center">
+              <svg className="w-6 h-6 text-[#00ff41]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h2 className="text-lg font-semibold text-[#e8e8e8]">Check your email.</h2>
+            <p className="font-mono text-sm text-[#888] max-w-sm">We sent a 6-digit code to <span className="text-[#e8e8e8]">{unsubscribeEmail}</span>. Enter it below to confirm removal.</p>
+            <form onSubmit={submitUnsubscribeCode} noValidate className="w-full max-w-xs flex flex-col gap-3 mt-2">
+              <input
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                placeholder="000000"
+                value={unsubscribeCode}
+                onChange={(e) => { setUnsubscribeCode(e.target.value.replace(/\D/g, "")); setUnsubscribeCodeError(""); }}
+                className={`w-full bg-[#161616] border ${unsubscribeCodeError ? "border-red-500/60" : "border-[#262626]"} px-4 py-3 text-center text-2xl tracking-[0.4em] font-mono text-[#e8e8e8] placeholder:text-[#333] focus:outline-none focus:border-[#00ff41] transition-all duration-150`}
+              />
+              {unsubscribeCodeError && <p className={errorClass}>{unsubscribeCodeError}</p>}
+              <button
+                type="submit"
+                disabled={unsubscribeVerifying || unsubscribeCode.length !== 6}
+                className="cursor-pointer w-full py-2.5 bg-[#00ff41] font-mono text-xs uppercase tracking-widest text-black hover:bg-[#00cc33] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {unsubscribeVerifying ? "Removing..." : "Confirm removal"}
+              </button>
+            </form>
+            <button onClick={cancelUnsubscribeVerify} className="mt-2 font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">
+              Didn&apos;t get it? Start over
             </button>
           </div>
         ) : status === "unsubscribed" ? (
