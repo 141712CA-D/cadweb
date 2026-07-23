@@ -21,6 +21,7 @@ type Status =
   | "duplicate"
   | "unsubscribing"
   | "unsubscribed"
+  | "unsubscribe_rate_limited"
   | "error";
 type EmailCheck = "idle" | "checking" | "available" | "registered" | "returning";
 
@@ -412,6 +413,10 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
 
     try {
       const res = await fetch(unsubscribeHref, { method: "POST" });
+      if (res.status === 429) {
+        setStatus("unsubscribe_rate_limited");
+        return;
+      }
       if (!res.ok) {
         setStatus("duplicate");
         setUnsubscribeError("That unsubscribe link could not be used right now.");
@@ -453,7 +458,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
               Done
             </button>
           </div>
-        ) : status === "duplicate" || status === "unsubscribing" ? (
+        ) : status === "duplicate" ? (
           <div className="flex flex-col items-center text-center py-8 gap-5">
             <div className="w-12 h-12 border border-[#262626] bg-[#161616] flex items-center justify-center">
               <svg className="w-6 h-6 text-[#888]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -487,13 +492,42 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
             ) : unsubscribeHref ? (
               <button
                 onClick={requestUnsubscribe}
-                disabled={status === "unsubscribing"}
-                className="font-mono text-xs uppercase tracking-widest text-[#555] hover:text-red-400 border border-[#262626] hover:border-red-500/40 px-5 py-2 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="font-mono text-xs uppercase tracking-widest text-[#555] hover:text-red-400 border border-[#262626] hover:border-red-500/40 px-5 py-2 transition-colors"
               >
-                {status === "unsubscribing" ? "Removing..." : "Remove from waitlist"}
+                Remove from waitlist
               </button>
             ) : null}
 
+            <button onClick={handleSuccess} className="mt-1 font-mono text-xs uppercase tracking-widest text-[#00ff41] hover:text-[#00cc33] transition-colors">
+              Done
+            </button>
+          </div>
+        ) : status === "unsubscribing" ? (
+          <div className="flex flex-col items-center text-center py-8 gap-5">
+            <div className="w-12 h-12 border border-[#262626] bg-[#161616] flex items-center justify-center">
+              <svg className="w-5 h-5 text-[#555] animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-[#e8e8e8]">Removing from waitlist...</h2>
+              <p className="mt-2 font-mono text-sm text-[#888] max-w-sm">Just a moment.</p>
+            </div>
+          </div>
+        ) : status === "unsubscribe_rate_limited" ? (
+          <div className="flex flex-col items-center text-center py-8 gap-5">
+            <div className="w-12 h-12 border border-amber-500/30 bg-[#161616] flex items-center justify-center">
+              <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-[#e8e8e8]">Slow down.</h2>
+              <p className="mt-2 font-mono text-sm text-[#888] max-w-sm">
+                You can remove yourself from the waitlist again in ~24 hours.
+              </p>
+            </div>
             <button onClick={handleSuccess} className="mt-1 font-mono text-xs uppercase tracking-widest text-[#00ff41] hover:text-[#00cc33] transition-colors">
               Done
             </button>
