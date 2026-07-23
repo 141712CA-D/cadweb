@@ -22,6 +22,7 @@ type Status =
   | "unsubscribing"
   | "unsubscribed"
   | "unsubscribe_rate_limited"
+  | "rate_limited"
   | "error";
 type EmailCheck = "idle" | "checking" | "available" | "registered" | "returning";
 
@@ -285,6 +286,12 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
         setStatus("duplicate");
         return;
       }
+      if (res.status === 429) {
+        setStatus("rate_limited");
+        turnstileRef.current?.reset();
+        setCaptchaToken(null);
+        return;
+      }
       if (!res.ok) {
         turnstileRef.current?.reset();
         setCaptchaToken(null);
@@ -444,7 +451,24 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
           </div>
         )}
 
-        {status === "welcome_back" ? (
+        {status === "rate_limited" ? (
+          <div className="flex flex-col items-center text-center py-8 gap-5">
+            <div className="w-12 h-12 border border-amber-500/30 bg-[#161616] flex items-center justify-center">
+              <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-[#e8e8e8]">Slow down.</h2>
+              <p className="mt-2 font-mono text-sm text-[#888] max-w-sm">
+                Too many requests. You can try again in ~24 hours.
+              </p>
+            </div>
+            <button onClick={startOver} className="mt-1 font-mono text-xs uppercase tracking-widest text-[#00ff41] hover:text-[#00cc33] transition-colors">
+              Done
+            </button>
+          </div>
+        ) : status === "welcome_back" ? (
           <div className="flex flex-col items-center text-center py-8 gap-4">
             <div className="w-12 h-12 border border-[#00ff41]/40 bg-[#161616] flex items-center justify-center">
               <svg className="w-6 h-6 text-[#00ff41]" fill="none" stroke="currentColor" viewBox="0 0 24 24">

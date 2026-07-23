@@ -3,10 +3,6 @@
     {
       "path": "/api/cron/sync-waitlist",
       "schedule": "0 0 * * *"
-    },
-    {
-      "path": "/api/cron/clear-rate-limiting",
-      "schedule": "0 0 * * 0"
     }
   ]
 }
