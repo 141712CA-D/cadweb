@@ -11,7 +11,7 @@ export default function TermsPage() {
 
       <main className="flex-1 max-w-3xl mx-auto px-6 py-32 sm:py-40 w-full">
         <h1 className="text-3xl sm:text-4xl font-bold mb-2">Terms of Service</h1>
-        <p className="font-mono text-xs text-[#555] mb-12">Last updated: June 30, 2026</p>
+        <p className="font-mono text-xs text-[#555] mb-12">Last updated: July 23, 2026</p>
 
         <div className="space-y-10 text-sm text-[#888] leading-relaxed">
 
@@ -43,15 +43,18 @@ export default function TermsPage() {
             <p className="mt-3">
               Waitlist enrollment uses a two-step email verification flow: you submit your information, receive
               a one-time verification code, and must enter that code before your waitlist entry is finalized.
-              Verification codes may expire and may be rate-limited after repeated failed attempts.
+              You may remove yourself from the waitlist at any time using the unsubscribe link in our emails,
+              which uses the same two-step, code-based verification flow to confirm the request. Verification
+              codes may expire and may be rate-limited after repeated failed attempts.
             </p>
             <p className="mt-3">
               To reduce duplicate submissions and improve consistency, we perform synchronization operations:
-              (1) during signup and verification, for real-time dedup checks across our systems; and (2) via a 
-              background sync that runs at most once per hour per browser (throttled by a functional cookie called 
-              <strong>waitlistSynced</strong>). The background sync ensures our database remains synchronized with our 
-              upstream data sources. You agree not to attempt to bypass or interfere with these verification and 
-              synchronization controls.
+              (1) during signup and verification, for real-time dedup checks across our systems using a managed
+              Redis cache; and (2) via a background sync that runs at most once per hour per browser (throttled
+              by a functional cookie called <strong>waitlistSynced</strong>). Rate limits on form submissions and
+              verification attempts are also enforced through this Redis cache. The background sync ensures our
+              database remains synchronized with our upstream data sources. You agree not to attempt to bypass or
+              interfere with these verification, rate-limiting, and synchronization controls.
             </p>
           </section>
 

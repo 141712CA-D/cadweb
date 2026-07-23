@@ -11,7 +11,7 @@ export default function PrivacyPolicyPage() {
 
       <main className="flex-1 max-w-3xl mx-auto px-6 py-32 sm:py-40 w-full">
         <h1 className="text-3xl sm:text-4xl font-bold mb-2">Privacy Policy</h1>
-        <p className="font-mono text-xs text-[#555] mb-12">Last updated: June 30, 2026</p>
+        <p className="font-mono text-xs text-[#555] mb-12">Last updated: July 23, 2026</p>
 
         <div className="space-y-10 text-sm text-[#888] leading-relaxed">
 
@@ -46,18 +46,22 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">3. Data Storage</h2>
             <p>
-              Waitlist data is stored in a Postgres database hosted on AWS and synced to Google Sheets.
-              Both are hosted in the United States. We take reasonable technical measures to protect your data,
-              but no system is completely secure.
+              Waitlist and contact data is stored in a Postgres database hosted on Neon and synced to Google
+              Sheets. We also use a managed Redis cache (hosted on Upstash) to speed up duplicate-email checks
+              and to enforce rate limits on form submissions and verification attempts. Our infrastructure runs
+              on AWS. All of the above are hosted in the United States. We take reasonable technical measures to
+              protect your data, but no system is completely secure.
             </p>
             <p className="mt-3">
               As part of waitlist checks, we may synchronize records across systems during request processing and
-              temporarily hold SHA-256 email hashes in memory so the client can perform local duplicate checks
-              without exposing plaintext email addresses.
+              temporarily hold SHA-256 email hashes in the Redis cache so the client can perform local duplicate
+              checks without exposing plaintext email addresses. These cached hashes expire automatically after a
+              short period.
             </p>
             <p className="mt-3">
-              Pending verification records are stored server-side only as needed to complete verification and are
-              removed after successful verification or expiration.
+              Pending verification records (for waitlist signup, contact submissions, and unsubscribe requests) are
+              stored server-side only as needed to complete verification and are removed after successful
+              verification or expiration.
             </p>
           </section>
 
@@ -67,7 +71,9 @@ export default function PrivacyPolicyPage() {
             <ul className="list-disc list-inside mt-2 space-y-1">
               <li><strong className="text-[#e8e8e8]">Resend</strong> — transactional email delivery</li>
               <li><strong className="text-[#e8e8e8]">Google Sheets / Google Cloud</strong> — waitlist storage and sync</li>
-              <li><strong className="text-[#e8e8e8]">AWS</strong> — database hosting and server infrastructure</li>
+              <li><strong className="text-[#e8e8e8]">Neon</strong> — Postgres database hosting</li>
+              <li><strong className="text-[#e8e8e8]">Upstash</strong> — managed Redis cache for dedup checks and rate limiting</li>
+              <li><strong className="text-[#e8e8e8]">AWS</strong> — server infrastructure</li>
               <li><strong className="text-[#e8e8e8]">Cloudflare Turnstile</strong> — bot protection on forms</li>
               <li><strong className="text-[#e8e8e8]">Vercel</strong> — hosting and analytics</li>
             </ul>
@@ -87,9 +93,11 @@ export default function PrivacyPolicyPage() {
           <section>
             <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">6. Your Rights</h2>
             <p>
-              You may request deletion of your personal data at any time by contacting us. We will remove your
-              information from our systems within a reasonable time frame. Note that removing your data will
-              also remove your place on the waitlist.
+              You may request deletion of your personal data at any time by contacting us, or unsubscribe from the
+              waitlist yourself using the unsubscribe link included in our emails. Unsubscribing follows the same
+              two-step email verification flow as signup: you request removal, receive a 6-digit code by email, and
+              confirm the code to complete removal. We will remove your information from our systems within a
+              reasonable time frame. Note that removing your data will also remove your place on the waitlist.
             </p>
           </section>
 
