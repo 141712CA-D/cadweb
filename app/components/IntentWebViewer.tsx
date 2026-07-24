@@ -73,10 +73,10 @@ const EDGES: WebEdge[] = [
   { a: "f11", b: "f12", kind: "flow" },
 ];
 
-const COLOR_FUSION  = "#4a9eff";
-const COLOR_ONSHAPE = "#00ff41";
-const COLOR_DERIVED = "#f5a623";
-const COLOR_FLOW    = "#2c2c2c";
+const COLOR_FUSION  = "#06b6d4";
+const COLOR_ONSHAPE = "#3b82f6";
+const COLOR_DERIVED = "#d97706";
+const COLOR_FLOW    = "#94a3b8";
 
 export default function IntentWebViewer() {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -94,7 +94,7 @@ export default function IntentWebViewer() {
       const h = mount.offsetHeight || 260;
 
       const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x070707);
+      scene.background = new THREE.Color(0xf8fafc);
 
       const camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 2000);
       camera.position.set(0, 0, 145);

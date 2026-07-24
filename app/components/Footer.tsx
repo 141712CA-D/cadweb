@@ -7,9 +7,9 @@ const GITHUB_URL = "https://github.com/141712CA-D";
 const INSTAGRAM_URL = "https://www.instagram.com/parametra.ai/";
 const DISCORD_URL = "https://discord.gg/4CDr6ZyFd";
 
-const linkClass = "font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors";
+const linkClass = "font-mono text-xs text-[#64748b] hover:text-[#3b82f6] transition-colors";
 const iconLinkClass =
-  "flex items-center gap-2 font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors";
+  "flex items-center gap-2 font-mono text-xs text-[#64748b] hover:text-[#3b82f6] transition-colors";
 
 type FooterPage = "home" | "how-it-works" | "contact" | "signup" | "terms" | "privacy";
 
@@ -40,15 +40,15 @@ export default function Footer({ currentPage = "home", onJoinWaitlist }: FooterP
   );
 
   return (
-    <footer className="relative z-10 bg-[#0f0f0f] border-t border-[#262626] px-6 py-8 sm:py-10">
+    <footer className="relative z-10 bg-[#f8fafc] border-t border-[#dbe6f5] px-6 py-8 sm:py-10">
       <div className="max-w-7xl mx-auto">
         {/* Mobile layout — unchanged from before, with the disclaimer flowing in beneath */}
         <div className="flex flex-col items-center gap-6 sm:hidden">
           <div className="flex flex-col items-center gap-2">
-            <p className="font-mono text-xs text-[#555]">© {year} Parametra</p>
+            <p className="font-mono text-xs text-[#64748b]">© {year} Parametra</p>
             <SocialLinks />
           </div>
-          <p className="font-mono text-xs text-[#333]">v1.5.1.1</p>
+          <p className="font-mono text-xs text-[#94a3b8]">v1.5.1.1</p>
           <div className="grid grid-cols-3 justify-items-center gap-x-6 gap-y-3">
             {currentPage !== "how-it-works" && (
               <Link href="/how-it-works" className={linkClass}>
@@ -75,7 +75,7 @@ export default function Footer({ currentPage = "home", onJoinWaitlist }: FooterP
               </Link>
             )}
           </div>
-          <p className="max-w-sm text-center font-mono text-[11px] leading-5 text-[#555]">
+          <p className="max-w-sm text-center font-mono text-[11px] leading-5 text-[#64748b]">
             {DISCLAIMER}
           </p>
         </div>
@@ -83,12 +83,12 @@ export default function Footer({ currentPage = "home", onJoinWaitlist }: FooterP
         {/* Desktop layout — copyright next to the link columns, centered version, and a left-aligned disclaimer on the right */}
         <div className="relative hidden sm:flex sm:items-start sm:justify-between sm:gap-10">
           <div className="flex gap-12 lg:gap-16">
-            <p className="font-mono text-xs text-[#555] transition-colors hover:text-[#00ff41]">
+            <p className="font-mono text-xs text-[#64748b] transition-colors hover:text-[#3b82f6]">
               © {year} Parametra
             </p>
 
             <div className="flex flex-col items-start gap-2">
-              <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-[#333]">
+              <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-[#94a3b8]">
                 Other Pages
               </p>
               {currentPage !== "how-it-works" && (
@@ -110,7 +110,7 @@ export default function Footer({ currentPage = "home", onJoinWaitlist }: FooterP
             </div>
 
             <div className="flex flex-col items-start gap-2">
-              <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-[#333]">
+              <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-[#94a3b8]">
                 Connect With Us
               </p>
               {currentPage !== "contact" && (
@@ -141,15 +141,15 @@ export default function Footer({ currentPage = "home", onJoinWaitlist }: FooterP
             </div>
           </div>
 
-          <p className="absolute left-1/2 top-0 -translate-x-1/2 font-mono text-xs text-[#333]">
+          <p className="absolute left-1/2 top-0 -translate-x-1/2 font-mono text-xs text-[#94a3b8]">
             v1.5.1.1
           </p>
 
           <div className="flex max-w-md flex-1 flex-col items-start gap-2 text-left">
-            <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-[#333]">
+            <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-[#94a3b8]">
               Disclaimer
             </p>
-            <p className="font-mono text-[11px] leading-5 text-[#555]">{DISCLAIMER}</p>
+            <p className="font-mono text-[11px] leading-5 text-[#64748b]">{DISCLAIMER}</p>
           </div>
         </div>
       </div>

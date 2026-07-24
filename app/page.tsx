@@ -13,32 +13,32 @@ export default function Home() {
   return (
     <>
       <DevBanner />
-      <main className="flex flex-col min-h-screen bg-[#0f0f0f]">
+      <main className="flex flex-col min-h-screen bg-[#f8fafc]">
         <Header onJoinWaitlist={() => setSignupModalOpen(true)} />
         <Hero onJoinWaitlist={() => setSignupModalOpen(true)} />
 
-        <section className="bg-[#0f0f0f] border-t border-[#262626] py-24 px-6">
+        <section className="bg-[#f8fafc] border-t border-[#dbe6f5] py-24 px-6">
           <div className="max-w-3xl mx-auto flex flex-col items-center text-center gap-6">
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#00ff41]">Releasing Soon</p>
-            <h2 className="text-3xl font-black leading-tight text-[#e8e8e8] sm:text-4xl lg:text-5xl">
+            <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#3b82f6]">Releasing Soon</p>
+            <h2 className="text-3xl font-black leading-tight text-[#0f172a] sm:text-4xl lg:text-5xl">
               Stop modeling by hand.
             </h2>
-            <p className="max-w-xl text-sm leading-6 text-[#888] sm:text-base">
+            <p className="max-w-xl text-sm leading-6 text-[#475569] sm:text-base">
               Describe the part. Get back real, editable CAD. Join the waitlist and be first in line when Parametra releases.
             </p>
             <button
               type="button"
               onClick={() => setSignupModalOpen(true)}
-              className="cursor-pointer inline-flex min-h-12 items-center justify-center bg-[#00ff41] px-8 font-mono text-xs uppercase tracking-widest text-black transition hover:bg-[#00cc33]"
+              className="cursor-pointer rounded-md inline-flex min-h-12 items-center justify-center bg-[#3b82f6] px-8 font-mono text-xs uppercase tracking-widest text-white transition hover:bg-[#2563eb]"
             >
               Join the Waitlist
             </button>
           </div>
         </section>
 
-        <section className="bg-[#0f0f0f] border-t border-[#262626] py-16 px-6">
+        <section className="bg-[#f8fafc] border-t border-[#dbe6f5] py-16 px-6">
           <div className="max-w-7xl mx-auto flex flex-col items-center gap-6">
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#555]">Partners</p>
+            <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#64748b]">Partners</p>
             <a
               href="https://www.onshape.com/"
               target="_blank"

@@ -635,31 +635,31 @@ export default function DemoSection() {
     <section
       id="live-demo"
       ref={sectionRef}
-      className="relative bg-[#080808] border-t border-[#1a1a1a]"
+      className="relative bg-[#f8fafc] border-t border-[#dbe6f5]"
       style={{ height: "100svh" }}
     >
 
       {/* ── Solid-bg stage — the window floats inside this, inset with padding ── */}
       <div className="flex h-full w-full items-center justify-center p-3 sm:p-6 lg:p-10">
-        <div className="relative flex h-full w-full max-w-[1400px] flex-col overflow-hidden rounded-2xl border border-[#1c1c1c] bg-[#0b0b0b] shadow-2xl">
+        <div className="relative flex h-full w-full max-w-[1400px] flex-col overflow-hidden rounded-2xl border border-[#dbe6f5] bg-[#ffffff] shadow-2xl">
           {/* Start gate — the demo never auto-plays; the user launches it */}
           {!started && (
-            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-black/70 backdrop-blur-[3px] px-4">
+            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-slate-100/85 backdrop-blur-[3px] px-4">
               <button
                 onClick={startDemo}
-                className="flex items-center gap-3 border border-[#00ff41] bg-[#080808] px-6 py-3.5 font-mono text-sm sm:text-xs uppercase tracking-widest text-[#00ff41] transition-colors hover:bg-[#00ff41] hover:text-black"
-                style={{ boxShadow: "0 0 24px rgba(0,255,65,0.15)" }}
+                className="flex items-center gap-3 rounded-lg border border-[#3b82f6] bg-[#ffffff] px-6 py-3.5 text-sm font-medium text-[#3b82f6] transition-colors hover:bg-[#3b82f6] hover:text-white shadow-sm"
+                style={{ boxShadow: "0 0 24px rgba(59,130,246,0.15)" }}
               >
                 <span className="text-[10px]">▶</span>
-                start mock application
+                Start mock application
               </button>
-              <p className="font-mono text-[11px] sm:text-[10px] text-[#7a7a7a] uppercase tracking-widest text-center">
-                guided run · scrolling locks until it finishes
+              <p className="text-xs text-[#64748b] text-center">
+                Guided run — scrolling locks until it finishes
               </p>
             </div>
           )}
           {/* Title bar */}
-          <div className="flex items-center gap-4 px-4 py-2.5 border-b border-[#121212] bg-[#090909] flex-shrink-0">
+          <div className="flex items-center gap-4 px-4 py-2.5 border-b border-[#dbe6f5] bg-[#f8fafc] flex-shrink-0">
             {/* Phone only: hamburger + inline hint — fixed row height so the
                 hint appearing/disappearing never nudges the title bar's height */}
             <div className="flex sm:hidden h-5 min-w-0 flex-1 items-center gap-2.5 overflow-hidden">
@@ -669,9 +669,9 @@ export default function DemoSection() {
                 aria-label="Open file panel"
               >
                 <span className="flex flex-col gap-1">
-                  <span className={`block h-0.5 w-5 transition-colors ${showMobileHint ? "bg-[#00ff41]" : "bg-[#555]"}`} />
-                  <span className={`block h-0.5 w-5 transition-colors ${showMobileHint ? "bg-[#00ff41]" : "bg-[#555]"}`} />
-                  <span className={`block h-0.5 w-4 transition-colors ${showMobileHint ? "bg-[#00ff41]" : "bg-[#555]"}`} />
+                  <span className={`block h-0.5 w-5 transition-colors ${showMobileHint ? "bg-[#3b82f6]" : "bg-[#64748b]"}`} />
+                  <span className={`block h-0.5 w-5 transition-colors ${showMobileHint ? "bg-[#3b82f6]" : "bg-[#64748b]"}`} />
+                  <span className={`block h-0.5 w-4 transition-colors ${showMobileHint ? "bg-[#3b82f6]" : "bg-[#64748b]"}`} />
                 </span>
               </button>
               {showMobileHint && (
@@ -679,9 +679,9 @@ export default function DemoSection() {
                   onClick={() => { setShelfOpen(true); setShowMobileHint(false); }}
                   className="flex min-w-0 flex-1 items-center gap-1.5 animate-fade-in"
                 >
-                  <span className="flex-shrink-0 text-[#00ff41] leading-none animate-pulse">←</span>
-                  <span className="min-w-0 flex-1 truncate font-mono text-[10px] leading-none text-[#00ff41]">
-                    tap here to view the model & more demos
+                  <span className="flex-shrink-0 text-[#3b82f6] leading-none animate-pulse">←</span>
+                  <span className="min-w-0 flex-1 truncate text-[11px] leading-none text-[#3b82f6]">
+                    Tap here to view the model & more demos
                   </span>
                 </button>
               )}
@@ -699,39 +699,39 @@ export default function DemoSection() {
           <div className="flex flex-1 min-h-0 overflow-x-auto">
 
             {/* ── Left sidebar ── */}
-            <aside className="hidden sm:flex w-52 flex-shrink-0 flex-col border-r border-[#121212] bg-[#080808]">
+            <aside className="hidden sm:flex w-52 flex-shrink-0 flex-col border-r border-[#dbe6f5] bg-[#ffffff]">
             {/* Brand */}
-            <div className="px-4 py-3 border-b border-[#121212] flex items-center gap-2">
-              <span className="font-mono text-sm sm:text-xs text-[#00ff41] tracking-[0.1em]">Parametra</span>
-              <span className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">v1.0</span>
+            <div className="px-4 py-3 border-b border-[#dbe6f5] flex items-center gap-2">
+              <span className="font-mono text-sm sm:text-xs text-[#3b82f6] tracking-[0.1em]">Parametra</span>
+              <span className="font-mono text-[10px] sm:text-[8px] text-[#94a3b8]">v1.0</span>
             </div>
 
             {/* Nav */}
             <nav className="px-2 pt-3 space-y-px">
               {[
-                { label: "Part Studios",       active: !showInterCad, accent: "#00ff41", onClick: () => setActivePanel("partStudio") },
-                { label: "Documents",          active: false,         accent: "#00ff41", onClick: undefined },
-                { label: "Assemblies",         active: false,         accent: "#00ff41", onClick: undefined },
-                { label: "Variables",          active: false,         accent: "#00ff41", onClick: undefined },
+                { label: "Part Studios",       active: !showInterCad, accent: "#3b82f6", onClick: () => setActivePanel("partStudio") },
+                { label: "Documents",          active: false,         accent: "#3b82f6", onClick: undefined },
+                { label: "Assemblies",         active: false,         accent: "#3b82f6", onClick: undefined },
+                { label: "Variables",          active: false,         accent: "#3b82f6", onClick: undefined },
                 {
                   label: "Inter-CAD Transfer",
                   active: showInterCad,
-                  accent: "#4a9eff",
+                  accent: "#06b6d4",
                   onClick: transferState === "done" ? () => setActivePanel("interCad") : undefined,
                 },
               ].map(item => (
                 <div
                   key={item.label}
                   onClick={item.onClick}
-                  className={`flex items-center gap-2 px-3 py-2 text-sm sm:text-xs select-none ${
-                    item.onClick ? "cursor-pointer hover:bg-[#0c0c0c]" : ""
+                  className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm sm:text-xs select-none ${
+                    item.onClick ? "cursor-pointer hover:bg-[#e2e8f0]" : ""
                   } ${
-                    item.active ? "bg-[#0e0e0e] text-[#bbb]" : "text-[#555]"
+                    item.active ? "bg-[#eef2f9] text-[#334155]" : "text-[#64748b]"
                   }`}
                 >
                   <span
                     className="h-1 w-1 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: item.active ? item.accent : "#1c1c1c" }}
+                    style={{ backgroundColor: item.active ? item.accent : "#dbe6f5" }}
                   />
                   {item.label}
                 </div>
@@ -740,7 +740,7 @@ export default function DemoSection() {
 
             {/* Design history */}
             <div className="px-2 pt-4">
-              <p className="px-3 pb-2 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em]">
+              <p className="px-3 pb-2 text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide">
                 Recent
               </p>
               {HISTORY.map(h => {
@@ -750,20 +750,20 @@ export default function DemoSection() {
                   <div
                     key={h.id}
                     onClick={clickable ? () => setActivePanel("partStudio") : undefined}
-                    className={`px-3 py-2.5 ${clickable ? "cursor-pointer hover:bg-[#0c0c0c]" : ""} ${
-                      active ? "bg-[#0e0e0e] border-l-2 border-[#00ff41]" : ""
+                    className={`rounded-md px-3 py-2.5 ${clickable ? "cursor-pointer hover:bg-[#e2e8f0]" : ""} ${
+                      active ? "bg-[#eef2f9] border-l-2 border-[#3b82f6]" : ""
                     }`}
                   >
                     <p
                       className={`text-sm sm:text-xs truncate ${
-                        active ? "text-[#bbb]" : "text-[#555]"
+                        active ? "text-[#334155]" : "text-[#64748b]"
                       }`}
                     >
                       {h.label}
                     </p>
                     <p
-                      className={`font-mono text-[11px] sm:text-[9px] ${
-                        active ? "text-[#666]" : "text-[#444]"
+                      className={`text-[11px] sm:text-[10px] ${
+                        active ? "text-[#64748b]" : "text-[#94a3b8]"
                       }`}
                     >
                       {h.sub}
@@ -774,53 +774,53 @@ export default function DemoSection() {
             </div>
 
             {/* Inter-CAD import entry — user-initiated only, never auto-clicked */}
-            <div className="px-2 pt-2 pb-2 border-t border-[#121212]">
-              <p className="px-3 pb-2 pt-2 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em]">
+            <div className="px-2 pt-2 pb-2 border-t border-[#dbe6f5]">
+              <p className="px-3 pb-2 pt-2 text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide">
                 Inter-CAD
               </p>
               <button
                 ref={interCadRef}
                 onClick={startTransfer}
                 disabled={transferState === "playing"}
-                className={`w-full text-left px-3 py-2.5 border transition-colors group ${
+                className={`w-full rounded-md text-left px-3 py-2.5 border transition-colors group ${
                   showInterCad
                     ? "border-blue-500 bg-blue-500/10"
                     : transferState === "idle" && cursorHintDone
-                      ? "breathe-blue border-blue-900"
-                      : "border-[#161616] hover:border-blue-900"
+                      ? "breathe-blue border-blue-300"
+                      : "border-[#dbe6f5] hover:border-blue-300"
                 }`}
               >
                 <p className={`text-sm sm:text-xs truncate transition-colors ${
-                  showInterCad ? "text-[#bbb]" : "text-[#777] group-hover:text-[#a0a0a0]"
+                  showInterCad ? "text-[#334155]" : "text-[#64748b] group-hover:text-[#334155]"
                 }`}>
                   {INTER_CAD.label}
                 </p>
-                <p className={`font-mono text-[11px] sm:text-[9px] transition-colors ${
-                  showInterCad ? "text-blue-400" : "text-[#555] group-hover:text-blue-500"
+                <p className={`text-[11px] sm:text-[10px] transition-colors ${
+                  showInterCad ? "text-blue-600" : "text-[#64748b] group-hover:text-blue-600"
                 }`}>
                   {INTER_CAD.sub}
                 </p>
               </button>
             </div>
 
-            <div className="mt-auto p-4 border-t border-[#121212]">
-              <p className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-widest">Settings</p>
+            <div className="mt-auto p-4 border-t border-[#dbe6f5]">
+              <p className="text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide">Settings</p>
             </div>
           </aside>
 
           {/* ── Middle: Part Studio panel ── */}
           <div
-            className="hidden sm:flex flex-col border-r border-[#121212] bg-[#090909]"
+            className="hidden sm:flex flex-col border-r border-[#dbe6f5] bg-[#f8fafc]"
             style={{ width: "clamp(200px, 32%, 320px)", flexShrink: 0 }}
           >
             {/* Tabs — Inter-CAD only exists once the transfer has been triggered */}
-            <div className="flex items-end border-b border-[#121212] px-4 flex-shrink-0">
+            <div className="flex items-center gap-1 border-b border-[#dbe6f5] px-3 py-2 flex-shrink-0">
               <button
                 onClick={() => setActivePanel("partStudio")}
-                className={`py-3 mr-5 font-mono text-xs sm:text-[10px] uppercase tracking-widest transition-colors ${
+                className={`rounded-md px-3 py-1.5 text-xs sm:text-[11px] font-medium transition-colors ${
                   !showInterCad
-                    ? "text-[#a0a0a0] border-b border-[#00ff41]"
-                    : "text-[#4a4a4a] hover:text-[#666]"
+                    ? "bg-[#eef2f9] text-[#0f172a]"
+                    : "text-[#94a3b8] hover:text-[#475569] hover:bg-[#f1f5f9]"
                 }`}
               >
                 Model Gen
@@ -828,10 +828,10 @@ export default function DemoSection() {
               {transferState !== "idle" && (
                 <button
                   onClick={() => setActivePanel("interCad")}
-                  className={`py-3 font-mono text-xs sm:text-[10px] uppercase tracking-widest transition-colors ${
+                  className={`rounded-md px-3 py-1.5 text-xs sm:text-[11px] font-medium transition-colors ${
                     showInterCad
-                      ? "text-[#a0a0a0] border-b border-blue-500"
-                      : "text-[#4a4a4a] hover:text-[#666]"
+                      ? "bg-[#eef2f9] text-[#0f172a]"
+                      : "text-[#94a3b8] hover:text-[#475569] hover:bg-[#f1f5f9]"
                   }`}
                 >
                   Inter-CAD
@@ -847,7 +847,7 @@ export default function DemoSection() {
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
               {/* Feature tree */}
               <div>
-                <p className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em] mb-2">
+                <p className="text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide mb-2">
                   Feature Tree
                 </p>
                 <div className="space-y-0.5">
@@ -861,7 +861,7 @@ export default function DemoSection() {
                       }`}
                     >
                       <FeatureIcon type={f.icon} />
-                      <span className="font-mono text-xs sm:text-[10px] text-[#8a8a8a]">{f.name}</span>
+                      <span className="font-mono text-xs sm:text-[10px] text-[#475569]">{f.name}</span>
                     </div>
                   ))}
                 </div>
@@ -869,36 +869,36 @@ export default function DemoSection() {
 
               {/* Variables — drill-down accordion */}
               {visibleMsgs.has("result") && (
-                <div className="border border-[#141414] bg-[#070707]">
-                  <p className="px-3 pt-2.5 pb-1.5 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em] border-b border-[#111]">
+                <div className="rounded-md border border-[#dbe6f5] bg-[#eef2f9] overflow-hidden">
+                  <p className="px-3 pt-2.5 pb-1.5 text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide border-b border-[#dbe6f5]">
                     Live Variables
                   </p>
                   {VAR_GROUPS.map(group => (
-                    <div key={group.label} className="border-b border-[#111] last:border-0">
+                    <div key={group.label} className="border-b border-[#dbe6f5] last:border-0">
                       <button
                         onClick={() => toggleVarGroup(group.label)}
-                        className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-[#0c0c0c] transition-colors"
+                        className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-[#e2e8f0] transition-colors"
                       >
                         <span
-                          className="font-mono text-[10px] sm:text-[8px] text-[#555] flex-shrink-0 transition-transform duration-150"
+                          className="text-[10px] text-[#64748b] flex-shrink-0 transition-transform duration-150"
                           style={{ display: "inline-block", transform: expandedVars.has(group.label) ? "rotate(90deg)" : "rotate(0deg)" }}
                         >
                           ▶
                         </span>
-                        <span className="font-mono text-[11px] sm:text-[9px] text-[#777] uppercase tracking-widest">
+                        <span className="text-xs sm:text-[11px] font-medium text-[#475569]">
                           {group.label}
                         </span>
-                        <span className="ml-auto font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">
+                        <span className="ml-auto font-mono text-[10px] sm:text-[8px] text-[#94a3b8]">
                           {group.vars.length}
                         </span>
                       </button>
                       {expandedVars.has(group.label) && (
-                        <div className="px-3 pb-2 space-y-1 border-t border-[#0e0e0e]">
+                        <div className="px-3 pb-2 space-y-1 border-t border-[#eef2f9]">
                           {group.vars.map(([name, val, unit]) => (
                             <div key={name} className="flex items-center justify-between py-0.5">
-                              <span className="font-mono text-[11px] sm:text-[9px] text-[#666]">{name}</span>
-                              <span className="font-mono text-[11px] sm:text-[9px] text-[#00ff41]">
-                                {val} <span className="text-[#4a4a4a]">{unit}</span>
+                              <span className="font-mono text-[11px] sm:text-[9px] text-[#64748b]">{name}</span>
+                              <span className="font-mono text-[11px] sm:text-[9px] text-[#3b82f6]">
+                                {val} <span className="text-[#94a3b8]">{unit}</span>
                               </span>
                             </div>
                           ))}
@@ -916,19 +916,19 @@ export default function DemoSection() {
                     <button
                       ref={meshBtnRef}
                       onClick={() => setShowMesh(true)}
-                      className="w-full border border-[#1c1c1c] hover:border-[#00ff41] py-2 font-mono text-[11px] sm:text-[9px] text-[#666] hover:text-[#00ff41] transition-colors uppercase tracking-widest"
+                      className="w-full rounded-md flex items-center justify-center gap-1.5 border border-[#dbe6f5] hover:border-[#334155] bg-[#0f172a] hover:bg-black py-2 text-xs sm:text-[11px] font-medium text-white transition-colors"
                     >
-                      ↗ view mesh model
+                      ↗ View mesh model
                     </button>
                   ) : (
-                    <div className="border border-[#00ff41]" style={{ boxShadow: "0 0 20px rgba(0,255,65,0.04)" }}>
-                      <div className="flex items-center justify-between px-3 py-1.5 border-b border-[#0e0e0e]">
-                        <span className="font-mono text-[10px] sm:text-[8px] text-[#00ff41] uppercase tracking-widest">
-                          local model
+                    <div className="rounded-md overflow-hidden border border-black bg-black" style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.25)" }}>
+                      <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/10">
+                        <span className="text-[11px] sm:text-[10px] font-medium text-white/80">
+                          Local model
                         </span>
                         <button
                           onClick={() => setShowMesh(false)}
-                          className="font-mono text-sm text-[#555] hover:text-[#a0a0a0] transition-colors leading-none"
+                          className="font-mono text-sm text-white/50 hover:text-white transition-colors leading-none"
                         >
                           ×
                         </button>
@@ -936,8 +936,8 @@ export default function DemoSection() {
                       <div className="overflow-hidden" style={{ height: 240 }}>
                         <MugModelViewer />
                       </div>
-                      <p className="px-3 py-1.5 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">
-                        drag to rotate · scroll to zoom
+                      <p className="px-3 py-1.5 text-[11px] sm:text-[10px] text-white/40">
+                        Drag to rotate · scroll to zoom
                       </p>
                     </div>
                   )}
@@ -947,31 +947,31 @@ export default function DemoSection() {
             )}
 
             {/* Status bar */}
-            <div className="flex items-center gap-2 px-4 py-2 border-t border-[#121212]">
+            <div className="flex items-center gap-2 px-4 py-2 border-t border-[#dbe6f5]">
               <span
                 className={`h-1.5 w-1.5 flex-shrink-0 ${
-                  (showInterCad ? transferState === "done" : animDone) ? "bg-[#00ff41]" : "bg-[#222] animate-pulse"
+                  (showInterCad ? transferState === "done" : animDone) ? "bg-[#3b82f6]" : "bg-[#cbd5e1] animate-pulse"
                 }`}
               />
-              <span className="font-mono text-[11px] sm:text-[9px] text-[#4a4a4a]">
+              <span className="text-[11px] sm:text-[10px] text-[#94a3b8]">
                 {showInterCad
-                  ? "transferred · 13 features mapped"
-                  : animDone ? "complete · 6 features · 9 variables" : "generating…"}
+                  ? "Transferred · 13 features mapped"
+                  : animDone ? "Complete · 6 features · 9 variables" : "Generating…"}
               </span>
             </div>
           </div>
 
           {/* ── Right: Chat panel ── */}
-          <div className="flex flex-col flex-1 min-w-[300px] bg-[#080808]">
+          <div className="flex flex-col flex-1 min-w-[300px] bg-[#ffffff]">
             {/* Tabs */}
-            <div className="flex items-end border-b border-[#121212] px-5 flex-shrink-0">
+            <div className="flex items-center gap-1 border-b border-[#dbe6f5] px-4 py-2 flex-shrink-0">
               <button
                 ref={convTabRef}
                 onClick={() => setActiveTab("conversation")}
-                className={`py-3 mr-5 font-mono text-xs sm:text-[10px] uppercase tracking-widest transition-colors ${
+                className={`rounded-md px-3 py-1.5 text-xs sm:text-[11px] font-medium transition-colors ${
                   activeTab === "conversation"
-                    ? "text-[#a0a0a0] border-b border-[#00ff41]"
-                    : "text-[#4a4a4a] hover:text-[#666]"
+                    ? "bg-[#eef2f9] text-[#0f172a]"
+                    : "text-[#94a3b8] hover:text-[#475569] hover:bg-[#f1f5f9]"
                 }`}
               >
                 Conversation
@@ -979,15 +979,15 @@ export default function DemoSection() {
               <button
                 ref={logsTabRef}
                 onClick={() => setActiveTab("logs")}
-                className={`py-3 font-mono text-xs sm:text-[10px] uppercase tracking-widest transition-colors ${
+                className={`rounded-md px-3 py-1.5 text-xs sm:text-[11px] font-medium transition-colors ${
                   activeTab === "logs"
-                    ? "text-[#a0a0a0] border-b border-[#00ff41]"
-                    : "text-[#4a4a4a] hover:text-[#666]"
+                    ? "bg-[#eef2f9] text-[#0f172a]"
+                    : "text-[#94a3b8] hover:text-[#475569] hover:bg-[#f1f5f9]"
                 }`}
               >
                 Logs
                 {visibleLogs.length > 0 && (
-                  <span className="ml-1.5 font-mono text-[10px] sm:text-[8px] text-[#555]">
+                  <span className="ml-1.5 font-mono text-[10px] sm:text-[8px] text-[#64748b]">
                     {visibleLogs.length}
                   </span>
                 )}
@@ -1007,9 +1007,9 @@ export default function DemoSection() {
                 ))}
                 {transferState !== "idle" && visibleTransferItems.length > 0 && (
                   <div className="flex items-center gap-2 py-1">
-                    <div className="h-px flex-1 bg-[#141414]" />
-                    <span className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-widest">inter-cad transfer</span>
-                    <div className="h-px flex-1 bg-[#141414]" />
+                    <div className="h-px flex-1 bg-[#dbe6f5]" />
+                    <span className="text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide">Inter-CAD transfer</span>
+                    <div className="h-px flex-1 bg-[#dbe6f5]" />
                   </div>
                 )}
                 {visibleTransferItems.map(item => (
@@ -1028,7 +1028,7 @@ export default function DemoSection() {
                       {[0, 120, 240].map(d => (
                         <span
                           key={d}
-                          className="h-1.5 w-1.5 rounded-full bg-[#00ff41] animate-bounce"
+                          className="h-1.5 w-1.5 rounded-full bg-[#3b82f6] animate-bounce"
                           style={{ animationDelay: `${d}ms` }}
                         />
                       ))}
@@ -1042,7 +1042,7 @@ export default function DemoSection() {
                       {[0, 120, 240].map(d => (
                         <span
                           key={d}
-                          className="h-1.5 w-1.5 rounded-full bg-[#00ff41] animate-bounce"
+                          className="h-1.5 w-1.5 rounded-full bg-[#3b82f6] animate-bounce"
                           style={{ animationDelay: `${d}ms` }}
                         />
                       ))}
@@ -1057,31 +1057,31 @@ export default function DemoSection() {
               <div ref={logsRef} className="flex-1 overflow-y-auto px-4 py-3 font-mono text-[11px] sm:text-[9px] leading-[1.8] space-y-0">
                 {visibleLogs.map((line, i) => (
                   <p key={i} className={
-                    line.level === "ok"   ? "text-[#00ff41]" :
-                    line.level === "api"  ? "text-[#4a9eff]" :
-                    line.level === "warn" ? "text-[#f5a623]" :
-                                           "text-[#666]"
+                    line.level === "ok"   ? "text-[#3b82f6]" :
+                    line.level === "api"  ? "text-[#06b6d4]" :
+                    line.level === "warn" ? "text-[#d97706]" :
+                                           "text-[#64748b]"
                   }>
                     {line.text}
                   </p>
                 ))}
                 {!animDone && visibleLogs.length > 0 && (
-                  <span className="text-[#00ff41] animate-pulse">▌</span>
+                  <span className="text-[#3b82f6] animate-pulse">▌</span>
                 )}
               </div>
             )}
 
             {/* Decorative input */}
-            <div className="px-5 py-3 border-t border-[#121212] flex-shrink-0">
-              <div className="flex items-center gap-2 border border-[#141414] bg-[#0b0b0b] px-3 py-2.5">
-                <span className="flex-1 font-mono text-xs sm:text-[10px] text-[#4a4a4a] select-none">
+            <div className="px-5 py-3 border-t border-[#dbe6f5] flex-shrink-0">
+              <div className="flex items-center gap-2 rounded-lg border border-[#dbe6f5] bg-[#ffffff] px-3 py-2.5">
+                <span className="flex-1 text-sm sm:text-xs text-[#94a3b8] select-none">
                   {animDone
-                    ? "design complete — scroll or swipe to return to the site"
+                    ? "Design complete — scroll or swipe to return to the site"
                     : started
-                      ? "demo in progress…"
-                      : "awaiting input…"}
+                      ? "Demo in progress…"
+                      : "Awaiting input…"}
                 </span>
-                <span className="font-mono text-[11px] sm:text-[9px] text-[#444] border border-[#181818] px-2 py-0.5 uppercase tracking-widest">
+                <span className="rounded-md text-[11px] sm:text-[10px] text-[#94a3b8] border border-[#dbe6f5] px-2 py-0.5">
                   ↑
                 </span>
               </div>
@@ -1092,56 +1092,56 @@ export default function DemoSection() {
           {/* ── Mobile slide-in shelf ── */}
           {/* Backdrop */}
           <div
-            className={`absolute inset-0 z-40 bg-black/60 transition-opacity duration-300 sm:hidden ${
+            className={`absolute inset-0 z-40 bg-slate-900/40 transition-opacity duration-300 sm:hidden ${
               shelfOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
             }`}
             onClick={() => setShelfOpen(false)}
           />
           {/* Shelf panel */}
           <div
-            className={`absolute top-0 left-0 z-50 h-full w-72 flex flex-col bg-[#080808] border-r border-[#1c1c1c] transition-transform duration-300 ease-out sm:hidden ${
+            className={`absolute top-0 left-0 z-50 h-full w-72 flex flex-col bg-[#ffffff] border-r border-[#dbe6f5] transition-transform duration-300 ease-out sm:hidden ${
               shelfOpen ? "translate-x-0" : "-translate-x-full"
             }`}
           >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[#141414]">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#dbe6f5]">
               <div className="flex items-center gap-2">
-                <span className="font-mono text-sm sm:text-xs text-[#00ff41] tracking-[0.1em]">Parametra</span>
-                <span className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">v1.0</span>
+                <span className="font-mono text-sm sm:text-xs text-[#3b82f6] tracking-[0.1em]">Parametra</span>
+                <span className="font-mono text-[10px] sm:text-[8px] text-[#94a3b8]">v1.0</span>
               </div>
-              <button onClick={() => setShelfOpen(false)} className="font-mono text-lg text-[#666] hover:text-[#a0a0a0] leading-none">×</button>
+              <button onClick={() => setShelfOpen(false)} className="font-mono text-lg text-[#64748b] hover:text-[#334155] leading-none">×</button>
             </div>
 
             <div className="flex-1 min-h-0 overflow-y-auto">
               {/* Nav */}
-              <nav className="px-2 pt-3 space-y-px border-b border-[#141414] pb-3">
+              <nav className="px-2 pt-3 space-y-px border-b border-[#dbe6f5] pb-3">
                 {[
-                  { label: "Part Studios",       active: !showInterCad, accent: "#00ff41", onClick: () => setActivePanel("partStudio") },
-                  { label: "Documents",          active: false,         accent: "#00ff41", onClick: undefined },
-                  { label: "Assemblies",         active: false,         accent: "#00ff41", onClick: undefined },
-                  { label: "Variables",          active: false,         accent: "#00ff41", onClick: undefined },
+                  { label: "Part Studios",       active: !showInterCad, accent: "#3b82f6", onClick: () => setActivePanel("partStudio") },
+                  { label: "Documents",          active: false,         accent: "#3b82f6", onClick: undefined },
+                  { label: "Assemblies",         active: false,         accent: "#3b82f6", onClick: undefined },
+                  { label: "Variables",          active: false,         accent: "#3b82f6", onClick: undefined },
                   {
                     label: "Inter-CAD Transfer",
                     active: showInterCad,
-                    accent: "#4a9eff",
+                    accent: "#06b6d4",
                     onClick: transferState === "done" ? () => setActivePanel("interCad") : undefined,
                   },
                 ].map(item => (
                   <div
                     key={item.label}
                     onClick={item.onClick}
-                    className={`flex items-center gap-2 px-3 py-2 text-sm sm:text-xs select-none ${item.onClick ? "cursor-pointer" : ""} ${
-                      item.active ? "bg-[#0e0e0e] text-[#bbb]" : "text-[#555]"
+                    className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm sm:text-xs select-none ${item.onClick ? "cursor-pointer" : ""} ${
+                      item.active ? "bg-[#eef2f9] text-[#334155]" : "text-[#64748b]"
                     }`}
                   >
-                    <span className="h-1 w-1 rounded-full flex-shrink-0" style={{ backgroundColor: item.active ? item.accent : "#1c1c1c" }} />
+                    <span className="h-1 w-1 rounded-full flex-shrink-0" style={{ backgroundColor: item.active ? item.accent : "#dbe6f5" }} />
                     {item.label}
                   </div>
                 ))}
               </nav>
 
               {/* History */}
-              <div className="px-2 pt-4 border-b border-[#141414] pb-4">
-                <p className="px-3 pb-2 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em]">Recent</p>
+              <div className="px-2 pt-4 border-b border-[#dbe6f5] pb-4">
+                <p className="px-3 pb-2 text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide">Recent</p>
                 {HISTORY.map(h => {
                   const active = h.active && !showInterCad;
                   const clickable = h.id === "mug";
@@ -1149,44 +1149,44 @@ export default function DemoSection() {
                     <div
                       key={h.id}
                       onClick={clickable ? () => setActivePanel("partStudio") : undefined}
-                      className={`px-3 py-2.5 ${clickable ? "cursor-pointer" : ""} ${active ? "bg-[#0e0e0e] border-l-2 border-[#00ff41]" : ""}`}
+                      className={`rounded-md px-3 py-2.5 ${clickable ? "cursor-pointer" : ""} ${active ? "bg-[#eef2f9] border-l-2 border-[#3b82f6]" : ""}`}
                     >
-                      <p className={`text-sm sm:text-xs truncate ${active ? "text-[#bbb]" : "text-[#555]"}`}>{h.label}</p>
-                      <p className={`font-mono text-[11px] sm:text-[9px] ${active ? "text-[#666]" : "text-[#444]"}`}>{h.sub}</p>
+                      <p className={`text-sm sm:text-xs truncate ${active ? "text-[#334155]" : "text-[#64748b]"}`}>{h.label}</p>
+                      <p className={`text-[11px] sm:text-[10px] ${active ? "text-[#64748b]" : "text-[#94a3b8]"}`}>{h.sub}</p>
                     </div>
                   );
                 })}
               </div>
 
               {/* Inter-CAD import entry */}
-              <div className="px-2 pt-4 border-b border-[#141414] pb-4">
-                <p className="px-3 pb-2 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em]">Inter-CAD</p>
+              <div className="px-2 pt-4 border-b border-[#dbe6f5] pb-4">
+                <p className="px-3 pb-2 text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide">Inter-CAD</p>
                 <button
                   onClick={startTransfer}
                   disabled={transferState === "playing"}
-                  className={`w-full text-left px-3 py-2.5 border transition-colors group ${
+                  className={`w-full rounded-md text-left px-3 py-2.5 border transition-colors group ${
                     showInterCad
                       ? "border-blue-500 bg-blue-500/10"
                       : transferState === "idle" && cursorHintDone
-                        ? "breathe-blue border-blue-900"
-                        : "border-[#161616]"
+                        ? "breathe-blue border-blue-300"
+                        : "border-[#dbe6f5]"
                   }`}
                 >
-                  <p className={`text-sm sm:text-xs truncate ${showInterCad ? "text-[#bbb]" : "text-[#777]"}`}>
+                  <p className={`text-sm sm:text-xs truncate ${showInterCad ? "text-[#334155]" : "text-[#64748b]"}`}>
                     {INTER_CAD.label}
                   </p>
-                  <p className={`font-mono text-[11px] sm:text-[9px] ${showInterCad ? "text-blue-400" : "text-[#555]"}`}>
+                  <p className={`text-[11px] sm:text-[10px] ${showInterCad ? "text-blue-600" : "text-[#64748b]"}`}>
                     {INTER_CAD.sub}
                   </p>
                 </button>
               </div>
 
               {/* Tabs — Inter-CAD only exists once the transfer has been triggered */}
-              <div className="flex items-end border-b border-[#141414] px-4">
+              <div className="flex items-center gap-1 border-b border-[#dbe6f5] px-3 py-2">
                 <button
                   onClick={() => setActivePanel("partStudio")}
-                  className={`py-3 mr-5 font-mono text-xs sm:text-[10px] uppercase tracking-widest transition-colors ${
-                    !showInterCad ? "text-[#a0a0a0] border-b border-[#00ff41]" : "text-[#4a4a4a]"
+                  className={`rounded-md px-3 py-1.5 text-xs sm:text-[11px] font-medium transition-colors ${
+                    !showInterCad ? "bg-[#eef2f9] text-[#0f172a]" : "text-[#94a3b8]"
                   }`}
                 >
                   Model Gen
@@ -1194,8 +1194,8 @@ export default function DemoSection() {
                 {transferState !== "idle" && (
                   <button
                     onClick={() => setActivePanel("interCad")}
-                    className={`py-3 font-mono text-xs sm:text-[10px] uppercase tracking-widest transition-colors ${
-                      showInterCad ? "text-[#a0a0a0] border-b border-blue-500" : "text-[#4a4a4a]"
+                    className={`rounded-md px-3 py-1.5 text-xs sm:text-[11px] font-medium transition-colors ${
+                      showInterCad ? "bg-[#eef2f9] text-[#0f172a]" : "text-[#94a3b8]"
                     }`}
                   >
                     Inter-CAD
@@ -1210,13 +1210,13 @@ export default function DemoSection() {
               ) : (
               <>
               {/* Feature tree */}
-              <div className="px-4 pt-4 border-b border-[#141414] pb-4">
-                <p className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em] mb-2">Feature Tree · mug_v1</p>
+              <div className="px-4 pt-4 border-b border-[#dbe6f5] pb-4">
+                <p className="text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide mb-2">Feature Tree · mug_v1</p>
                 <div className="space-y-0.5">
                   {FEATURES.map(f => (
                     <div key={f.id} className={`flex items-center gap-2 py-0.5 transition-all duration-300 ${visibleFeat.has(f.id) ? "opacity-100" : "opacity-0"}`}>
                       <FeatureIcon type={f.icon} />
-                      <span className="font-mono text-xs sm:text-[10px] text-[#8a8a8a]">{f.name}</span>
+                      <span className="font-mono text-xs sm:text-[10px] text-[#475569]">{f.name}</span>
                     </div>
                   ))}
                 </div>
@@ -1224,28 +1224,28 @@ export default function DemoSection() {
 
               {/* Variables */}
               {visibleMsgs.has("result") && (
-                <div className="px-4 pt-4 border-b border-[#141414] pb-4">
-                  <p className="font-mono text-[10px] sm:text-[8px] text-[#4a4a4a] uppercase tracking-[0.2em] mb-2">Live Variables</p>
-                  <div className="border border-[#141414] bg-[#070707]">
+                <div className="px-4 pt-4 border-b border-[#dbe6f5] pb-4">
+                  <p className="text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide mb-2">Live Variables</p>
+                  <div className="rounded-md border border-[#dbe6f5] bg-[#eef2f9] overflow-hidden">
                     {VAR_GROUPS.map(group => (
-                      <div key={group.label} className="border-b border-[#111] last:border-0">
+                      <div key={group.label} className="border-b border-[#dbe6f5] last:border-0">
                         <button
                           onClick={() => toggleVarGroup(group.label)}
-                          className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-[#0c0c0c] transition-colors"
+                          className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-[#e2e8f0] transition-colors"
                         >
                           <span
-                            className="font-mono text-[10px] sm:text-[8px] text-[#555] flex-shrink-0 transition-transform duration-150"
+                            className="text-[10px] text-[#64748b] flex-shrink-0 transition-transform duration-150"
                             style={{ display: "inline-block", transform: expandedVars.has(group.label) ? "rotate(90deg)" : "rotate(0deg)" }}
                           >▶</span>
-                          <span className="font-mono text-[11px] sm:text-[9px] text-[#777] uppercase tracking-widest">{group.label}</span>
-                          <span className="ml-auto font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">{group.vars.length}</span>
+                          <span className="text-xs sm:text-[11px] font-medium text-[#475569]">{group.label}</span>
+                          <span className="ml-auto font-mono text-[10px] sm:text-[8px] text-[#94a3b8]">{group.vars.length}</span>
                         </button>
                         {expandedVars.has(group.label) && (
-                          <div className="px-3 pb-2 space-y-1 border-t border-[#0e0e0e]">
+                          <div className="px-3 pb-2 space-y-1 border-t border-[#eef2f9]">
                             {group.vars.map(([name, val, unit]) => (
                               <div key={name} className="flex items-center justify-between py-0.5">
-                                <span className="font-mono text-[11px] sm:text-[9px] text-[#666]">{name}</span>
-                                <span className="font-mono text-[11px] sm:text-[9px] text-[#00ff41]">{val} <span className="text-[#4a4a4a]">{unit}</span></span>
+                                <span className="font-mono text-[11px] sm:text-[9px] text-[#64748b]">{name}</span>
+                                <span className="font-mono text-[11px] sm:text-[9px] text-[#3b82f6]">{val} <span className="text-[#94a3b8]">{unit}</span></span>
                               </div>
                             ))}
                           </div>
@@ -1262,20 +1262,20 @@ export default function DemoSection() {
                   {!showMesh ? (
                     <button
                       onClick={() => setShowMesh(true)}
-                      className="w-full border border-[#1c1c1c] hover:border-[#00ff41] py-2 font-mono text-[11px] sm:text-[9px] text-[#666] hover:text-[#00ff41] transition-colors uppercase tracking-widest"
+                      className="w-full rounded-md flex items-center justify-center gap-1.5 border border-[#dbe6f5] hover:border-[#334155] bg-[#0f172a] hover:bg-black py-2 text-xs sm:text-[11px] font-medium text-white transition-colors"
                     >
-                      ↗ view mesh model
+                      ↗ View mesh model
                     </button>
                   ) : (
-                    <div className="border border-[#00ff41]">
-                      <div className="flex items-center justify-between px-3 py-1.5 border-b border-[#0e0e0e]">
-                        <span className="font-mono text-[10px] sm:text-[8px] text-[#00ff41] uppercase tracking-widest">local model</span>
-                        <button onClick={() => setShowMesh(false)} className="font-mono text-sm text-[#555] hover:text-[#a0a0a0] transition-colors leading-none">×</button>
+                    <div className="rounded-md overflow-hidden border border-black bg-black">
+                      <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/10">
+                        <span className="text-[11px] sm:text-[10px] font-medium text-white/80">Local model</span>
+                        <button onClick={() => setShowMesh(false)} className="font-mono text-sm text-white/50 hover:text-white transition-colors leading-none">×</button>
                       </div>
                       <div className="overflow-hidden" style={{ height: 220 }}>
                         <MugModelViewer />
                       </div>
-                      <p className="px-3 py-1.5 font-mono text-[10px] sm:text-[8px] text-[#4a4a4a]">drag to rotate · scroll to zoom</p>
+                      <p className="px-3 py-1.5 text-[11px] sm:text-[10px] text-white/40">Drag to rotate · scroll to zoom</p>
                     </div>
                   )}
                 </div>
@@ -1302,15 +1302,15 @@ export default function DemoSection() {
           <svg
             width="20" height="20" viewBox="0 0 20 20" fill="none"
             className={`transition-transform duration-100 ${cursor.clicking ? "scale-75" : "scale-100"}`}
-            style={{ filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.8))" }}
+            style={{ filter: "drop-shadow(0 1px 3px rgba(15,23,42,0.35))" }}
           >
-            <path d="M4 2L4 15L7.5 11.5L10 17L12 16L9.5 10.5L14 10.5L4 2Z" fill="white" stroke="#000" strokeWidth="0.8" strokeLinejoin="round" />
+            <path d="M4 2L4 15L7.5 11.5L10 17L12 16L9.5 10.5L14 10.5L4 2Z" fill="#0f172a" stroke="white" strokeWidth="1.2" strokeLinejoin="round" />
           </svg>
           {/* Tooltip */}
           {cursor.tooltip && (
             <div
-              className="absolute left-5 top-0 whitespace-nowrap border border-[#00ff41] bg-[#080808] px-2.5 py-1.5 font-mono text-[11px] sm:text-[9px] text-[#00ff41] uppercase tracking-widest"
-              style={{ boxShadow: "0 0 16px rgba(0,255,65,0.15)" }}
+              className="absolute left-5 top-0 whitespace-nowrap rounded-md border border-[#3b82f6] bg-[#ffffff] px-2.5 py-1.5 text-[11px] sm:text-[10px] font-medium text-[#3b82f6] shadow-sm"
+              style={{ boxShadow: "0 0 16px rgba(59,130,246,0.15)" }}
             >
               {cursor.tooltip}
             </div>
@@ -1326,9 +1326,9 @@ export default function DemoSection() {
 
 function PAvatar() {
   return (
-    <div className="h-5 w-5 flex-shrink-0 flex items-center justify-center border border-[#1a1a1a] bg-[#0f0f0f] overflow-hidden">
+    <div className="h-5 w-5 flex-shrink-0 rounded-full flex items-center justify-center bg-black overflow-hidden">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/logo.svg" alt="Parametra" className="h-3.5 w-3.5 object-contain" />
+      <img src="/logo.svg" alt="Parametra" className="h-3 w-3 object-contain" style={{ filter: "brightness(0) invert(1)" }} />
     </div>
   );
 }
@@ -1347,8 +1347,8 @@ function ChatMessage({
   if (item.type === "user") {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[78%] border border-[#1c1c1c] bg-[#0e0e0e] px-3 py-2">
-          <p className="text-sm sm:text-xs text-[#d0d0d0] leading-relaxed">{item.text}</p>
+        <div className="max-w-[78%] rounded-lg border border-[#dbe6f5] bg-[#eef2f9] px-3 py-2">
+          <p className="text-sm sm:text-xs text-[#1e293b] leading-relaxed">{item.text}</p>
         </div>
       </div>
     );
@@ -1362,19 +1362,19 @@ function ChatMessage({
         className="flex items-start gap-2 text-left w-full group"
       >
         <span
-          className="font-mono text-[11px] sm:text-[9px] text-[#555] group-hover:text-[#999] transition-colors mt-px flex-shrink-0"
+          className="text-[11px] text-[#64748b] group-hover:text-[#475569] transition-colors mt-px flex-shrink-0"
           style={{ display: "inline-block", transform: expanded ? "rotate(90deg)" : "rotate(0deg)" }}
         >
           ▶
         </span>
         <div>
-          <span className="font-mono text-[11px] sm:text-[9px] text-[#555] group-hover:text-[#999] uppercase tracking-widest transition-colors">
-            thinking ({item.lines?.length} steps)
+          <span className="text-xs sm:text-[11px] font-medium text-[#64748b] group-hover:text-[#475569] transition-colors">
+            Thinking ({item.lines?.length} steps)
           </span>
           {expanded && (
-            <div className="mt-1.5 border-l-2 border-[#131313] pl-2.5 space-y-0.5">
+            <div className="mt-1.5 border-l-2 border-[#dbe6f5] pl-2.5 space-y-0.5">
               {item.lines?.map((line, i) => (
-                <p key={i} className="font-mono text-[11px] sm:text-[9px] text-[#5a5a5a] leading-5">
+                <p key={i} className="font-mono text-[11px] sm:text-[9px] text-[#64748b] leading-5">
                   {line}
                 </p>
               ))}
@@ -1391,13 +1391,13 @@ function ChatMessage({
         <PAvatar />
         <div className="flex-1 space-y-0.5 pt-0.5">
           {item.lines?.slice(0, statusLineCount).map((line, i) => (
-            <p key={i} className="font-mono text-xs sm:text-[10px] text-[#7a7a7a] leading-5">
-              <span className="text-[#00ff41]">✓</span> {line}
+            <p key={i} className="font-mono text-xs sm:text-[10px] text-[#64748b] leading-5">
+              <span className="text-[#3b82f6]">✓</span> {line}
             </p>
           ))}
           {statusLineCount < (item.lines?.length ?? 0) && (
-            <p className="font-mono text-xs sm:text-[10px] text-[#555] leading-5">
-              <span className="text-[#00ff41] animate-pulse">▌</span>
+            <p className="font-mono text-xs sm:text-[10px] text-[#64748b] leading-5">
+              <span className="text-[#3b82f6] animate-pulse">▌</span>
             </p>
           )}
         </div>
@@ -1411,7 +1411,7 @@ function ChatMessage({
         <PAvatar />
         <div className="flex-1 max-w-[85%] space-y-2">
           {item.text?.split("\n\n").map((para, i) => (
-            <p key={i} className="text-sm sm:text-xs text-[#a0a0a0] leading-relaxed">
+            <p key={i} className="text-sm sm:text-xs text-[#334155] leading-relaxed">
               {para}
             </p>
           ))}
@@ -1426,16 +1426,16 @@ function ChatMessage({
       <div className="flex items-start gap-2.5">
         <PAvatar />
         <div className="flex-1">
-          <div className="border border-[#161616] bg-[#080808] p-3 space-y-2">
+          <div className="rounded-lg border border-[#dbe6f5] bg-[#ffffff] p-3 space-y-2">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-xs sm:text-[10px] text-[#00ff41]">
+              <span className="font-mono text-xs sm:text-[10px] text-[#3b82f6]">
                 {isTransfer ? "✓ transferred" : "✓ built"}
               </span>
-              <span className="font-mono text-[11px] sm:text-[9px] text-[#555]">
+              <span className="text-[11px] sm:text-[10px] text-[#64748b]">
                 {isTransfer ? "Daily Mug · Part Studio" : "mug_v1 · Part Studio"}
               </span>
             </div>
-            <p className="font-mono text-[11px] sm:text-[9px] text-[#6a6a6a] leading-5">
+            <p className="text-xs sm:text-[11px] text-[#64748b] leading-5">
               {isTransfer ? (
                 <>
                   7 direct · 6 replicated features
@@ -1473,16 +1473,16 @@ function FeatureIcon({ type }: { type: "sketch" | "plane" | "solid" }) {
     // plane / rectangle icon
     return (
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="flex-shrink-0">
-        <rect x="1.5" y="3" width="9" height="6" rx="0.5" stroke="#888" strokeWidth="1" />
-        <line x1="1.5" y1="6" x2="10.5" y2="6" stroke="#888" strokeWidth="0.5" strokeDasharray="1.5 1" />
+        <rect x="1.5" y="3" width="9" height="6" rx="0.5" stroke="#475569" strokeWidth="1" />
+        <line x1="1.5" y1="6" x2="10.5" y2="6" stroke="#475569" strokeWidth="0.5" strokeDasharray="1.5 1" />
       </svg>
     );
   }
   // solid / extrude icon
   return (
     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="flex-shrink-0">
-      <rect x="2" y="4" width="7" height="6" rx="0.5" stroke="#888" strokeWidth="1" />
-      <path d="M2 4L5 2H9L9 8" stroke="#888" strokeWidth="1" strokeLinejoin="round" />
+      <rect x="2" y="4" width="7" height="6" rx="0.5" stroke="#475569" strokeWidth="1" />
+      <path d="M2 4L5 2H9L9 8" stroke="#475569" strokeWidth="1" strokeLinejoin="round" />
     </svg>
   );
 }
