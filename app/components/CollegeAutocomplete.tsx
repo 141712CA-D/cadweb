@@ -75,7 +75,7 @@ export default function CollegeAutocomplete({ value, onChange, onBlur, placehold
         }}
       />
       {open && matches.length > 0 && (
-        <ul className="absolute left-0 right-0 z-20 mt-1 max-h-60 overflow-y-auto border border-[#262626] bg-[#161616] shadow-xl">
+        <ul className="absolute left-0 right-0 z-20 mt-1 max-h-60 overflow-y-auto rounded-md border border-[#dbe6f5] bg-[#eef2f9] shadow-xl">
           {matches.map((u, i) => (
             <li key={`${u.name}-${u.country}`}>
               <button
@@ -83,11 +83,11 @@ export default function CollegeAutocomplete({ value, onChange, onBlur, placehold
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => selectMatch(u.name)}
                 className={`flex w-full flex-col items-start gap-0.5 px-4 py-3 text-left transition-colors ${
-                  i === activeIndex ? "bg-[#1c1c1c]" : "active:bg-[#1c1c1c]"
+                  i === activeIndex ? "bg-[#dbe6f5]" : "active:bg-[#dbe6f5]"
                 }`}
               >
-                <span className="text-sm text-[#e8e8e8]">{u.name}</span>
-                <span className="font-mono text-xs text-[#555]">{u.country}</span>
+                <span className="text-sm text-[#0f172a]">{u.name}</span>
+                <span className="font-mono text-xs text-[#64748b]">{u.country}</span>
               </button>
             </li>
           ))}

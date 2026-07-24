@@ -76,9 +76,9 @@ function mapUnsubscribeError(status: number, error: string | undefined): string 
 }
 
 const inputClass = (error?: string) =>
-  `w-full bg-[#161616] border ${error ? "border-red-500/60" : "border-[#262626]"} px-4 py-3 text-sm text-[#e8e8e8] placeholder:text-[#444] focus:outline-none focus:border-[#00ff41] transition-all duration-150 font-mono`;
+  `w-full rounded-md bg-[#eef2f9] border ${error ? "border-red-500/60" : "border-[#dbe6f5]"} px-4 py-3 text-sm text-[#0f172a] placeholder:text-[#94a3b8] focus:outline-none focus:border-[#3b82f6] transition-all duration-150 font-mono`;
 
-const labelClass = "block font-mono text-xs uppercase tracking-[0.2em] text-[#555] mb-1.5";
+const labelClass = "block font-mono text-xs uppercase tracking-[0.2em] text-[#64748b] mb-1.5";
 const errorClass = "font-mono text-xs text-red-500 mt-1";
 
 function EmailCheckBadge({
@@ -96,10 +96,10 @@ function EmailCheckBadge({
     return <span className={`${baseClass} text-transparent`} aria-hidden="true">Can register</span>;
   }
   if (status === "checking") {
-    return <span className={`${baseClass} text-[#555]`}>Checking...</span>;
+    return <span className={`${baseClass} text-[#64748b]`}>Checking...</span>;
   }
   if (status === "available" || status === "returning") {
-    return <span className={`${baseClass} text-[#00ff41]`}>Can register</span>;
+    return <span className={`${baseClass} text-[#3b82f6]`}>Can register</span>;
   }
   if (status === "registered") {
     return (
@@ -109,7 +109,7 @@ function EmailCheckBadge({
           <a
             href={unsubscribeHref}
             onClick={onUnsubscribe}
-            className="underline decoration-current underline-offset-2 hover:text-[#00ff41]"
+            className="underline decoration-current underline-offset-2 hover:text-[#3b82f6]"
           >
             Remove?
           </a>
@@ -521,61 +521,61 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
   }
 
   return (
-    <div className={isModal ? "" : "min-h-screen bg-[#0f0f0f] grid-bg flex flex-col items-center justify-center px-4 py-12"}>
+    <div className={isModal ? "" : "min-h-screen bg-[#f8fafc] grid-bg flex flex-col items-center justify-center px-4 py-12"}>
       <div className={isModal ? "w-full" : "w-full max-w-lg"}>
 
         {!isModal && (
           <div className="flex items-center justify-between mb-8">
             <Link href="/" className="flex items-center gap-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.svg" alt="Parametra" style={{ width: 32, height: 32, display: "block", flexShrink: 0, filter: "brightness(0) invert(1)" }} />
-              <span className="text-[#e8e8e8] font-semibold text-base tracking-tight">Parametra</span>
+              <img src="/logo.svg" alt="Parametra" style={{ width: 32, height: 32, display: "block", flexShrink: 0, filter: "brightness(0)" }} />
+              <span className="text-[#0f172a] font-semibold text-base tracking-tight">Parametra</span>
             </Link>
-            <Link href="/" className="font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">← Back</Link>
+            <Link href="/" className="font-mono text-xs text-[#64748b] hover:text-[#3b82f6] transition-colors">← Back</Link>
           </div>
         )}
 
         {status === "rate_limited" ? (
           <div className="flex flex-col items-center text-center py-8 gap-5">
-            <div className="w-12 h-12 border border-amber-500/30 bg-[#161616] flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full border border-amber-500/30 bg-[#eef2f9] flex items-center justify-center">
               <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" />
               </svg>
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-[#e8e8e8]">Slow down.</h2>
-              <p className="mt-2 font-mono text-sm text-[#888] max-w-sm">
+              <h2 className="text-lg font-semibold text-[#0f172a]">Slow down.</h2>
+              <p className="mt-2 font-mono text-sm text-[#475569] max-w-sm">
                 Too many requests. You can try again in ~24 hours.
               </p>
             </div>
-            <button onClick={startOver} className="mt-1 font-mono text-xs uppercase tracking-widest text-[#00ff41] hover:text-[#00cc33] transition-colors">
+            <button onClick={startOver} className="mt-1 font-mono text-xs uppercase tracking-widest text-[#3b82f6] hover:text-[#2563eb] transition-colors">
               Done
             </button>
           </div>
         ) : status === "welcome_back" ? (
           <div className="flex flex-col items-center text-center py-8 gap-4">
-            <div className="w-12 h-12 border border-[#00ff41]/40 bg-[#161616] flex items-center justify-center">
-              <svg className="w-6 h-6 text-[#00ff41]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 rounded-full border border-[#3b82f6]/40 bg-[#eef2f9] flex items-center justify-center">
+              <svg className="w-6 h-6 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-[#e8e8e8]">Welcome back to the list.</h2>
-            <p className="font-mono text-sm text-[#888] max-w-sm">Good to see you again. You&apos;re back on the waitlist — we&apos;ll be in touch when access opens up.</p>
-            <p className="font-mono text-xs text-[#555] max-w-sm">If this is your first time receiving an email from {process.env.NEXT_PUBLIC_MAIL_FROM_EMAIL ?? "no-reply@parametra.ai"}, please unmark us as spam if applicable.</p>
-            <button onClick={handleSuccess} className="mt-4 font-mono text-xs uppercase tracking-widest text-[#00ff41] hover:text-[#00cc33] transition-colors">
+            <h2 className="text-lg font-semibold text-[#0f172a]">Welcome back to the list.</h2>
+            <p className="font-mono text-sm text-[#475569] max-w-sm">Good to see you again. You&apos;re back on the waitlist — we&apos;ll be in touch when access opens up.</p>
+            <p className="font-mono text-xs text-[#64748b] max-w-sm">If this is your first time receiving an email from {process.env.NEXT_PUBLIC_MAIL_FROM_EMAIL ?? "no-reply@parametra.ai"}, please unmark us as spam if applicable.</p>
+            <button onClick={handleSuccess} className="mt-4 font-mono text-xs uppercase tracking-widest text-[#3b82f6] hover:text-[#2563eb] transition-colors">
               Done
             </button>
           </div>
         ) : status === "duplicate" ? (
           <div className="flex flex-col items-center text-center py-8 gap-5">
-            <div className="w-12 h-12 border border-[#262626] bg-[#161616] flex items-center justify-center">
-              <svg className="w-6 h-6 text-[#888]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 rounded-full border border-[#dbe6f5] bg-[#eef2f9] flex items-center justify-center">
+              <svg className="w-6 h-6 text-[#475569]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" />
               </svg>
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-[#e8e8e8]">Already registered.</h2>
-              <p className="mt-2 font-mono text-sm text-[#888] max-w-sm">
+              <h2 className="text-lg font-semibold text-[#0f172a]">Already registered.</h2>
+              <p className="mt-2 font-mono text-sm text-[#475569] max-w-sm">
                 This email is already on the waitlist. We&apos;ll be in touch when access opens up.
               </p>
             </div>
@@ -590,7 +590,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
                   {unsubscribeHref && (
                     <button
                       onClick={() => { setUnsubscribeError(""); setShowUnsubscribeConfirm(true); }}
-                      className="mt-2 font-mono text-[11px] uppercase tracking-widest text-[#555] hover:text-[#e8e8e8] transition-colors"
+                      className="mt-2 font-mono text-[11px] uppercase tracking-widest text-[#64748b] hover:text-[#0f172a] transition-colors"
                     >
                       Try again →
                     </button>
@@ -600,55 +600,55 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
             ) : unsubscribeHref ? (
               <button
                 onClick={requestUnsubscribe}
-                className="font-mono text-xs uppercase tracking-widest text-[#555] hover:text-red-400 border border-[#262626] hover:border-red-500/40 px-5 py-2 transition-colors"
+                className="font-mono text-xs uppercase tracking-widest text-[#64748b] hover:text-red-400 border border-[#dbe6f5] hover:border-red-500/40 px-5 py-2 transition-colors"
               >
                 Remove from waitlist
               </button>
             ) : null}
 
-            <button onClick={handleSuccess} className="mt-1 font-mono text-xs uppercase tracking-widest text-[#00ff41] hover:text-[#00cc33] transition-colors">
+            <button onClick={handleSuccess} className="mt-1 font-mono text-xs uppercase tracking-widest text-[#3b82f6] hover:text-[#2563eb] transition-colors">
               Done
             </button>
           </div>
         ) : status === "unsubscribing" ? (
           <div className="flex flex-col items-center text-center py-8 gap-5">
-            <div className="w-12 h-12 border border-[#262626] bg-[#161616] flex items-center justify-center">
-              <svg className="w-5 h-5 text-[#555] animate-spin" fill="none" viewBox="0 0 24 24">
+            <div className="w-12 h-12 rounded-full border border-[#dbe6f5] bg-[#eef2f9] flex items-center justify-center">
+              <svg className="w-5 h-5 text-[#64748b] animate-spin" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
               </svg>
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-[#e8e8e8]">Sending code...</h2>
-              <p className="mt-2 font-mono text-sm text-[#888] max-w-sm">Just a moment.</p>
+              <h2 className="text-lg font-semibold text-[#0f172a]">Sending code...</h2>
+              <p className="mt-2 font-mono text-sm text-[#475569] max-w-sm">Just a moment.</p>
             </div>
           </div>
         ) : status === "unsubscribe_rate_limited" ? (
           <div className="flex flex-col items-center text-center py-8 gap-5">
-            <div className="w-12 h-12 border border-amber-500/30 bg-[#161616] flex items-center justify-center">
+            <div className="w-12 h-12 rounded-full border border-amber-500/30 bg-[#eef2f9] flex items-center justify-center">
               <svg className="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" />
               </svg>
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-[#e8e8e8]">Slow down.</h2>
-              <p className="mt-2 font-mono text-sm text-[#888] max-w-sm">
+              <h2 className="text-lg font-semibold text-[#0f172a]">Slow down.</h2>
+              <p className="mt-2 font-mono text-sm text-[#475569] max-w-sm">
                 You can remove yourself from the waitlist again in ~24 hours.
               </p>
             </div>
-            <button onClick={handleSuccess} className="mt-1 font-mono text-xs uppercase tracking-widest text-[#00ff41] hover:text-[#00cc33] transition-colors">
+            <button onClick={handleSuccess} className="mt-1 font-mono text-xs uppercase tracking-widest text-[#3b82f6] hover:text-[#2563eb] transition-colors">
               Done
             </button>
           </div>
         ) : status === "unsubscribe_verify" ? (
           <div className="flex flex-col items-center text-center py-4 gap-4">
-            <div className="w-12 h-12 border border-[#262626] bg-[#161616] flex items-center justify-center">
-              <svg className="w-6 h-6 text-[#00ff41]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 rounded-full border border-[#dbe6f5] bg-[#eef2f9] flex items-center justify-center">
+              <svg className="w-6 h-6 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-[#e8e8e8]">Check your email.</h2>
-            <p className="font-mono text-sm text-[#888] max-w-sm">We sent a 6-digit code to <span className="text-[#e8e8e8]">{unsubscribeEmail}</span>. Enter it below to confirm removal.</p>
+            <h2 className="text-lg font-semibold text-[#0f172a]">Check your email.</h2>
+            <p className="font-mono text-sm text-[#475569] max-w-sm">We sent a 6-digit code to <span className="text-[#0f172a]">{unsubscribeEmail}</span>. Enter it below to confirm removal.</p>
             <form onSubmit={submitUnsubscribeCode} noValidate className="w-full max-w-xs flex flex-col gap-3 mt-2">
               <input
                 inputMode="numeric"
@@ -657,43 +657,43 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
                 placeholder="000000"
                 value={unsubscribeCode}
                 onChange={(e) => { setUnsubscribeCode(e.target.value.replace(/\D/g, "")); setUnsubscribeCodeError(""); }}
-                className={`w-full bg-[#161616] border ${unsubscribeCodeError ? "border-red-500/60" : "border-[#262626]"} px-4 py-3 text-center text-2xl tracking-[0.4em] font-mono text-[#e8e8e8] placeholder:text-[#333] focus:outline-none focus:border-[#00ff41] transition-all duration-150`}
+                className={`w-full rounded-md bg-[#eef2f9] border ${unsubscribeCodeError ? "border-red-500/60" : "border-[#dbe6f5]"} px-4 py-3 text-center text-2xl tracking-[0.4em] font-mono text-[#0f172a] placeholder:text-[#94a3b8] focus:outline-none focus:border-[#3b82f6] transition-all duration-150`}
               />
               {unsubscribeCodeError && <p className={errorClass}>{unsubscribeCodeError}</p>}
               <button
                 type="submit"
                 disabled={unsubscribeVerifying || unsubscribeCode.length !== 6}
-                className="cursor-pointer w-full py-2.5 bg-[#00ff41] font-mono text-xs uppercase tracking-widest text-black hover:bg-[#00cc33] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="cursor-pointer w-full py-2.5 bg-[#3b82f6] font-mono text-xs uppercase tracking-widest text-white hover:bg-[#2563eb] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {unsubscribeVerifying ? "Removing..." : "Confirm removal"}
               </button>
             </form>
-            <button onClick={cancelUnsubscribeVerify} className="mt-2 font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">
+            <button onClick={cancelUnsubscribeVerify} className="mt-2 font-mono text-xs text-[#64748b] hover:text-[#3b82f6] transition-colors">
               Didn&apos;t get it? Start over
             </button>
           </div>
         ) : status === "unsubscribed" ? (
           <div className="flex flex-col items-center text-center py-8 gap-4">
-            <div className="w-12 h-12 border border-[#00ff41]/40 bg-[#161616] flex items-center justify-center">
-              <svg className="w-6 h-6 text-[#00ff41]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 rounded-full border border-[#3b82f6]/40 bg-[#eef2f9] flex items-center justify-center">
+              <svg className="w-6 h-6 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-[#e8e8e8]">You&apos;re unsubscribed.</h2>
-            <p className="font-mono text-sm text-[#888] max-w-sm">You won&apos;t receive waitlist emails for this address anymore.</p>
-            <button onClick={handleSuccess} className="mt-4 font-mono text-xs uppercase tracking-widest text-[#00ff41] hover:text-[#00cc33] transition-colors">
+            <h2 className="text-lg font-semibold text-[#0f172a]">You&apos;re unsubscribed.</h2>
+            <p className="font-mono text-sm text-[#475569] max-w-sm">You won&apos;t receive waitlist emails for this address anymore.</p>
+            <button onClick={handleSuccess} className="mt-4 font-mono text-xs uppercase tracking-widest text-[#3b82f6] hover:text-[#2563eb] transition-colors">
               Done
             </button>
           </div>
         ) : status === "verify" ? (
           <div className="flex flex-col items-center text-center py-4 gap-4">
-            <div className="w-12 h-12 border border-[#262626] bg-[#161616] flex items-center justify-center">
-              <svg className="w-6 h-6 text-[#00ff41]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 rounded-full border border-[#dbe6f5] bg-[#eef2f9] flex items-center justify-center">
+              <svg className="w-6 h-6 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-[#e8e8e8]">Check your email.</h2>
-            <p className="font-mono text-sm text-[#888] max-w-sm">We sent a 6-digit code to <span className="text-[#e8e8e8]">{pendingEmail}</span>. Enter it below to confirm.</p>
+            <h2 className="text-lg font-semibold text-[#0f172a]">Check your email.</h2>
+            <p className="font-mono text-sm text-[#475569] max-w-sm">We sent a 6-digit code to <span className="text-[#0f172a]">{pendingEmail}</span>. Enter it below to confirm.</p>
             <form onSubmit={handleVerify} noValidate className="w-full max-w-xs flex flex-col gap-3 mt-2">
               <input
                 inputMode="numeric"
@@ -702,41 +702,41 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
                 placeholder="000000"
                 value={code}
                 onChange={(e) => { setCode(e.target.value.replace(/\D/g, "")); setVerifyError(""); }}
-                className={`w-full bg-[#161616] border ${verifyError ? "border-red-500/60" : "border-[#262626]"} px-4 py-3 text-center text-2xl tracking-[0.4em] font-mono text-[#e8e8e8] placeholder:text-[#333] focus:outline-none focus:border-[#00ff41] transition-all duration-150`}
+                className={`w-full rounded-md bg-[#eef2f9] border ${verifyError ? "border-red-500/60" : "border-[#dbe6f5]"} px-4 py-3 text-center text-2xl tracking-[0.4em] font-mono text-[#0f172a] placeholder:text-[#94a3b8] focus:outline-none focus:border-[#3b82f6] transition-all duration-150`}
               />
               {verifyError && <p className={errorClass}>{verifyError}</p>}
               <button
                 type="submit"
                 disabled={verifying || code.length !== 6}
-                className="cursor-pointer w-full py-2.5 bg-[#00ff41] font-mono text-xs uppercase tracking-widest text-black hover:bg-[#00cc33] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="cursor-pointer w-full py-2.5 bg-[#3b82f6] font-mono text-xs uppercase tracking-widest text-white hover:bg-[#2563eb] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {verifying ? "Verifying..." : "Verify & join"}
               </button>
             </form>
-            <button onClick={startOver} className="mt-2 font-mono text-xs text-[#555] hover:text-[#00ff41] transition-colors">
+            <button onClick={startOver} className="mt-2 font-mono text-xs text-[#64748b] hover:text-[#3b82f6] transition-colors">
               Didn&apos;t get it? Start over
             </button>
           </div>
         ) : status === "success" ? (
           <div className="flex flex-col items-center text-center py-8 gap-4">
-            <div className="w-12 h-12 border border-[#00ff41]/40 bg-[#161616] flex items-center justify-center">
-              <svg className="w-6 h-6 text-[#00ff41]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 rounded-full border border-[#3b82f6]/40 bg-[#eef2f9] flex items-center justify-center">
+              <svg className="w-6 h-6 text-[#3b82f6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-[#e8e8e8]">You&apos;re on the list.</h2>
-            <p className="font-mono text-sm text-[#888] max-w-sm">We&apos;ll reach out when access opens up. You won&apos;t want to miss it.</p>
-            <p className="font-mono text-xs text-[#555] max-w-sm">If this is your first time receiving an email from {process.env.NEXT_PUBLIC_MAIL_FROM_EMAIL ?? "no-reply@parametra.ai"}, please unmark us as spam if applicable.</p>
-            <button onClick={handleSuccess} className="mt-4 font-mono text-xs uppercase tracking-widest text-[#00ff41] hover:text-[#00cc33] transition-colors">
+            <h2 className="text-lg font-semibold text-[#0f172a]">You&apos;re on the list.</h2>
+            <p className="font-mono text-sm text-[#475569] max-w-sm">We&apos;ll reach out when access opens up. You won&apos;t want to miss it.</p>
+            <p className="font-mono text-xs text-[#64748b] max-w-sm">If this is your first time receiving an email from {process.env.NEXT_PUBLIC_MAIL_FROM_EMAIL ?? "no-reply@parametra.ai"}, please unmark us as spam if applicable.</p>
+            <button onClick={handleSuccess} className="mt-4 font-mono text-xs uppercase tracking-widest text-[#3b82f6] hover:text-[#2563eb] transition-colors">
               Done
             </button>
           </div>
         ) : (
           <>
-            <h1 className="text-2xl font-bold text-[#e8e8e8] mb-2">Join the waitlist</h1>
-            <p className="font-mono text-sm text-[#555] mb-6">Tell us who you are and we&apos;ll be in touch.</p>
+            <h1 className="text-2xl font-bold text-[#0f172a] mb-2">Join the waitlist</h1>
+            <p className="font-mono text-sm text-[#64748b] mb-6">Tell us who you are and we&apos;ll be in touch.</p>
 
-            <div className="flex gap-0 mb-6 border border-[#262626]">
+            <div className="flex gap-0 mb-6 rounded-md border border-[#dbe6f5] overflow-hidden">
               {(["individual", "team"] as FormType[]).map((t) => (
                 <button
                   key={t}
@@ -744,8 +744,8 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
                   onClick={() => { setType(t); setErrors({}); }}
                   className={`cursor-pointer flex-1 py-2 px-3 font-mono text-xs uppercase tracking-widest transition-all duration-150 ${
                     type === t
-                      ? "bg-[#00ff41] text-black"
-                      : "text-[#555] hover:text-[#e8e8e8] bg-[#0f0f0f]"
+                      ? "bg-[#3b82f6] text-white"
+                      : "text-[#64748b] hover:text-[#0f172a] bg-[#f8fafc]"
                   }`}
                 >
                   {t === "individual" ? "Individual" : "Team / Org"}
@@ -780,14 +780,14 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
                     <label className={labelClass}>Role</label>
                     <select aria-label="Role" className={inputClass(errors.indRole) + " cursor-pointer appearance-none pr-10"} value={indRole}
                       style={{
-                        color: indRole ? "rgb(232,232,232)" : "rgb(68,68,68)",
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgb(85,85,85)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
+                        color: indRole ? "rgb(15,23,42)" : "rgb(148,163,184)",
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgb(100,116,139)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")`,
                         backgroundRepeat: "no-repeat",
                         backgroundPosition: "right 12px center",
                       }}
                       onChange={(e) => { setIndRole(e.target.value); setIndUniversity(""); clearError("indRole"); }}>
-                      <option value="" disabled style={{ background: "#161616" }}>Select your role</option>
-                      {INDIVIDUAL_ROLES.map((r) => <option key={r} value={r} style={{ background: "#161616" }}>{r}</option>)}
+                      <option value="" disabled style={{ background: "#eef2f9" }}>Select your role</option>
+                      {INDIVIDUAL_ROLES.map((r) => <option key={r} value={r} style={{ background: "#eef2f9" }}>{r}</option>)}
                     </select>
                     {errors.indRole && <p className={errorClass}>{errors.indRole}</p>}
                   </div>
@@ -813,7 +813,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
                       onChange={(e) => { setIndReason(e.target.value); clearError("indReason"); }} />
                     <div className="flex justify-between items-center mt-1">
                       {errors.indReason ? <p className={errorClass}>{errors.indReason}</p> : <span />}
-                      <span className={`font-mono text-xs ${indReason.length >= 1000 ? "text-red-500" : indReason.length > 800 ? "text-amber-500" : "text-[#333]"}`}>{indReason.length} / 1000</span>
+                      <span className={`font-mono text-xs ${indReason.length >= 1000 ? "text-red-500" : indReason.length > 800 ? "text-amber-500" : "text-[#94a3b8]"}`}>{indReason.length} / 1000</span>
                     </div>
                   </div>
                 </div>
@@ -856,7 +856,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
                       onChange={(e) => { setTeamUsage(e.target.value); clearError("teamUsage"); }} />
                     <div className="flex justify-between items-center mt-1">
                       {errors.teamUsage ? <p className={errorClass}>{errors.teamUsage}</p> : <span />}
-                      <span className={`font-mono text-xs ${teamUsage.length >= 1000 ? "text-red-500" : teamUsage.length > 800 ? "text-amber-500" : "text-[#333]"}`}>{teamUsage.length} / 1000</span>
+                      <span className={`font-mono text-xs ${teamUsage.length >= 1000 ? "text-red-500" : teamUsage.length > 800 ? "text-amber-500" : "text-[#94a3b8]"}`}>{teamUsage.length} / 1000</span>
                     </div>
                   </div>
                 </div>
@@ -868,7 +868,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
                 siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
                 onSuccess={(token) => { setCaptchaToken(token); clearError("captcha"); }}
                 onExpire={() => setCaptchaToken(null)}
-                options={{ theme: "dark" }}
+                options={{ theme: "light" }}
               />
               {errors.captcha && <p className={errorClass}>{errors.captcha}</p>}
 
@@ -879,7 +879,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
               <button
                 type="submit"
                 disabled={status === "loading" || !captchaToken || emailCannotRegister || !allFieldsFilled}
-                className="cursor-pointer w-full py-2.5 bg-[#00ff41] font-mono text-xs uppercase tracking-widest text-black hover:bg-[#00cc33] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="cursor-pointer w-full py-2.5 bg-[#3b82f6] font-mono text-xs uppercase tracking-widest text-white hover:bg-[#2563eb] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {status === "loading" ? "Sending..." : "Request access"}
               </button>
@@ -893,25 +893,25 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
             aria-modal="true"
             aria-labelledby="unsubscribe-title"
           >
-            <div className="w-full max-w-sm border border-[#262626] bg-[#161616] p-6 shadow-2xl">
-              <h3 id="unsubscribe-title" className="text-lg font-semibold text-[#e8e8e8]">
+            <div className="w-full max-w-sm rounded-lg border border-[#dbe6f5] bg-[#eef2f9] p-6 shadow-2xl">
+              <h3 id="unsubscribe-title" className="text-lg font-semibold text-[#0f172a]">
                 Are you sure?
               </h3>
-              <p className="mt-2 font-mono text-sm text-[#888]">
+              <p className="mt-2 font-mono text-sm text-[#475569]">
                 Are you sure you want to remove yourself from the waitlist?
               </p>
               <div className="mt-6 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={cancelUnsubscribe}
-                  className="font-mono text-xs uppercase tracking-widest text-[#555] hover:text-[#e8e8e8] transition-colors"
+                  className="font-mono text-xs uppercase tracking-widest text-[#64748b] hover:text-[#0f172a] transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={confirmUnsubscribe}
-                  className="font-mono text-xs uppercase tracking-widest text-[#00ff41] hover:text-[#00cc33] transition-colors"
+                  className="font-mono text-xs uppercase tracking-widest text-[#3b82f6] hover:text-[#2563eb] transition-colors"
                 >
                   Remove
                 </button>

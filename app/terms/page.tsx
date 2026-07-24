@@ -5,18 +5,18 @@ import Footer from "../components/Footer";
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-[#e8e8e8] flex flex-col grid-bg">
+    <div className="min-h-screen bg-[#f8fafc] text-[#0f172a] flex flex-col grid-bg">
       <DevBanner />
       <Header />
 
       <main className="flex-1 max-w-3xl mx-auto px-6 py-32 sm:py-40 w-full">
         <h1 className="text-3xl sm:text-4xl font-bold mb-2">Terms of Service</h1>
-        <p className="font-mono text-xs text-[#555] mb-12">Last updated: July 23, 2026</p>
+        <p className="font-mono text-xs text-[#64748b] mb-12">Last updated: July 23, 2026</p>
 
-        <div className="space-y-10 text-sm text-[#888] leading-relaxed">
+        <div className="space-y-10 text-sm text-[#475569] leading-relaxed">
 
           <section>
-            <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">1. Acceptance of Terms</h2>
+            <h2 className="text-base font-semibold text-[#0f172a] mb-3">1. Acceptance of Terms</h2>
             <p>
               By accessing or using Parametra (&quot;the Service&quot;), you agree to be bound by these Terms of Service.
               If you do not agree, do not use the Service. We reserve the right to update these terms at any time;
@@ -25,7 +25,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">2. Description of Service</h2>
+            <h2 className="text-base font-semibold text-[#0f172a] mb-3">2. Description of Service</h2>
             <p>
               Parametra provides AI-powered CAD design tools that generate and manipulate 3D models in
               platforms such as Onshape, Fusion 360, and SolidWorks. The Service is currently in pre-launch
@@ -34,7 +34,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">3. Waitlist and Early Access</h2>
+            <h2 className="text-base font-semibold text-[#0f172a] mb-3">3. Waitlist and Early Access</h2>
             <p>
               Joining the waitlist does not guarantee access to the Service. We may invite users in any order
               we choose. We reserve the right to decline access to any applicant at our sole discretion.
@@ -59,7 +59,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">4. User Conduct</h2>
+            <h2 className="text-base font-semibold text-[#0f172a] mb-3">4. User Conduct</h2>
             <p>You agree not to:</p>
             <ul className="list-disc list-inside mt-2 space-y-1">
               <li>Use the Service for any unlawful purpose</li>
@@ -70,7 +70,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">5. Intellectual Property</h2>
+            <h2 className="text-base font-semibold text-[#0f172a] mb-3">5. Intellectual Property</h2>
             <p>
               All content, branding, and software on the Service is the property of Parametra or its licensors
               and is protected by applicable intellectual property laws. You may not copy, modify, or distribute
@@ -79,7 +79,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">6. Disclaimer of Warranties</h2>
+            <h2 className="text-base font-semibold text-[#0f172a] mb-3">6. Disclaimer of Warranties</h2>
             <p>
               The Service is provided &quot;as is&quot; without warranties of any kind, express or implied. We do not
               warrant that the Service will be uninterrupted, error-free, or suitable for any particular purpose.
@@ -89,7 +89,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">7. Limitation of Liability</h2>
+            <h2 className="text-base font-semibold text-[#0f172a] mb-3">7. Limitation of Liability</h2>
             <p>
               To the fullest extent permitted by law, Parametra shall not be liable for any indirect,
               incidental, special, or consequential damages arising out of or related to your use of the Service,
@@ -98,7 +98,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">8. Governing Law</h2>
+            <h2 className="text-base font-semibold text-[#0f172a] mb-3">8. Governing Law</h2>
             <p>
               These Terms shall be governed by and construed in accordance with the laws of the State of Michigan,
               without regard to its conflict of law provisions.
@@ -106,10 +106,10 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">9. Contact</h2>
+            <h2 className="text-base font-semibold text-[#0f172a] mb-3">9. Contact</h2>
             <p>
               For questions about these Terms, please contact us via the{" "}
-              <Link href="/contact" className="text-[#00ff41] hover:text-[#00cc33] transition-colors">contact page</Link>.
+              <Link href="/contact" className="text-[#3b82f6] hover:text-[#2563eb] transition-colors">contact page</Link>.
             </p>
           </section>
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import DemoSection from "./DemoSection";
 import { isPageTransitioning } from "@/lib/pageTransitionState";
+import { useTypewriter } from "@/lib/useTypewriter";
 
 const prompt =
   "make me a base plate with 6 through holes and 4 m6 holes for mounting. The whole base plate should be 15x35cm";
@@ -14,6 +15,17 @@ const typingPrompts = [
   { text: "create a cylindrical enclosure 60mm diameter, 80mm tall with a snap-fit lid", holdMs: 2200 },
   { text: "build a spur gear — 24 teeth, module 1.5, 8mm bore, 5mm face width", holdMs: 2200 },
 ];
+
+const INTER_CAD_STEPS = ["scanned model", "software-neutral json", "transferred feature-rich design"];
+
+// Slide-fade transition classes shared by every crossfading hero element —
+// active sits at rest, inactive drifts slightly right and fades out, so
+// every switch reads as a consistent rightward slide+fade rather than a hard cut.
+function slideFadeClass(active: boolean) {
+  return `absolute inset-0 transition-all duration-700 ease-out ${
+    active ? "translate-x-0 opacity-100" : "pointer-events-none translate-x-6 opacity-0"
+  }`;
+}
 
 const platformStages = [
   {
@@ -58,19 +70,19 @@ function LeafList({
   return (
     <div className={`transition-all duration-700 ${show ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
       <div className="flex justify-center">
-        <div className="h-5 w-px bg-[#262626]" />
+        <div className="h-5 w-px bg-[#dbe6f5]" />
       </div>
-      <div className="relative ml-5 border-l border-[#262626] pl-4 space-y-2">
+      <div className="relative ml-5 border-l border-[#dbe6f5] pl-4 space-y-2">
         {leaves.map(({ tag, text }, i) => (
           <div
             key={tag}
             className={`relative transition-all duration-500 ${show ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"}`}
             style={{ transitionDelay: `${i * 55}ms` }}
           >
-            <div className="absolute -left-4 top-1/2 w-3 h-px bg-[#262626]" />
-            <div className="border border-[#262626] bg-[#161616] px-3 py-1.5 font-mono text-[11px]">
+            <div className="absolute -left-4 top-1/2 w-3 h-px bg-[#dbe6f5]" />
+            <div className="rounded-md border border-[#dbe6f5] bg-[#eef2f9] px-3 py-1.5 font-mono text-[11px]">
               <span className={tagColor}>{tag}</span>
-              <span className="ml-1.5 text-[#555]">{text}</span>
+              <span className="ml-1.5 text-[#64748b]">{text}</span>
             </div>
           </div>
         ))}
@@ -84,15 +96,15 @@ function PlatformTree({ activeIndex }: { activeIndex: number }) {
     <div className="mx-auto max-w-2xl">
       {/* Root: Onshape */}
       <div className="flex justify-center">
-        <div className="w-72 border border-[#00ff41]/40 bg-[#161616] p-4">
+        <div className="w-72 rounded-lg border border-[#3b82f6]/40 bg-[#eef2f9] p-4">
           <div className="mb-2.5 flex items-center gap-2">
-            <span className="h-2 w-2 bg-[#00ff41]" />
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#555]">Source · Onshape</span>
+            <span className="h-2 w-2 bg-[#3b82f6]" />
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#64748b]">Source · Onshape</span>
           </div>
           <div className="space-y-1">
-            <p className="font-mono text-[11px] text-[#555]">[feature] base plate extruded: 8mm</p>
-            <p className="font-mono text-[11px] text-[#555]">[cut] 6 through holes + 4 M6 mounts</p>
-            <p className={`font-mono text-[11px] transition-all duration-500 ${activeIndex >= 5 ? "text-[#00ff41]" : "text-[#555]"}`}>
+            <p className="font-mono text-[11px] text-[#64748b]">[feature] base plate extruded: 8mm</p>
+            <p className="font-mono text-[11px] text-[#64748b]">[cut] 6 through holes + 4 M6 mounts</p>
+            <p className={`font-mono text-[11px] transition-all duration-500 ${activeIndex >= 5 ? "text-[#3b82f6]" : "text-[#64748b]"}`}>
               [done] parametric tree committed
             </p>
           </div>
@@ -101,10 +113,10 @@ function PlatformTree({ activeIndex }: { activeIndex: number }) {
 
       {/* Trunk + crossbar */}
       <div className={`transition-opacity duration-700 ${activeIndex >= 1 ? "opacity-100" : "opacity-0"}`}>
-        <div className="flex justify-center"><div className="h-6 w-px bg-[#262626]" /></div>
-        <div className="relative mx-[25%] h-px bg-[#262626]">
-          <div className="absolute -left-px top-0 h-6 w-px bg-[#262626]" />
-          <div className="absolute -right-px top-0 h-6 w-px bg-[#262626]" />
+        <div className="flex justify-center"><div className="h-6 w-px bg-[#dbe6f5]" /></div>
+        <div className="relative mx-[25%] h-px bg-[#dbe6f5]">
+          <div className="absolute -left-px top-0 h-6 w-px bg-[#dbe6f5]" />
+          <div className="absolute -right-px top-0 h-6 w-px bg-[#dbe6f5]" />
         </div>
         <div className="h-6" />
       </div>
@@ -113,16 +125,16 @@ function PlatformTree({ activeIndex }: { activeIndex: number }) {
       <div className="grid grid-cols-2 gap-5">
         {/* Fusion 360 branch */}
         <div className={`transition-all duration-700 ${activeIndex >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}>
-          <div className="border border-blue-900 bg-[#161616] p-4">
+          <div className="rounded-lg border border-cyan-300 bg-[#eef2f9] p-4">
             <div className="flex items-center gap-2">
-              <span className="h-2 w-2 bg-blue-500" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#555]">Fusion 360</span>
+              <span className="h-2 w-2 bg-cyan-500" />
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#64748b]">Fusion 360</span>
             </div>
-            <p className="mt-2 font-mono text-[11px] text-[#555]">[translate] model persisted</p>
+            <p className="mt-2 font-mono text-[11px] text-[#64748b]">[translate] model persisted</p>
           </div>
           <LeafList
             show={activeIndex >= 3}
-            tagColor="text-blue-500"
+            tagColor="text-cyan-600"
             leaves={[
               { tag: "[cam]",        text: "CAM toolpath generation"    },
               { tag: "[gen-design]", text: "Generative topology design"  },
@@ -135,12 +147,12 @@ function PlatformTree({ activeIndex }: { activeIndex: number }) {
 
         {/* SolidWorks branch */}
         <div className={`transition-all duration-700 ${activeIndex >= 2 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}>
-          <div className="border border-violet-900 bg-[#161616] p-4">
+          <div className="rounded-lg border border-violet-300 bg-[#eef2f9] p-4">
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 bg-violet-500" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#555]">SolidWorks</span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#64748b]">SolidWorks</span>
             </div>
-            <p className="mt-2 font-mono text-[11px] text-[#555]">[translate] model persisted</p>
+            <p className="mt-2 font-mono text-[11px] text-[#64748b]">[translate] model persisted</p>
           </div>
           <LeafList
             show={activeIndex >= 4}
@@ -166,10 +178,20 @@ interface HeroProps {
 export default function Hero({ onJoinWaitlist }: HeroProps) {
   const treeRef = useRef<HTMLDivElement>(null);
   const demoVideoRef = useRef<HTMLVideoElement>(null);
+  const nodeVideoRef = useRef<HTMLVideoElement>(null);
   const [platformIndex, setPlatformIndex] = useState(0);
   const activePlatformStage = platformStages[platformIndex];
   const [showNudge, setShowNudge] = useState(false);
   const [demoInView, setDemoInView] = useState(false);
+
+  // Cycles which "pitch" is showing — the reasoning-agent prompt box + gears
+  // video, or the inter-CAD transfer flow + node-graph video — on a timer.
+  const [heroState, setHeroState] = useState<0 | 1>(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setHeroState((s) => (s === 0 ? 1 : 0)), 6500);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -181,29 +203,38 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Force the hero video to behave like a GIF: always playing, even when the
-  // tab is backgrounded or the browser tries to pause it. Muted + playsInline
+  // Force the hero videos to behave like GIFs: always playing, even when the
+  // tab is backgrounded or the browser tries to pause them. Muted + playsInline
   // keeps autoplay policy happy; we re-issue play() on any pause/visibility change.
+  // Both videos stay mounted and playing at all times (only opacity toggles
+  // between them) so switching states is an instant crossfade, never a restart.
   useEffect(() => {
-    const video = demoVideoRef.current;
-    if (!video) return;
+    const videos = [demoVideoRef.current, nodeVideoRef.current].filter((v): v is HTMLVideoElement => v !== null);
+    if (!videos.length) return;
 
     const forcePlay = () => {
-      const p = video.play();
-      if (p) p.catch(() => {});
+      videos.forEach((video) => {
+        const p = video.play();
+        if (p) p.catch(() => {});
+      });
     };
 
     forcePlay();
-    video.addEventListener("pause", forcePlay);
-    video.addEventListener("loadeddata", forcePlay);
+    videos.forEach((video) => {
+      video.addEventListener("pause", forcePlay);
+      video.addEventListener("loadeddata", forcePlay);
+    });
     document.addEventListener("visibilitychange", forcePlay);
 
     return () => {
-      video.removeEventListener("pause", forcePlay);
-      video.removeEventListener("loadeddata", forcePlay);
+      videos.forEach((video) => {
+        video.removeEventListener("pause", forcePlay);
+        video.removeEventListener("loadeddata", forcePlay);
+      });
       document.removeEventListener("visibilitychange", forcePlay);
     };
   }, []);
+
 
   useEffect(() => {
     const onScroll = () => {
@@ -227,42 +258,7 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
     return () => obs.disconnect();
   }, []);
 
-  const [typedText, setTypedText] = useState("");
-  const [typingPhase, setTypingPhase] = useState<"typing" | "holding" | "erasing">("typing");
-  const [promptIdx, setPromptIdx] = useState(0);
-  const [charPos, setCharPos] = useState(0);
-
-  useEffect(() => {
-    const current = typingPrompts[promptIdx];
-    let id: ReturnType<typeof setTimeout>;
-
-    if (typingPhase === "typing") {
-      if (charPos < current.text.length) {
-        id = setTimeout(() => {
-          setTypedText(current.text.slice(0, charPos + 1));
-          setCharPos((c) => c + 1);
-        }, 36);
-      } else {
-        id = setTimeout(() => setTypingPhase("holding"), 80);
-      }
-    } else if (typingPhase === "holding") {
-      id = setTimeout(() => setTypingPhase("erasing"), current.holdMs);
-    } else {
-      if (charPos > 0) {
-        id = setTimeout(() => {
-          setCharPos((c) => c - 1);
-          setTypedText(current.text.slice(0, charPos - 1));
-        }, 14);
-      } else {
-        id = setTimeout(() => {
-          setPromptIdx((i) => (i + 1) % typingPrompts.length);
-          setTypingPhase("typing");
-        }, 180);
-      }
-    }
-
-    return () => clearTimeout(id);
-  }, [typingPhase, charPos, promptIdx]);
+  const { text: typedText } = useTypewriter(typingPrompts);
 
   useEffect(() => {
     let frame = 0;
@@ -281,29 +277,51 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
   }, []);
 
   return (
-    <section className="relative bg-[#0f0f0f] text-[#e8e8e8]">
+    <section className="relative bg-[#f8fafc] text-[#0f172a]">
       <div className="absolute inset-0 pointer-events-none grid-bg" />
 
       {/* ── Initial hero ── */}
       <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-7xl items-center gap-12 px-5 pb-20 pt-36 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
         <div>
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#00ff41] mb-6">Parametra · v1.0 · Releasing Soon</p>
-          <h1 className="max-w-2xl text-balance text-4xl font-black leading-[1.05] tracking-tight text-[#e8e8e8] sm:text-5xl lg:text-6xl">
-            One prompt. Real CAD.
-          </h1>
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#3b82f6] mb-6">Parametra · v1.0 · Releasing Soon</p>
 
-          <p className="mt-6 max-w-md text-sm leading-6 text-[#888] sm:text-base sm:leading-7">
+          <div className="relative min-h-[76px] max-w-2xl sm:min-h-[101px] lg:min-h-[126px]">
+            <h1 className={`${slideFadeClass(heroState === 0)} text-balance text-4xl font-black leading-[1.05] tracking-tight text-[#0f172a] sm:text-5xl lg:text-6xl`}>
+              One prompt.<br />Real CAD.
+            </h1>
+            <h1 className={`${slideFadeClass(heroState === 1)} text-balance text-4xl font-black leading-[1.05] tracking-tight text-[#0f172a] sm:text-5xl lg:text-6xl`}>
+              Intra-Software Git<br />for CAD
+            </h1>
+          </div>
+
+          <p className="mt-6 max-w-md text-sm leading-6 text-[#475569] sm:text-base sm:leading-7">
             Software shouldn&apos;t make engineers wait. Describe the part in plain English — Parametra hands back a model you can actually edit, not a rendering.
           </p>
 
-          <div className="mt-8 border border-[#262626] bg-[#161616] p-4">
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#555]">Try a prompt</p>
-            <p className="relative mt-3 font-mono text-sm leading-7 text-[#e8e8e8]">
-              <span className="invisible select-none" aria-hidden="true">{typingPrompts[0].text}</span>
-              <span className="absolute inset-0">
-                {typedText}<span className="cursor-blink ml-px text-[#00ff41]">|</span>
-              </span>
-            </p>
+          <div className="relative mt-8 min-h-[152px] sm:min-h-[158px]">
+            <div className={`${slideFadeClass(heroState === 0)} rounded-lg border border-[#dbe6f5] bg-[#eef2f9] p-4`}>
+              <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#64748b]">Try a prompt</p>
+              <p className="relative mt-3 font-mono text-sm leading-7 text-[#0f172a]">
+                <span className="invisible select-none" aria-hidden="true">{typingPrompts[0].text}</span>
+                <span className="absolute inset-0">
+                  {typedText}<span className="cursor-blink ml-px text-[#3b82f6]">|</span>
+                </span>
+              </p>
+            </div>
+
+            <div className={`${slideFadeClass(heroState === 1)} rounded-lg border border-[#dbe6f5] bg-[#eef2f9] p-4`}>
+              <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#64748b]">Inter-CAD transfer</p>
+              <div className="mt-3 flex flex-col items-start gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+                {INTER_CAD_STEPS.map((step, i) => (
+                  <div key={step} className="flex items-center gap-2">
+                    <span className="rounded-md border border-[#dbe6f5] bg-[#f8fafc] px-2.5 py-1.5 font-mono text-xs text-[#0f172a]">
+                      {step}
+                    </span>
+                    {i < INTER_CAD_STEPS.length - 1 && <span className="font-mono text-xs text-[#94a3b8]">→</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="mt-8 flex items-center gap-4">
@@ -311,21 +329,21 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
               <button
                 type="button"
                 onClick={onJoinWaitlist}
-                className="cursor-pointer inline-flex min-h-12 items-center justify-center bg-[#00ff41] px-7 font-mono text-xs uppercase tracking-widest text-black transition hover:bg-[#00cc33]"
+                className="cursor-pointer rounded-md inline-flex min-h-12 items-center justify-center bg-[#3b82f6] px-7 font-mono text-xs uppercase tracking-widest text-white transition hover:bg-[#2563eb]"
               >
                 Join the Waitlist
               </button>
             ) : (
               <Link
                 href="/signup"
-                className="inline-flex min-h-12 items-center justify-center bg-[#00ff41] px-7 font-mono text-xs uppercase tracking-widest text-black transition hover:bg-[#00cc33]"
+                className="rounded-md inline-flex min-h-12 items-center justify-center bg-[#3b82f6] px-7 font-mono text-xs uppercase tracking-widest text-white transition hover:bg-[#2563eb]"
               >
                 Join the Waitlist
               </Link>
             )}
             <Link
               href="/how-it-works"
-              className="font-mono text-xs uppercase tracking-widest text-[#555] hover:text-[#00ff41] transition-colors"
+              className="font-mono text-xs uppercase tracking-widest text-[#64748b] hover:text-[#3b82f6] transition-colors"
             >
               How it works →
             </Link>
@@ -333,11 +351,11 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
         </div>
 
         <div className="flex flex-col gap-5">
-          <p className="text-sm leading-6 text-[#888]">
+          <p className="text-sm leading-6 text-[#475569]">
             Every model comes back as a native Onshape part studio — sketches, features, and dimensions fully intact. Export to Fusion 360 or SolidWorks when the job calls for it.
           </p>
-          <div className="border border-[#262626] bg-[#161616] p-4">
-            <div className="bg-[#0f0f0f]">
+          <div className="rounded-lg border border-[#dbe6f5] bg-[#eef2f9] p-4 overflow-hidden">
+            <div className="relative bg-[#f8fafc]">
               <video
                 ref={demoVideoRef}
                 src="/demoVideo.mp4"
@@ -349,17 +367,30 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
                 disablePictureInPicture
                 controls={false}
                 tabIndex={-1}
-                className="block h-auto w-full object-contain"
+                className={`block h-auto w-full object-contain transition-opacity duration-700 ${heroState === 0 ? "opacity-100" : "opacity-0"}`}
               />
-              <div className="flex items-center justify-between border-t border-[#262626] bg-[#161616] px-3 py-2">
+              <video
+                ref={nodeVideoRef}
+                src="/node-demo-video.mov"
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                disablePictureInPicture
+                controls={false}
+                tabIndex={-1}
+                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${heroState === 1 ? "opacity-100" : "opacity-0"}`}
+              />
+              <div className="flex items-center justify-between border-t border-[#dbe6f5] bg-[#eef2f9] px-3 py-2">
               <button
                 onClick={() => { setShowNudge(false); document.getElementById("live-demo")?.scrollIntoView({ behavior: "smooth" }); }}
                 className="flex items-center gap-2 group"
               >
-                <span className="text-left font-mono text-[11px] sm:text-[9px] text-[#00ff41] group-hover:underline underline-offset-2 sm:whitespace-nowrap">
+                <span className="text-left font-mono text-[11px] sm:text-[9px] text-[#3b82f6] group-hover:underline underline-offset-2 sm:whitespace-nowrap">
                   like what you see? scroll down to see Parametra in action
                 </span>
-                <span className="text-[#00ff41] animate-bounce inline-block">↓</span>
+                <span className="text-[#3b82f6] animate-bounce inline-block">↓</span>
               </button>
               </div>
             </div>
@@ -378,24 +409,24 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
           showNudge && !demoInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3 pointer-events-none"
         }`}
       >
-        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#555]">scroll</span>
-        <svg className="h-4 w-4 animate-bounce text-[#555]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#64748b]">scroll</span>
+        <svg className="h-4 w-4 animate-bounce text-[#64748b]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       </div>
 
       {/* ── Platform tree section ── */}
-      <div ref={treeRef} className="relative z-10 min-h-[300vh] border-t border-[#262626]">
+      <div ref={treeRef} className="relative z-10 min-h-[300vh] border-t border-[#dbe6f5]">
         <div className="sticky top-20 flex min-h-[calc(100vh-5rem)] flex-col justify-start px-5 pt-8 pb-10 sm:px-6 lg:px-8">
           <div className="mx-auto w-full max-w-7xl">
             <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
               <div>
-                <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#00ff41]">Works where the job demands</p>
-                <h2 className="relative mt-2 text-3xl font-black leading-tight text-[#e8e8e8] sm:text-4xl lg:text-5xl">
+                <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#3b82f6]">Works where the job demands</p>
+                <h2 className="relative mt-2 text-3xl font-black leading-tight text-[#0f172a] sm:text-4xl lg:text-5xl">
                   <span className="invisible select-none" aria-hidden="true">{platformStages[1].title}</span>
                   <span className="absolute inset-0">{activePlatformStage.title}</span>
                 </h2>
-                <p className="relative mt-2 max-w-xl text-sm leading-6 text-[#888] sm:text-base">
+                <p className="relative mt-2 max-w-xl text-sm leading-6 text-[#475569] sm:text-base">
                   <span className="invisible select-none" aria-hidden="true">{platformStages[1].summary}</span>
                   <span className="absolute inset-0">{activePlatformStage.summary}</span>
                 </p>
@@ -404,10 +435,10 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
                 {platformStages.map((_, index) => (
                   <span
                     key={index}
-                    className={`h-2 w-2 transition-all duration-500 ${index <= platformIndex ? "bg-[#00ff41]" : "bg-[#262626]"}`}
+                    className={`h-2 w-2 transition-all duration-500 ${index <= platformIndex ? "bg-[#3b82f6]" : "bg-[#dbe6f5]"}`}
                   />
                 ))}
-                <span className="ml-1 font-mono text-[11px] text-[#555]">{platformIndex + 1}/{platformStages.length}</span>
+                <span className="ml-1 font-mono text-[11px] text-[#64748b]">{platformIndex + 1}/{platformStages.length}</span>
               </div>
             </div>
             <div className="relative">

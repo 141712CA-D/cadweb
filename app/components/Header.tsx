@@ -62,7 +62,7 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
       <header
         className={`fixed top-8 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled
-            ? "header-glass border-b border-[#262626]"
+            ? "header-glass border-b border-[#dbe6f5]"
             : "bg-transparent border-b border-transparent"
         } ${hiddenForDemo ? "-translate-y-[calc(100%+2rem)] opacity-0 pointer-events-none" : "translate-y-0 opacity-100"}`}
       >
@@ -74,9 +74,9 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
             <img
               src="/logo.svg"
               alt="Parametra"
-              style={{ width: 32, height: 32, display: "block", flexShrink: 0, filter: "brightness(0) invert(1)" }}
+              style={{ width: 32, height: 32, display: "block", flexShrink: 0, filter: "brightness(0)" }}
             />
-            <span className="text-[#e8e8e8] font-semibold text-base sm:text-lg tracking-tight whitespace-nowrap">
+            <span className="text-[#0f172a] font-semibold text-base sm:text-lg tracking-tight whitespace-nowrap">
               Parametra
             </span>
           </Link>
@@ -87,14 +87,14 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
             {/* Desktop nav links */}
             <Link
               href="/how-it-works"
-              className="hidden sm:block font-mono text-xs uppercase tracking-widest px-4 py-2 border border-[#262626] text-[#888] hover:border-[#00ff41] hover:text-[#00ff41] transition-all duration-200"
+              className="hidden sm:block rounded-md font-mono text-xs uppercase tracking-widest px-4 py-2 border border-[#dbe6f5] text-[#475569] hover:border-[#3b82f6] hover:text-[#3b82f6] transition-all duration-200"
             >
               How It Works
             </Link>
 
             <Link
               href="/contact"
-              className="hidden sm:block font-mono text-xs uppercase tracking-widest px-4 py-2 border border-[#262626] text-[#888] hover:border-[#00ff41] hover:text-[#00ff41] transition-all duration-200"
+              className="hidden sm:block rounded-md font-mono text-xs uppercase tracking-widest px-4 py-2 border border-[#dbe6f5] text-[#475569] hover:border-[#3b82f6] hover:text-[#3b82f6] transition-all duration-200"
             >
               Contact Us
             </Link>
@@ -103,7 +103,7 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
               href="https://discord.gg/4CDr6ZyFd"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:block font-mono text-xs uppercase tracking-widest px-4 py-2 border border-[#262626] text-[#888] hover:border-[#00ff41] hover:text-[#00ff41] transition-all duration-200"
+              className="hidden sm:block rounded-md font-mono text-xs uppercase tracking-widest px-4 py-2 border border-[#dbe6f5] text-[#475569] hover:border-[#3b82f6] hover:text-[#3b82f6] transition-all duration-200"
             >
               Join Discord
             </a>
@@ -111,7 +111,7 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
             {/* Waitlist button */}
             <button
               onClick={handleWaitlistClick}
-              className="cursor-pointer font-mono text-xs uppercase tracking-widest px-4 sm:px-5 py-2 bg-[#00ff41] text-black hover:bg-[#00cc33] transition-all duration-200 whitespace-nowrap"
+              className="cursor-pointer rounded-md font-mono text-xs uppercase tracking-widest px-4 sm:px-5 py-2 bg-[#3b82f6] text-white hover:bg-[#2563eb] transition-all duration-200 whitespace-nowrap"
             >
               <span className="sm:hidden">Waitlist</span>
               <span className="hidden sm:inline">Join the Waitlist</span>
@@ -121,7 +121,7 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
             <div className="relative sm:hidden" onClick={(e) => e.stopPropagation()}>
               <button
                 onClick={() => setMenuOpen((v) => !v)}
-                className="flex flex-col justify-center items-center w-9 h-9 border border-[#262626] text-[#888] hover:border-[#00ff41] hover:text-[#00ff41] transition-all duration-200 gap-1.5"
+                className="flex flex-col justify-center items-center w-9 h-9 rounded-md border border-[#dbe6f5] text-[#475569] hover:border-[#3b82f6] hover:text-[#3b82f6] transition-all duration-200 gap-1.5"
                 aria-label="Menu"
               >
                 <span
@@ -141,20 +141,20 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
               {/* Dropdown */}
               {menuOpen && (
                 <div
-                  className="absolute right-0 top-12 w-44 border border-[#262626] overflow-hidden"
-                  style={{ background: "rgba(15,15,15,0.98)", backdropFilter: "blur(20px)" }}
+                  className="absolute right-0 top-12 w-44 rounded-md border border-[#dbe6f5] overflow-hidden shadow-lg"
+                  style={{ background: "rgba(255,255,255,0.97)", backdropFilter: "blur(20px)" }}
                 >
                   <Link
                     href="/how-it-works"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 font-mono text-xs uppercase tracking-widest text-[#888] hover:text-[#00ff41] hover:bg-[#161616] transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 font-mono text-xs uppercase tracking-widest text-[#475569] hover:text-[#3b82f6] hover:bg-[#eef2f9] transition-colors"
                   >
                     How It Works
                   </Link>
                   <Link
                     href="/contact"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 font-mono text-xs uppercase tracking-widest text-[#888] hover:text-[#00ff41] hover:bg-[#161616] transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 font-mono text-xs uppercase tracking-widest text-[#475569] hover:text-[#3b82f6] hover:bg-[#eef2f9] transition-colors"
                   >
                     Contact Us
                   </Link>
@@ -163,7 +163,7 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 font-mono text-xs uppercase tracking-widest text-[#888] hover:text-[#00ff41] hover:bg-[#161616] transition-colors"
+                    className="flex items-center gap-3 px-4 py-3 font-mono text-xs uppercase tracking-widest text-[#475569] hover:text-[#3b82f6] hover:bg-[#eef2f9] transition-colors"
                   >
                     Join Discord
                   </a>

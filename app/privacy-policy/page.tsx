@@ -5,18 +5,18 @@ import Footer from "../components/Footer";
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-[#e8e8e8] flex flex-col grid-bg">
+    <div className="min-h-screen bg-[#f8fafc] text-[#0f172a] flex flex-col grid-bg">
       <DevBanner />
       <Header />
 
       <main className="flex-1 max-w-3xl mx-auto px-6 py-32 sm:py-40 w-full">
         <h1 className="text-3xl sm:text-4xl font-bold mb-2">Privacy Policy</h1>
-        <p className="font-mono text-xs text-[#555] mb-12">Last updated: July 23, 2026</p>
+        <p className="font-mono text-xs text-[#64748b] mb-12">Last updated: July 23, 2026</p>
 
-        <div className="space-y-10 text-sm text-[#888] leading-relaxed">
+        <div className="space-y-10 text-sm text-[#475569] leading-relaxed">
 
           <section>
-            <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">1. Information We Collect</h2>
+            <h2 className="text-base font-semibold text-[#0f172a] mb-3">1. Information We Collect</h2>
             <p>When you join our waitlist or contact us, we collect:</p>
             <ul className="list-disc list-inside mt-2 space-y-1">
               <li>Name and email address</li>
@@ -32,7 +32,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">2. How We Use Your Information</h2>
+            <h2 className="text-base font-semibold text-[#0f172a] mb-3">2. How We Use Your Information</h2>
             <p>We use the information we collect to:</p>
             <ul className="list-disc list-inside mt-2 space-y-1">
               <li>Manage and communicate about waitlist access</li>
@@ -44,7 +44,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">3. Data Storage</h2>
+            <h2 className="text-base font-semibold text-[#0f172a] mb-3">3. Data Storage</h2>
             <p>
               Waitlist and contact data is stored in a Postgres database hosted on Neon and synced to Google
               Sheets. We also use a managed Redis cache (hosted on Upstash) to speed up duplicate-email checks
@@ -66,16 +66,16 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">4. Third-Party Services</h2>
+            <h2 className="text-base font-semibold text-[#0f172a] mb-3">4. Third-Party Services</h2>
             <p>We use the following third-party services which may process your data:</p>
             <ul className="list-disc list-inside mt-2 space-y-1">
-              <li><strong className="text-[#e8e8e8]">Resend</strong> — transactional email delivery</li>
-              <li><strong className="text-[#e8e8e8]">Google Sheets / Google Cloud</strong> — waitlist storage and sync</li>
-              <li><strong className="text-[#e8e8e8]">Neon</strong> — Postgres database hosting</li>
-              <li><strong className="text-[#e8e8e8]">Upstash</strong> — managed Redis cache for dedup checks and rate limiting</li>
-              <li><strong className="text-[#e8e8e8]">AWS</strong> — server infrastructure</li>
-              <li><strong className="text-[#e8e8e8]">Cloudflare Turnstile</strong> — bot protection on forms</li>
-              <li><strong className="text-[#e8e8e8]">Vercel</strong> — hosting and analytics</li>
+              <li><strong className="text-[#0f172a]">Resend</strong> — transactional email delivery</li>
+              <li><strong className="text-[#0f172a]">Google Sheets / Google Cloud</strong> — waitlist storage and sync</li>
+              <li><strong className="text-[#0f172a]">Neon</strong> — Postgres database hosting</li>
+              <li><strong className="text-[#0f172a]">Upstash</strong> — managed Redis cache for dedup checks and rate limiting</li>
+              <li><strong className="text-[#0f172a]">AWS</strong> — server infrastructure</li>
+              <li><strong className="text-[#0f172a]">Cloudflare Turnstile</strong> — bot protection on forms</li>
+              <li><strong className="text-[#0f172a]">Vercel</strong> — hosting and analytics</li>
             </ul>
             <p className="mt-3">
               Each third party has its own privacy policy governing their data handling.
@@ -83,7 +83,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">5. Data Sharing</h2>
+            <h2 className="text-base font-semibold text-[#0f172a] mb-3">5. Data Sharing</h2>
             <p>
               We do not sell or rent your personal data to any third party. We do not share your information
               with advertisers. We may disclose data if required by law or to protect our legal rights.
@@ -91,7 +91,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">6. Your Rights</h2>
+            <h2 className="text-base font-semibold text-[#0f172a] mb-3">6. Your Rights</h2>
             <p>
               You may request deletion of your personal data at any time by contacting us, or unsubscribe from the
               waitlist yourself using the unsubscribe link included in our emails. Unsubscribing follows the same
@@ -102,12 +102,12 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">7. Cookies</h2>
+            <h2 className="text-base font-semibold text-[#0f172a] mb-3">7. Cookies</h2>
             <p>
               We use functional cookies to optimize waitlist synchronization:
             </p>
             <ul className="list-disc list-inside mt-2 space-y-1">
-              <li><strong className="text-[#e8e8e8]">waitlistSynced</strong> — set for 1 hour per browser to throttle background sync operations. This ensures our system resyncs waitlist data with our upstream database at most once per hour per browser, reducing unnecessary network traffic while keeping data fresh. This cookie is functional only and contains no personal data.</li>
+              <li><strong className="text-[#0f172a]">waitlistSynced</strong> — set for 1 hour per browser to throttle background sync operations. This ensures our system resyncs waitlist data with our upstream database at most once per hour per browser, reducing unnecessary network traffic while keeping data fresh. This cookie is functional only and contains no personal data.</li>
             </ul>
             <p className="mt-3">
               Browser storage is also used for functional purposes: sessionStorage (to gate the first-visit demo experience so it only plays once per session).
@@ -119,7 +119,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">8. Children&apos;s Privacy</h2>
+            <h2 className="text-base font-semibold text-[#0f172a] mb-3">8. Children&apos;s Privacy</h2>
             <p>
               The Service is not directed to children under 13. We do not knowingly collect personal
               information from anyone under 13. If you believe we have inadvertently collected such data,
@@ -128,7 +128,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">9. Changes to This Policy</h2>
+            <h2 className="text-base font-semibold text-[#0f172a] mb-3">9. Changes to This Policy</h2>
             <p>
               We may update this Privacy Policy from time to time. We will post the new policy on this page
               with an updated date. Your continued use of the Service after changes constitutes acceptance.
@@ -136,10 +136,10 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-semibold text-[#e8e8e8] mb-3">10. Contact</h2>
+            <h2 className="text-base font-semibold text-[#0f172a] mb-3">10. Contact</h2>
             <p>
               For privacy-related requests or questions, please reach out via the{" "}
-              <Link href="/contact" className="text-[#00ff41] hover:text-[#00cc33] transition-colors">contact page</Link>.
+              <Link href="/contact" className="text-[#3b82f6] hover:text-[#2563eb] transition-colors">contact page</Link>.
             </p>
           </section>
 

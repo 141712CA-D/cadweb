@@ -1,11 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0f0f0f;
-  --foreground: #e8e8e8;
-  --surface: #161616;
-  --border: #262626;
-  --accent: #00ff41;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --surface: #eef2f9;
+  --border: #dbe6f5;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
 }
 
 @theme inline {
@@ -45,7 +46,7 @@ html {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #333333;
+  background: #b7c6dc;
 }
 
 ::-webkit-scrollbar-corner {
@@ -61,6 +62,91 @@ html {
 @keyframes fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
+}
+
+/* ── Grand reveal: bigger, slower, blurred entrance for hero-scale statements ── */
+@keyframes grand-reveal {
+  0%   { opacity: 0; transform: translateY(56px) scale(0.9); filter: blur(8px); }
+  55%  { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+.animate-grand-reveal {
+  opacity: 0;
+  animation: grand-reveal 1200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Same reveal, but keeps the logo mark forced solid black throughout —
+   a plain `filter: brightness(0)` on the element would get clobbered by
+   the animation's own `filter: blur(...)` keyframes (only one `filter`
+   value can apply at a time), so brightness(0) has to live in every
+   keyframe here instead. */
+@keyframes grand-reveal-logo {
+  0%   { opacity: 0; transform: translateY(56px) scale(0.9); filter: blur(8px) brightness(0); }
+  55%  { opacity: 1; filter: blur(0) brightness(0); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0) brightness(0); }
+}
+
+.animate-grand-reveal-logo {
+  opacity: 0;
+  animation: grand-reveal-logo 1200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Node ripple: expanding, fading ring used for the click-to-bloom burst ── */
+@keyframes node-ripple {
+  0%   { transform: scale(0.5); opacity: 0.5; }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+
+.node-ripple {
+  animation: node-ripple 1100ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Node float: gentle idle bob so the feature-node "sea" reads as alive
+   rather than a frozen diagram. Duration/delay are varied per-node inline. ── */
+@keyframes node-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-7px); }
+}
+
+.node-float {
+  animation: node-float 3.8s ease-in-out infinite;
+}
+
+/* ── Background drift: slow ambient motion for the big-statement slide
+   backdrops, so they read as a living scene rather than a static slideshow
+   frame. The -50%/-50% centering has to live *inside* the keyframe (not on
+   the element's own className) because a running animation's `transform`
+   fully overrides any transform set via a class or inline style. ── */
+@keyframes bg-drift {
+  0%, 100% { transform: translate(-50%, -50%) translate(0, 0) scale(1); }
+  50%      { transform: translate(-50%, -50%) translate(3%, -4%) scale(1.08); }
+}
+@keyframes bg-drift-alt {
+  0%, 100% { transform: translate(-50%, -50%) translate(0, 0) scale(1); }
+  50%      { transform: translate(-50%, -50%) translate(-4%, 3%) scale(0.94); }
+}
+
+.bg-drift {
+  animation: bg-drift 9s ease-in-out infinite;
+}
+
+.bg-drift-alt {
+  animation: bg-drift-alt 11s ease-in-out infinite;
+}
+
+/* ── Pop from bottom: a bouncier, longer-travel entrance for accent lines
+   that should feel like they're arriving from off-screen, distinct from the
+   more restrained grand-reveal used for headline text. ── */
+@keyframes pop-from-bottom {
+  0%   { opacity: 0; transform: translateY(80px) scale(0.92); }
+  60%  { opacity: 1; transform: translateY(-6px) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-pop-from-bottom {
+  opacity: 0;
+  animation: pop-from-bottom 900ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .animate-fade-up {
@@ -82,12 +168,9 @@ html {
 .delay-1000 { animation-delay: 1000ms; }
 .delay-1200 { animation-delay: 1200ms; }
 
-/* ── Technical coordinate grid ── */
+/* ── grid-bg: retained as a class for existing markup, intentionally a no-op
+   now that the terminal/coordinate-grid aesthetic has been softened away ── */
 .grid-bg {
-  background-image:
-    linear-gradient(rgba(0,255,65,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,255,65,0.04) 1px, transparent 1px);
-  background-size: 40px 40px;
 }
 
 /* ── Gradient text (flattened to solid white) ── */
@@ -107,7 +190,7 @@ html {
 
 /* ── Header glass ── */
 .header-glass {
-  background: rgba(15,15,15,0.95);
+  background: rgba(248,250,252,0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }

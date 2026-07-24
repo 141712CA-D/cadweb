@@ -2,14 +2,15 @@
 
 Pre-launch marketing site for Parametra.ai, an AI-powered multi-agent CAD design tool for Onshape. Built with Next.js 16, Tailwind CSS v4, TypeScript.
 
-**Current state: full dark-theme redesign** (branch `redesign`) — "precision engineering / terminal" aesthetic. The old blue/sky light-accent design this doc previously described is gone.
+**Current state: light-theme redesign** (branch `refactor/major-website-updates`) — soft off-white background with blue accents, softened (rounded-corner) styling. The earlier near-black/CAD-green "terminal" aesthetic this doc previously described is gone from the site shell.
 
 ## Design language
 
-- **Colors**: near-black base `#0f0f0f`, panels `#161616`, borders `#262626`, text `#e8e8e8` (primary) / `#888` (secondary) / `#555` (dim), accent **CAD green `#00ff41`** (hover `#00cc33`). Blue is used only for the Fusion 360 node, violet only for the SolidWorks node in the platform tree.
+- **Colors**: off-white base `#f8fafc`, blue-tinted panels `#eef2f9`, borders `#dbe6f5`, text `#0f172a` (primary) / `#475569` (secondary) / `#64748b` (dim) / `#94a3b8` (extra-dim), accent **blue `#3b82f6`** (hover `#2563eb`). Blue is now the site's own brand accent, so the platform-tree Fusion 360 node uses **cyan** (`cyan-300`/`cyan-500`/`cyan-600`) instead to stay visually distinct from the Onshape-root/brand blue; violet is still used for the SolidWorks node.
 - **Fonts**: Lato (`--font-lato`, sans) + Geist Mono (`--font-geist-mono`) via `next/font/google`. (No longer Geist Sans.)
-- **Style**: sharp corners (no rounded borders), monospace eyebrows/labels in uppercase tracking-widest, terminal-style `[tag]` log lines.
-- Key CSS classes in `globals.css`: `grid-bg`, `gradient-text`, `header-glass`, `cursor-blink`, `morph-fade-in/out`, `form-field-enter`, `cad-scan-line`, `cad-pulse`, `animate-fade-up/in`.
+- **Style**: rounded corners (`rounded-md`/`rounded-lg`, softened from the old sharp-corner look) on buttons, cards, inputs, and panels; monospace eyebrows/labels in uppercase tracking-widest and terminal-style `[tag]` log lines are still used as a typographic motif.
+- Key CSS classes in `globals.css`: `grid-bg` (now an intentional no-op — the coordinate-grid effect was dropped when softening the aesthetic), `gradient-text`, `header-glass` (light frosted-glass blur), `cursor-blink`, `morph-fade-in/out`, `form-field-enter`, `cad-scan-line`, `cad-pulse` (both currently unused dead CSS), `animate-fade-up/in`.
+- **`DemoSection.tsx` is an intentional exception**: the scripted "mock Parametra desktop app" window (and its child components `InterCadPanel.tsx`, `IntentWebViewer.tsx`) keeps its own self-contained dark/CAD-green palette — like a product screenshot floating on the light page — rather than following the site-shell light theme. Only its outer section wrapper background was updated to blend with the new page background.
 
 ## Stack
 
