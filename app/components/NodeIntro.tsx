@@ -47,7 +47,7 @@ function nodeStyle(accent = false): React.CSSProperties {
 }
 
 function FlowSteps() {
-  const steps = ["scanned model", "json payload", "redesigned in target software"];
+  const steps = ["scanned model", "software-neutral json", "transferred feature-rich design"];
   return (
     <div className="mt-4 flex flex-col items-start gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
       {steps.map((step, i) => (
@@ -68,14 +68,22 @@ function BigTextSlide({
   show,
   lines,
   showLogo,
+  subLine,
+  glow = "blue",
 }: {
   show: boolean;
   lines: { text: string; italic?: boolean }[];
   showLogo?: boolean;
+  subLine?: string;
+  glow?: "blue" | "violet";
 }) {
+  const glowA = glow === "violet" ? "bg-violet-400/15" : "bg-blue-400/10";
+  const glowB = glow === "violet" ? "bg-blue-400/10" : "bg-violet-400/10";
+
   return (
     <div className="relative flex h-screen w-full flex-shrink-0 flex-col items-center justify-center gap-3 overflow-hidden px-6 text-center">
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[560px] w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-400/10 blur-3xl" />
+      <div className={`bg-drift pointer-events-none absolute left-1/2 top-1/2 h-[560px] w-[560px] rounded-full ${glowA} blur-3xl`} />
+      <div className={`bg-drift-alt pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-[420px] rounded-full ${glowB} blur-3xl`} />
       {show && showLogo && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -95,6 +103,11 @@ function BigTextSlide({
             {line.text}
           </h2>
         ))}
+      {show && subLine && (
+        <p className="animate-pop-from-bottom delay-1000 relative z-10 mt-3 rounded-full border border-[#dbe6f5] bg-[#eef2f9] px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] text-[#3b82f6] sm:text-sm">
+          {subLine}
+        </p>
+      )}
     </div>
   );
 }
@@ -103,8 +116,10 @@ function FinalSlide({ show }: { show: boolean }) {
   const { text: typedText } = useTypewriter(introTypingPrompts);
 
   return (
-    <div className="flex h-screen w-full flex-shrink-0 flex-col items-center justify-center gap-6 px-6">
-      <div className="mx-auto grid w-full max-w-4xl gap-5 sm:grid-cols-2">
+    <div className="relative flex h-screen w-full flex-shrink-0 flex-col items-center justify-center gap-6 overflow-hidden px-6">
+      <div className="bg-drift pointer-events-none absolute left-1/2 top-1/2 h-[560px] w-[560px] rounded-full bg-blue-400/10 blur-3xl" />
+      <div className="bg-drift-alt pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-[420px] rounded-full bg-violet-400/10 blur-3xl" />
+      <div className="relative z-10 mx-auto grid w-full max-w-4xl gap-5 sm:grid-cols-2">
         <div
           className={`rounded-lg border border-[#dbe6f5] bg-[#eef2f9] p-5 transition-all duration-700 ${
             show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
@@ -112,6 +127,18 @@ function FinalSlide({ show }: { show: boolean }) {
         >
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#3b82f6]">01 · Reasoning Agent</p>
           <p className="mt-2 text-sm leading-6 text-[#475569]">Our strongest reasoning CAD agent.</p>
+          <video
+            src="/demoVideo.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            disablePictureInPicture
+            controls={false}
+            tabIndex={-1}
+            className="mt-4 hidden aspect-video w-full rounded-md border border-[#dbe6f5] bg-[#f8fafc] object-cover sm:block"
+          />
           <div className="mt-4 rounded-md border border-[#dbe6f5] bg-[#f8fafc] p-3">
             <p className="relative min-h-12 font-mono text-xs leading-6 text-[#0f172a]">
               <span className="invisible select-none" aria-hidden="true">{introTypingPrompts[0].text}</span>
@@ -133,6 +160,18 @@ function FinalSlide({ show }: { show: boolean }) {
           <p className="mt-2 text-sm leading-6 text-[#475569]">
             Our inter-software CAD tool, persisting fully feature- and parameter-hydrated designs in any CAD tool.
           </p>
+          <video
+            src="/node-demo-video.mov"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            disablePictureInPicture
+            controls={false}
+            tabIndex={-1}
+            className="mt-4 hidden aspect-video w-full rounded-md border border-[#dbe6f5] bg-[#f8fafc] object-cover sm:block"
+          />
           <FlowSteps />
         </div>
       </div>
@@ -425,7 +464,9 @@ export default function NodeIntro() {
         {/* ── Slide 2 ── */}
         <BigTextSlide
           show={slideIndex >= 2}
-          lines={[{ text: "The next" }, { text: "Git for CAD", italic: true }, { text: "Between Softwares" }]}
+          glow="violet"
+          lines={[{ text: "The next" }, { text: "Intra-Software Git for CAD", italic: true }]}
+          subLine="and also the best reasoning AI CAD engine"
         />
 
         {/* ── Slide 3 ── */}

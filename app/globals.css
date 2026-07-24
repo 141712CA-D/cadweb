@@ -113,6 +113,42 @@ html {
   animation: node-float 3.8s ease-in-out infinite;
 }
 
+/* ── Background drift: slow ambient motion for the big-statement slide
+   backdrops, so they read as a living scene rather than a static slideshow
+   frame. The -50%/-50% centering has to live *inside* the keyframe (not on
+   the element's own className) because a running animation's `transform`
+   fully overrides any transform set via a class or inline style. ── */
+@keyframes bg-drift {
+  0%, 100% { transform: translate(-50%, -50%) translate(0, 0) scale(1); }
+  50%      { transform: translate(-50%, -50%) translate(3%, -4%) scale(1.08); }
+}
+@keyframes bg-drift-alt {
+  0%, 100% { transform: translate(-50%, -50%) translate(0, 0) scale(1); }
+  50%      { transform: translate(-50%, -50%) translate(-4%, 3%) scale(0.94); }
+}
+
+.bg-drift {
+  animation: bg-drift 9s ease-in-out infinite;
+}
+
+.bg-drift-alt {
+  animation: bg-drift-alt 11s ease-in-out infinite;
+}
+
+/* ── Pop from bottom: a bouncier, longer-travel entrance for accent lines
+   that should feel like they're arriving from off-screen, distinct from the
+   more restrained grand-reveal used for headline text. ── */
+@keyframes pop-from-bottom {
+  0%   { opacity: 0; transform: translateY(80px) scale(0.92); }
+  60%  { opacity: 1; transform: translateY(-6px) scale(1.02); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-pop-from-bottom {
+  opacity: 0;
+  animation: pop-from-bottom 900ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
 .animate-fade-up {
   opacity: 0;
   animation: fade-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
