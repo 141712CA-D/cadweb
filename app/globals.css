@@ -64,6 +64,55 @@ html {
   to   { opacity: 1; }
 }
 
+/* ── Grand reveal: bigger, slower, blurred entrance for hero-scale statements ── */
+@keyframes grand-reveal {
+  0%   { opacity: 0; transform: translateY(56px) scale(0.9); filter: blur(8px); }
+  55%  { opacity: 1; filter: blur(0); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+.animate-grand-reveal {
+  opacity: 0;
+  animation: grand-reveal 1200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Same reveal, but keeps the logo mark forced solid black throughout —
+   a plain `filter: brightness(0)` on the element would get clobbered by
+   the animation's own `filter: blur(...)` keyframes (only one `filter`
+   value can apply at a time), so brightness(0) has to live in every
+   keyframe here instead. */
+@keyframes grand-reveal-logo {
+  0%   { opacity: 0; transform: translateY(56px) scale(0.9); filter: blur(8px) brightness(0); }
+  55%  { opacity: 1; filter: blur(0) brightness(0); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0) brightness(0); }
+}
+
+.animate-grand-reveal-logo {
+  opacity: 0;
+  animation: grand-reveal-logo 1200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Node ripple: expanding, fading ring used for the click-to-bloom burst ── */
+@keyframes node-ripple {
+  0%   { transform: scale(0.5); opacity: 0.5; }
+  100% { transform: scale(3.2); opacity: 0; }
+}
+
+.node-ripple {
+  animation: node-ripple 1100ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Node float: gentle idle bob so the feature-node "sea" reads as alive
+   rather than a frozen diagram. Duration/delay are varied per-node inline. ── */
+@keyframes node-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-7px); }
+}
+
+.node-float {
+  animation: node-float 3.8s ease-in-out infinite;
+}
+
 .animate-fade-up {
   opacity: 0;
   animation: fade-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;

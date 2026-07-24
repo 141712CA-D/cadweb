@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import DemoSection from "./DemoSection";
 import { isPageTransitioning } from "@/lib/pageTransitionState";
+import { useTypewriter } from "@/lib/useTypewriter";
 
 const prompt =
   "make me a base plate with 6 through holes and 4 m6 holes for mounting. The whole base plate should be 15x35cm";
@@ -227,42 +228,7 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
     return () => obs.disconnect();
   }, []);
 
-  const [typedText, setTypedText] = useState("");
-  const [typingPhase, setTypingPhase] = useState<"typing" | "holding" | "erasing">("typing");
-  const [promptIdx, setPromptIdx] = useState(0);
-  const [charPos, setCharPos] = useState(0);
-
-  useEffect(() => {
-    const current = typingPrompts[promptIdx];
-    let id: ReturnType<typeof setTimeout>;
-
-    if (typingPhase === "typing") {
-      if (charPos < current.text.length) {
-        id = setTimeout(() => {
-          setTypedText(current.text.slice(0, charPos + 1));
-          setCharPos((c) => c + 1);
-        }, 36);
-      } else {
-        id = setTimeout(() => setTypingPhase("holding"), 80);
-      }
-    } else if (typingPhase === "holding") {
-      id = setTimeout(() => setTypingPhase("erasing"), current.holdMs);
-    } else {
-      if (charPos > 0) {
-        id = setTimeout(() => {
-          setCharPos((c) => c - 1);
-          setTypedText(current.text.slice(0, charPos - 1));
-        }, 14);
-      } else {
-        id = setTimeout(() => {
-          setPromptIdx((i) => (i + 1) % typingPrompts.length);
-          setTypingPhase("typing");
-        }, 180);
-      }
-    }
-
-    return () => clearTimeout(id);
-  }, [typingPhase, charPos, promptIdx]);
+  const { text: typedText } = useTypewriter(typingPrompts);
 
   useEffect(() => {
     let frame = 0;
