@@ -31,6 +31,28 @@ export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
     };
   }, []);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      // Mac keyboards label their backspace key "delete" — support it (and
+      // the separate forward-delete "Delete" key) as a close shortcut too,
+      // but only when focus isn't in a text field, so deleting a character
+      // while typing in the form doesn't accidentally close the modal.
+      if (e.key === "Backspace" || e.key === "Delete") {
+        const target = e.target as HTMLElement | null;
+        const isEditable =
+          target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.tagName === "SELECT" || target?.isContentEditable;
+        if (!isEditable) onClose();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, onClose]);
+
   return (
     <>
       {/* Backdrop */}

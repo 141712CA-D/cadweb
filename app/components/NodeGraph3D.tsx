@@ -1,5 +1,5 @@
 "use client";
-//test
+
 import { useEffect, useRef } from "react";
 
 // Same feature-dependency topology as the rest of the intro, but placed in
@@ -89,6 +89,24 @@ const EDGES: Edge3D[] = [
 
 const ease = (t: number) => 1 - Math.pow(1 - t, 3);
 
+// The graph's world-space bounding box (x spans roughly ±19, y spans 0 to
+// -28), with a little margin for sphere radii and labels.
+const VERTICAL_FOV_DEG = 42;
+const GRAPH_X_HALF = 24;
+const GRAPH_Y_HALF = 17;
+const GRAPH_Y_CENTER = -14;
+
+// Picks a camera distance that fits the whole graph's bounding box for
+// *whatever* aspect ratio the container has — a fixed distance looked fine
+// on a landscape-ish box, but clipped hard on a tall/narrow mobile viewport
+// once the scene went full-bleed. Recomputed on resize (see ResizeObserver).
+function fitCameraDistance(aspect: number) {
+  const halfV = (VERTICAL_FOV_DEG * Math.PI) / 360;
+  const distanceForHeight = GRAPH_Y_HALF / Math.tan(halfV);
+  const distanceForWidth = GRAPH_X_HALF / (Math.tan(halfV) * aspect);
+  return Math.max(distanceForHeight, distanceForWidth) * 1.15;
+}
+
 interface NodeGraph3DProps {
   zoom: boolean;
   onZoomDone?: () => void;
@@ -122,10 +140,10 @@ export default function NodeGraph3D({ zoom, onZoomDone }: NodeGraph3DProps) {
       const h = mount.offsetHeight || 400;
 
       const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 500);
-      const startZ = 52;
-      camera.position.set(0, -13, startZ);
-      camera.lookAt(0, -13, 0);
+      const camera = new THREE.PerspectiveCamera(VERTICAL_FOV_DEG, w / h, 0.1, 500);
+      let startZ = fitCameraDistance(w / h);
+      camera.position.set(0, GRAPH_Y_CENTER, startZ);
+      camera.lookAt(0, GRAPH_Y_CENTER, 0);
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(w, h);
@@ -241,6 +259,12 @@ export default function NodeGraph3D({ zoom, onZoomDone }: NodeGraph3DProps) {
           renderer.setSize(rw, rh);
           camera.aspect = rw / rh;
           camera.updateProjectionMatrix();
+          // Re-fit the "at rest" distance for the new aspect ratio — but not
+          // mid-zoom, since that's actively animating camera.position.z itself.
+          if (!zooming) {
+            startZ = fitCameraDistance(rw / rh);
+            camera.position.z = startZ;
+          }
         }
       });
       ro.observe(mount);
