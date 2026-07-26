@@ -715,7 +715,7 @@ export default function StartupSchoolForm({ onSuccess, isModal = false }: Startu
                   <div>
                     <label className={labelClass}>Reason</label>
                     <input
-                      className={inputClass() + " cursor-not-allowed opacity-70"}
+                      className={inputClass() + " cursor-not-allowed text-[#64748b]"}
                       value={STARTUP_SCHOOL_REASON}
                       readOnly
                       aria-readonly="true"
@@ -760,7 +760,7 @@ export default function StartupSchoolForm({ onSuccess, isModal = false }: Startu
                   <div>
                     <label className={labelClass}>Intended Usage</label>
                     <input
-                      className={inputClass() + " cursor-not-allowed opacity-70"}
+                      className={inputClass() + " cursor-not-allowed text-[#64748b]"}
                       value={STARTUP_SCHOOL_REASON}
                       readOnly
                       aria-readonly="true"
