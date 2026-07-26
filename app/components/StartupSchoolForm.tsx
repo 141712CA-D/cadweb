@@ -258,7 +258,8 @@ export default function StartupSchoolForm({ onSuccess, isModal = false }: Startu
   }
 
   // Single-step: the startup-school endpoint has no email-code verification. We POST to the
-  // same-origin proxy (which injects the server-only JWT) and a 200 means we're on the list.
+  // same-origin proxy (/api/startup-school), which injects the server-only JWT_STARTUP_SCHOOL_TOKEN
+  // and forwards to the backend's /api/waitlist/startup-school. A 200 means we're on the list.
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
