@@ -93,6 +93,13 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
             </Link>
 
             <Link
+              href="/pitch"
+              className="hidden sm:block rounded-md font-mono text-xs uppercase tracking-widest px-4 py-2 border border-[#dbe6f5] text-[#475569] hover:border-[#3b82f6] hover:text-[#3b82f6] transition-all duration-200"
+            >
+              The Pitch
+            </Link>
+
+            <Link
               href="/contact"
               className="hidden sm:block rounded-md font-mono text-xs uppercase tracking-widest px-4 py-2 border border-[#dbe6f5] text-[#475569] hover:border-[#3b82f6] hover:text-[#3b82f6] transition-all duration-200"
             >
@@ -150,6 +157,13 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
                     className="flex items-center gap-3 px-4 py-3 font-mono text-xs uppercase tracking-widest text-[#475569] hover:text-[#3b82f6] hover:bg-[#eef2f9] transition-colors"
                   >
                     How It Works
+                  </Link>
+                  <Link
+                    href="/pitch"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 font-mono text-xs uppercase tracking-widest text-[#475569] hover:text-[#3b82f6] hover:bg-[#eef2f9] transition-colors"
+                  >
+                    The Pitch
                   </Link>
                   <Link
                     href="/contact"

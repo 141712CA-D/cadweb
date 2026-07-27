@@ -154,9 +154,47 @@ html {
   animation: fade-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* ── Ink stamp: entrance for the pitch page's "F**K [X]" beats. A short
+   press-down with a slight overshoot — reads like a rubber stamp set onto
+   paper, and settles at a -2deg tilt (the tilt lives in the final keyframe
+   because fill-mode: forwards overrides any class-level transform). ── */
+@keyframes stamp-slam {
+  0%   { opacity: 0; transform: translateY(10px) scale(1.16) rotate(0.5deg); }
+  65%  { opacity: 1; transform: translateY(0) scale(0.985) rotate(-2.5deg); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(-2deg); }
+}
+
+.animate-stamp-slam {
+  opacity: 0;
+  animation: stamp-slam 650ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
 .animate-fade-in {
   opacity: 0;
   animation: fade-in 1s ease forwards;
+}
+
+/* ── Reduced motion: entrance animations collapse to a plain fade, ambient
+   drift stops. The logo variant re-pins brightness(0) since it normally
+   lives inside the animation's own filter keyframes. ── */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-fade-in,
+  .animate-grand-reveal,
+  .animate-grand-reveal-logo,
+  .animate-pop-from-bottom,
+  .animate-stamp-slam {
+    animation: fade-in 300ms ease forwards;
+  }
+
+  .animate-grand-reveal-logo {
+    filter: brightness(0);
+  }
+
+  .bg-drift,
+  .bg-drift-alt {
+    animation: none;
+  }
 }
 
 .delay-100 { animation-delay: 100ms; }

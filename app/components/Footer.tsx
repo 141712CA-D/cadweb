@@ -11,7 +11,7 @@ const linkClass = "font-mono text-xs text-[#64748b] hover:text-[#3b82f6] transit
 const iconLinkClass =
   "flex items-center gap-2 font-mono text-xs text-[#64748b] hover:text-[#3b82f6] transition-colors";
 
-type FooterPage = "home" | "how-it-works" | "contact" | "signup" | "terms" | "privacy";
+type FooterPage = "home" | "how-it-works" | "pitch" | "contact" | "signup" | "terms" | "privacy";
 
 interface FooterProps {
   currentPage?: FooterPage;
@@ -55,6 +55,11 @@ export default function Footer({ currentPage = "home", onJoinWaitlist }: FooterP
                 How It Works
               </Link>
             )}
+            {currentPage !== "pitch" && (
+              <Link href="/pitch" className={linkClass}>
+                The Pitch
+              </Link>
+            )}
             {currentPage !== "contact" && (
               <Link href="/contact" className={linkClass}>
                 Contact Us
@@ -94,6 +99,11 @@ export default function Footer({ currentPage = "home", onJoinWaitlist }: FooterP
               {currentPage !== "how-it-works" && (
                 <Link href="/how-it-works" className={linkClass}>
                   How It Works
+                </Link>
+              )}
+              {currentPage !== "pitch" && (
+                <Link href="/pitch" className={linkClass}>
+                  The Pitch
                 </Link>
               )}
               {currentPage !== "signup" && waitlistLink}
