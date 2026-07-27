@@ -13,20 +13,26 @@
  * DemoSection just maps the result onto one element's inline style per frame.
  */
 
+/**
+ * A single frame of the flight. Read-only: the docked band hands back a shared
+ * constant rather than allocating on every scroll frame, so a frame must never
+ * be treated as scratch space — mutating one would corrupt every later docked
+ * frame in the session.
+ */
 export interface FlightFrame {
   /** X offset as a percentage of the element's own width. */
-  tx: number;
+  readonly tx: number;
   /** Z offset in px. Negative = away from the viewer, positive = toward it. */
-  tz: number;
+  readonly tz: number;
   /** Rotation about the horizontal axis, degrees. */
-  rx: number;
+  readonly rx: number;
   /** Rotation about the vertical axis, degrees. */
-  ry: number;
-  opacity: number;
+  readonly ry: number;
+  readonly opacity: number;
   /** 1 = full device shell, 0 = bare window. Drives the `--chrome` CSS var. */
-  chrome: number;
+  readonly chrome: number;
   /** True only in the still band — the window is interactive exactly here. */
-  docked: boolean;
+  readonly docked: boolean;
 }
 
 /** Progress at which the fly-in finishes. Everything past this is docked. */
@@ -51,7 +57,18 @@ export const RUNWAY_SVH = 170;
  */
 export const DOCK_MARKER_TOP_SVH = DOCK_P * (RUNWAY_SVH - 100);
 
-export const DOCKED_FRAME: FlightFrame = {
+/**
+ * Id on that marker. Anything linking to the demo should target this, not the
+ * `#live-demo` section — the section's top is progress 0, where the window is
+ * still mid-flight and deliberately not interactive.
+ */
+export const DOCK_ANCHOR_ID = "live-demo-dock";
+
+/**
+ * The one frame the whole docked band returns. Frozen so the `readonly` types
+ * are enforced at runtime too, not just by the compiler.
+ */
+export const DOCKED_FRAME: FlightFrame = Object.freeze({
   tx: 0,
   tz: 0,
   rx: 0,
@@ -59,7 +76,7 @@ export const DOCKED_FRAME: FlightFrame = {
   opacity: 1,
   chrome: 0,
   docked: true,
-};
+});
 
 // Written to fold -0 and NaN down to 0 as well as clamping — a stray -0 would
 // otherwise surface as "-0.00%" in the transform string.

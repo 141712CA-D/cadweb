@@ -6,6 +6,7 @@ import { lockScroll, unlockScroll } from "../../lib/scrollLock";
 import DeviceShell, { type DeviceKind } from "./DeviceShell";
 import {
   DOCKED_FRAME,
+  DOCK_ANCHOR_ID,
   DOCK_MARKER_TOP_SVH,
   RUNWAY_SVH,
   flightAt,
@@ -672,10 +673,12 @@ export default function DemoSection() {
       className="relative bg-[#f8fafc] border-t border-[#dbe6f5]"
       style={{ height: `${RUNWAY_SVH}svh` }}
     >
-      {/* Scroll target for startDemo. Parking this at the top of the viewport
-          lands the runway inside the docked band, so launching the demo can
-          never strand the window mid-flight. */}
+      {/* Scroll target for startDemo and for anything linking to the demo.
+          Parking this at the top of the viewport lands the runway inside the
+          docked band, so you always arrive at the window fully flown in and
+          interactive rather than stranded mid-flight. */}
       <div
+        id={DOCK_ANCHOR_ID}
         ref={dockRef}
         aria-hidden
         className="pointer-events-none absolute left-0 h-px w-px"

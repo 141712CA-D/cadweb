@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import DemoSection from "./DemoSection";
 import { isPageTransitioning } from "@/lib/pageTransitionState";
+import { DOCK_ANCHOR_ID } from "@/lib/deviceFlight";
 
 const INTER_CAD_STEPS = ["scanned model", "software-neutral json", "transferred feature-rich design"];
 
@@ -206,6 +207,18 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Jump to the demo's dock marker, not the top of its section — the section
+  // starts a scroll runway the window flies in along, so landing at its top
+  // drops you at the far end of that flight with the window still tiny,
+  // rotated, and deliberately not clickable. The marker sits at the point the
+  // flight has finished and the demo is interactive.
+  const scrollToDemo = () => {
+    setShowNudge(false);
+    const target =
+      document.getElementById(DOCK_ANCHOR_ID) ?? document.getElementById("live-demo");
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   // Track whether the live-demo section is on screen. Uses IntersectionObserver
   // (not scroll events) so it still fires while DemoSection has the body scroll
   // locked — otherwise the nudge could get stranded on top of the locked demo.
@@ -286,7 +299,7 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
             )}
             <button
               type="button"
-              onClick={() => { setShowNudge(false); document.getElementById("live-demo")?.scrollIntoView({ behavior: "smooth" }); }}
+              onClick={scrollToDemo}
               className="cursor-pointer font-mono text-xs uppercase tracking-widest text-[#64748b] hover:text-[#3b82f6] transition-colors"
             >
               See a transfer →
@@ -315,7 +328,7 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
               />
               <div className="flex items-center justify-between border-t border-[#dbe6f5] bg-[#eef2f9] px-3 py-2">
               <button
-                onClick={() => { setShowNudge(false); document.getElementById("live-demo")?.scrollIntoView({ behavior: "smooth" }); }}
+                onClick={scrollToDemo}
                 className="flex items-center gap-2 group"
               >
                 <span className="text-left font-mono text-[11px] sm:text-[9px] text-[#3b82f6] group-hover:underline underline-offset-2 sm:whitespace-nowrap">

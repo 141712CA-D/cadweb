@@ -130,7 +130,7 @@ export default function PitchPage() {
         </StampWord>
 
         <p className="animate-fade-up delay-400 relative z-10 max-w-lg font-mono text-base text-[#475569] sm:text-lg">
-          Here&apos;s why we built Parametra — and why Big CAD never wanted you to have it.
+          Here&apos;s why we built Parametra — and why they never wanted you to have it.
         </p>
 
         <div className="animate-fade-in delay-800 absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce text-[#94a3b8]">
@@ -140,7 +140,7 @@ export default function PitchPage() {
         </div>
       </section>
 
-      {/* ── The problem: Big CAD ── */}
+      {/* ── The problem: CAD lock-in ── */}
       <section className="relative border-t border-[#dbe6f5] bg-[#f8fafc] px-6 py-20 sm:py-32">
         <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 text-center sm:gap-8">
           <Reveal>
@@ -149,14 +149,14 @@ export default function PitchPage() {
 
           <Reveal className="delay-100">
             <h2 className="text-[clamp(2rem,9.5vw,2.75rem)] font-black leading-tight text-[#0f172a] sm:text-5xl lg:text-6xl">
-              Big CAD is limiting
+              CAD Lock-in is limiting
               <br className="hidden sm:block" /> your engineering.
             </h2>
           </Reveal>
 
           <Reveal className="delay-200">
             <p className="max-w-xl text-lg leading-8 text-[#475569] sm:text-xl">
-              They trap <MarkUnderline color="red">your feature information</MarkUnderline> — the
+              It traps <MarkUnderline color="red">your feature information</MarkUnderline> — the
               constraints and relations you worked hard to create.
             </p>
           </Reveal>
