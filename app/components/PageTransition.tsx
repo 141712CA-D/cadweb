@@ -57,18 +57,13 @@ export default function PageTransition({ children }: PageTransitionProps) {
       e.preventDefault();
       pendingHrefRef.current = url.pathname + url.search + url.hash;
 
-      // Every route on this site starts at the top. Kick off a smooth scroll
-      // to top right here, tied to the click gesture, so it plays out
-      // alongside the exit animation rather than as a separate jump once the
-      // new page appears.
-      window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-
       setFrozen(childrenRef.current);
       setPhase("out");
       setPageTransitioning(true);
 
       setTimeout(() => {
-        // scroll: false — we're already handling the scroll to top ourselves.
+        // scroll: false — we jump to the top ourselves at the swap, before
+        // paint, so the reposition is never visible.
         if (pendingHrefRef.current) router.push(pendingHrefRef.current, { scroll: false });
       }, EXIT_DURATION);
     };
@@ -83,11 +78,15 @@ export default function PageTransition({ children }: PageTransitionProps) {
 
   // Once the navigation we triggered actually resolves (pathname catches up),
   // swap in the live (now-current) children and play the enter animation.
-  // The smooth scroll to top kicked off in the click handler keeps running
-  // on its own and may still be settling into place at this point.
+  // The instant jump to top happens here, inside a layout effect — after the
+  // old page is gone but before the new one paints — so neither page is ever
+  // seen scrolling.
   useLayoutEffect(() => {
     if (phase !== "out" || pathname === displayPathname) return;
 
+    // behavior: "instant" — the site sets `scroll-behavior: smooth` globally,
+    // which would turn a plain scrollTo(0,0) into a visible animated scroll.
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     setDisplayPathname(pathname);
     setPhase("in");
     pendingHrefRef.current = null;
@@ -111,9 +110,9 @@ export default function PageTransition({ children }: PageTransitionProps) {
       key={displayPathname}
       style={
         phase === "out"
-          ? { animation: `page-fade-out-down ${EXIT_DURATION}ms cubic-bezier(0.4,0,0.2,1) forwards` }
+          ? { animation: `page-fade-out ${EXIT_DURATION}ms cubic-bezier(0.4,0,0.2,1) forwards` }
           : phase === "in"
-          ? { animation: `page-fade-in-up ${ENTER_DURATION}ms cubic-bezier(0.16,1,0.3,1) forwards` }
+          ? { animation: `page-fade-in ${ENTER_DURATION}ms cubic-bezier(0.16,1,0.3,1) forwards` }
           : undefined
       }
     >
