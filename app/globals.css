@@ -421,14 +421,14 @@ html {
 }
 
 /* ── Page transition animations ── */
-@keyframes page-fade-out-down {
-  0%   { opacity: 1; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(28px); }
+@keyframes page-fade-out {
+  0%   { opacity: 1; }
+  100% { opacity: 0; }
 }
 
-@keyframes page-fade-in-up {
-  0%   { opacity: 0; transform: translateY(28px); }
-  100% { opacity: 1; transform: translateY(0); }
+@keyframes page-fade-in {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 @keyframes field-morph-in {

@@ -175,4 +175,5 @@ All calls go through `apiUrl()`. Endpoints used by this front end:
 - Turnstile needs Cloudflare network access — may not appear on poor connections
 - Dead assets in `public/`: `logo copy.png`, `next.svg`, `vercel.svg`, `file.svg`, `globe.svg`, `window.svg`
 - Footer version string (`v1.5.1.1` in `page.tsx`) is updated manually
+- Turbopack's persistent cache can keep serving stale `globals.css` after edits made while `next dev` is running (even across server restarts) — if CSS changes don't show up, `rm -rf .next` and restart
 - Commit messages in this repo must contain **no Claude/AI references** (no Co-Authored-By or session trailers)
