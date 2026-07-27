@@ -3,9 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { lockScroll, unlockScroll } from "../../lib/scrollLock";
+import DeviceShell, { type DeviceKind } from "./DeviceShell";
+import {
+  DOCKED_FRAME,
+  DOCK_MARKER_TOP_SVH,
+  RUNWAY_SVH,
+  flightAt,
+  progressFor,
+  transformFor,
+  type FlightFrame,
+} from "../../lib/deviceFlight";
 
-const MugModelViewer = dynamic(() => import("./MugModelViewer"), { ssr: false });
-const InterCadPanel  = dynamic(() => import("./InterCadPanel"),  { ssr: false });
+const InterCadPanel = dynamic(() => import("./InterCadPanel"), { ssr: false });
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -25,6 +34,18 @@ interface Step {
 }
 
 // ── Data ──────────────────────────────────────────────────────────────────────
+//
+// The live demo plays ONE scripted run: the Inter-CAD transfer
+// (TRANSFER_MESSAGES / TRANSFER_SCRIPT / TRANSFER_LOG_LINES). The middle
+// panel's Inter-CAD breakdown builds progressively in step with it via the
+// `stage` prop on InterCadPanel.
+//
+// The text-to-CAD generation data below (MESSAGES / SCRIPT / FEATURES /
+// VAR_GROUPS / LOG_LINES) is intentionally NOT wired into the live demo
+// anymore — it's kept exported for the data-invariant tests and for reuse
+// if the generation demo returns elsewhere.
+
+// ── Text-to-CAD generation data (not surfaced in the live demo) ──────────────
 
 export const MESSAGES: Msg[] = [
   {
@@ -119,17 +140,14 @@ export const VAR_GROUPS: { label: string; vars: [string, string, string][] }[] =
   },
 ];
 
-// Flat list for the mesh panel
-const MUG_VARS: [string, string, string][] = VAR_GROUPS.flatMap(g => g.vars);
-
+// Recent documents. "Daily Mug" is the transferred document — it's the active
+// one because the transfer is the primary demo.
 const HISTORY = [
-  { id: "mug",     label: "mug_v1",           sub: "Part Studio", active: true  },
-  { id: "bracket", label: "M6_bracket_v2",    sub: "Part Studio", active: false },
-  { id: "gear",    label: "spur_gear_set",    sub: "Assembly",    active: false },
-  { id: "clamp",   label: "shaft_clamp_30mm", sub: "Part Studio", active: false },
+  { id: "transfer", label: "Daily Mug",          sub: "Fusion 360 → Onshape" },
+  { id: "bracket",  label: "M6_bracket_v2",      sub: "Part Studio"          },
+  { id: "gear",     label: "spur_gear_set",      sub: "Assembly"             },
+  { id: "clamp",    label: "shaft_clamp_30mm",   sub: "Part Studio"          },
 ];
-
-const INTER_CAD = { id: "intercad", label: "DailyMug.f3d", sub: "Fusion 360 · Ready to import" };
 
 export const SCRIPT: Step[] = [
   { delay: 700,   show: ["u1"] },
@@ -190,7 +208,7 @@ export const LOG_LINES: LogLine[] = [
   { t: 13400, level: "ok",   text: "[DONE]  12 features · 9 variables · total=4.2s" },
 ];
 
-// ── Inter-CAD transfer conversation ──────────────────────────────────────────
+// ── Primary run: Inter-CAD transfer conversation ─────────────────────────────
 
 export const TRANSFER_MESSAGES: Msg[] = [
   {
@@ -232,6 +250,52 @@ export const TRANSFER_SCRIPT: TransferStep[] = [
   { delay: 9200, show: ["tresult"] },
 ];
 
+// Log lines for the transfer run — timed against TRANSFER_SCRIPT so the Logs
+// tab stays in step with the conversation.
+export const TRANSFER_LOG_LINES: LogLine[] = [
+  { t: 400,  level: "info", text: '[NLM]  parsing → intent=inter_cad_transfer, object="Daily Mug"' },
+  { t: 600,  level: "info", text: "[NLM]  source=fusion360  target=onshape" },
+  { t: 900,  level: "info", text: '[SCAN] locating project "Daily Mug" in Fusion 360 hub' },
+  { t: 2500, level: "api",  text: "[SCAN] GET /f360/projects/daily-mug/timeline" },
+  { t: 2700, level: "ok",   text: "        ↳ 200  13 timeline nodes  t=214ms" },
+  { t: 3600, level: "info", text: "[INTENT] lifting timeline → software-neutral intent web" },
+  { t: 3800, level: "info", text: "[INTENT] resolved 13 nodes · 21 dependency edges" },
+  { t: 4100, level: "warn", text: "[INTENT] 3 inline sketch planes have no Onshape equivalent" },
+  { t: 4300, level: "warn", text: "[INTENT] 2 implicit fillet edge loops need re-derivation" },
+  { t: 5000, level: "info", text: "[MAP]  direct conversions → 7 features" },
+  { t: 5100, level: "api",  text: "[EXEC] POST /api/documents  (Daily Mug)" },
+  { t: 5200, level: "ok",   text: "        ↳ 200  doc_id=a91c4b7e2  t=168ms" },
+  { t: 5300, level: "api",  text: "[EXEC] Sketch1 → BaseProfile" },
+  { t: 5380, level: "ok",   text: "        ↳ 200  feature_id=fid_001  t=141ms" },
+  { t: 5460, level: "api",  text: "[EXEC] Sketch2 → MidProfile" },
+  { t: 5540, level: "ok",   text: "        ↳ 200  feature_id=fid_002  t=118ms" },
+  { t: 5620, level: "api",  text: "[EXEC] Sketch3 → TopProfile" },
+  { t: 5700, level: "ok",   text: "        ↳ 200  feature_id=fid_003  t=124ms" },
+  { t: 5780, level: "api",  text: "[EXEC] Sketch4 → HandleOuter" },
+  { t: 5860, level: "ok",   text: "        ↳ 200  feature_id=fid_004  t=109ms" },
+  { t: 5940, level: "api",  text: "[EXEC] Revolve1 → MugBody" },
+  { t: 6020, level: "ok",   text: "        ↳ 200  feature_id=fid_005  t=203ms" },
+  { t: 6100, level: "api",  text: "[EXEC] Shell1 → MugHollow" },
+  { t: 6180, level: "ok",   text: "        ↳ 200  feature_id=fid_006  t=176ms" },
+  { t: 6260, level: "api",  text: "[EXEC] Extrude1 → Handle" },
+  { t: 6340, level: "ok",   text: "        ↳ 200  feature_id=fid_007  t=152ms" },
+  { t: 6440, level: "info", text: "[REPL] 6 features have no direct equivalent — replicating" },
+  { t: 6560, level: "api",  text: "[REPL] inline sketch plane (Mid) ⇢ MidPlane" },
+  { t: 6660, level: "ok",   text: "        ↳ 200  feature_id=fid_008  t=96ms" },
+  { t: 6780, level: "api",  text: "[REPL] inline sketch plane (Top) ⇢ TopPlane" },
+  { t: 6880, level: "ok",   text: "        ↳ 200  feature_id=fid_009  t=91ms" },
+  { t: 7000, level: "api",  text: "[REPL] inline sketch plane (Handle) ⇢ HandlePlane" },
+  { t: 7100, level: "ok",   text: "        ↳ 200  feature_id=fid_010  t=88ms" },
+  { t: 7220, level: "api",  text: "[REPL] implicit fillet loop (Base) ⇢ BaseRim" },
+  { t: 7340, level: "ok",   text: "        ↳ 200  feature_id=fid_011  t=187ms" },
+  { t: 7460, level: "api",  text: "[REPL] implicit fillet loop (Top) ⇢ TopRim" },
+  { t: 7580, level: "ok",   text: "        ↳ 200  feature_id=fid_012  t=174ms" },
+  { t: 7700, level: "api",  text: "[REPL] appearance · Ceramic Gloss ⇢ part property" },
+  { t: 7820, level: "ok",   text: "        ↳ 200  applied  t=64ms" },
+  { t: 7960, level: "info", text: "[VERIFY] rebuild regenerated clean — 0 errors, 0 warnings" },
+  { t: 8100, level: "ok",   text: "[DONE]  13 features mapped · 7 direct · 6 replicated · total=8.1s" },
+];
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function DemoSection() {
@@ -242,75 +306,116 @@ export default function DemoSection() {
 
   // Always start empty (SSR-safe) — fast-forward to complete state in useEffect if already played
   const [started,      setStarted]      = useState(false);
-  const [visibleMsgs,  setVisibleMsgs]  = useState<Set<string>>(new Set());
-  const [visibleFeat,  setVisibleFeat]  = useState<Set<string>>(new Set());
-  const [showTyping,   setShowTyping]   = useState(false);
   const [expandedSet,  setExpandedSet]  = useState<Set<string>>(new Set());
-  const [showMesh,     setShowMesh]     = useState(false);
-  const [animDone,     setAnimDone]     = useState(false);
   const [activeTab,    setActiveTab]    = useState<"conversation" | "logs">("conversation");
   const [visibleLogs,  setVisibleLogs]  = useState<LogLine[]>([]);
-  const [expandedVars, setExpandedVars] = useState<Set<string>>(new Set(["Body"]));
   const [shelfOpen,    setShelfOpen]    = useState(false);
 
-  // Inter-CAD transfer flow
-  const [transferState,      setTransferState]      = useState<"idle" | "playing" | "done">("idle");
+  // Primary run — Inter-CAD transfer (played by the start gate)
   const [visibleTransferMsgs, setVisibleTransferMsgs] = useState<Set<string>>(new Set());
   const [transferTyping,     setTransferTyping]     = useState(false);
   const [statusLineCount,    setStatusLineCount]    = useState(0);
-  // Which middle-panel view is showing — independent of whether the transfer
-  // has ever run, so the user can flip back to mug_v1 and return to the
-  // Inter-CAD breakdown without re-playing the transfer conversation.
-  const [activePanel,        setActivePanel]        = useState<"partStudio" | "interCad">("partStudio");
-  const showInterCad = activePanel === "interCad";
-  // Gates the "breathe blue" hint on the Inter-CAD button — on desktop this only
-  // flips true once the cursor-hint sequence has finished pointing at it, so the
-  // two hints never compete; on mobile (no cursor hint) it flips true immediately.
-  const [cursorHintDone,     setCursorHintDone]     = useState(false);
-  // Phone-only equivalent of the desktop cursor hint — the mesh view and
-  // Inter-CAD nav live behind the hamburger shelf on mobile, so instead of a
-  // click-through sequence we just point at the hamburger once.
+  const [transferDone,       setTransferDone]       = useState(false);
+
+  // Phone-only equivalent of the desktop cursor hint — the breakdown panel
+  // lives behind the hamburger shelf on mobile, so instead of a click-through
+  // sequence we just point at the hamburger once.
   const [showMobileHint,     setShowMobileHint]     = useState(false);
 
   const logsRef       = useRef<HTMLDivElement>(null);
   const logsTabRef    = useRef<HTMLButtonElement>(null);
   const convTabRef    = useRef<HTMLButtonElement>(null);
-  const meshBtnRef    = useRef<HTMLButtonElement>(null);
-  const interCadRef   = useRef<HTMLButtonElement>(null);
   const cursorRunning = useRef(false);
-  const transferLockedRef = useRef(false);
 
-  // Refs mirror state so the async cursor animation reads fresh values
-  // even if the user interacts between animDone and the animation starting.
-  const activeTabRef   = useRef(activeTab);
-  const expandedSetRef = useRef(expandedSet);
-  const showMeshRef    = useRef(showMesh);
-  const transferStateRef = useRef(transferState);
-  useEffect(() => { activeTabRef.current   = activeTab;   }, [activeTab]);
-  useEffect(() => { expandedSetRef.current = expandedSet; }, [expandedSet]);
-  useEffect(() => { showMeshRef.current    = showMesh;    }, [showMesh]);
-  useEffect(() => { transferStateRef.current = transferState; }, [transferState]);
+  // ── Device flight ──────────────────────────────────────────────────────────
+  // The window rides a 3D arc through the section: in from the back-left as a
+  // MacBook/phone, docked while it's readable, then outward past the camera.
+  const flyRef  = useRef<HTMLDivElement>(null);
+  const dockRef = useRef<HTMLDivElement>(null);
+  // Which shell flies in. Laptop is the SSR default; the shell is invisible at
+  // rest (--chrome: 0), so correcting it on mount can't flash.
+  const [device, setDevice] = useState<DeviceKind>("laptop");
+
+  // Ref mirrors state so the async cursor animation reads fresh values
+  // even if the user interacts between transferDone and the animation starting.
+  const activeTabRef = useRef(activeTab);
+  useEffect(() => { activeTabRef.current = activeTab; }, [activeTab]);
 
   // Cursor animation state (desktop-only hint)
   const [cursor, setCursor] = useState({ x: 0, y: 0, visible: false, tooltip: "", clicking: false });
 
-  // On mount: if demo already played this session, fast-forward to complete state immediately
+  // On mount: if the demo already played this session, fast-forward the
+  // transfer run to its complete state immediately.
   useEffect(() => {
     if (sessionStorage.getItem("demoAnimPlayed") !== "true") return;
     startedRef.current = true;
     setStarted(true);
-    setVisibleMsgs(new Set(MESSAGES.map(m => m.id)));
-    setVisibleFeat(new Set(FEATURES.map(f => f.id)));
-    setVisibleLogs(LOG_LINES);
-    setAnimDone(true);
+    setVisibleTransferMsgs(new Set(TRANSFER_MESSAGES.map(m => m.id)));
+    setStatusLineCount(
+      TRANSFER_MESSAGES.find(m => m.type === "status")?.lines?.length ?? 0,
+    );
+    setVisibleLogs(TRANSFER_LOG_LINES);
+    setTransferDone(true);
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Pick the shell that matches the form factor being shown.
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const sync = () => setDevice(mq.matches ? "phone" : "laptop");
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  // Drive the flight from scroll position. This writes straight to the DOM
+  // rather than through state: it runs on every frame of a scroll, and the demo
+  // subtree is far too heavy to re-render at that rate. One element, one write.
+  useEffect(() => {
+    const fly = flyRef.current;
+    const section = sectionRef.current;
+    if (!fly || !section) return;
+
+    const apply = (f: FlightFrame) => {
+      fly.style.transform = transformFor(f);
+      fly.style.opacity = String(f.opacity);
+      fly.style.setProperty("--chrome", f.chrome.toFixed(3));
+      // Only clickable once it has settled — no catching the Start button
+      // while it's still rotated and sliding past.
+      fly.style.pointerEvents = f.docked ? "" : "none";
+    };
+
+    // Respect reduced motion by skipping the flight entirely: the window simply
+    // sits docked for the whole runway.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      apply(DOCKED_FRAME);
+      return;
+    }
+
+    let frame = 0;
+    const update = () => {
+      apply(flightAt(progressFor(section.getBoundingClientRect(), window.innerHeight)));
+    };
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, []);
 
   // Scroll chat pane to bottom on new content
   useEffect(() => {
     const el = chatRef.current;
     if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-  }, [visibleMsgs, showTyping, visibleTransferMsgs, transferTyping, statusLineCount]);
+  }, [visibleTransferMsgs, transferTyping, statusLineCount]);
 
   // Scroll logs pane to bottom
   useEffect(() => {
@@ -320,44 +425,43 @@ export default function DemoSection() {
 
   // The demo is gated behind an explicit start button — it never auto-plays on
   // scroll. Clicking snaps the section into view, locks scroll, and runs the
-  // scripted conversation; scroll unlocks when the run completes.
+  // Inter-CAD transfer conversation; scroll unlocks when the run completes.
   const startDemo = () => {
     if (startedRef.current) return;
     startedRef.current = true;
     setStarted(true);
 
-    // Snap instantly — "auto" would defer to the global `scroll-behavior: smooth`
-    // CSS rule, and locking scroll right after would freeze body overflow
-    // mid-animation, stranding the page wherever the smooth scroll had reached.
-    sectionRef.current?.scrollIntoView({ behavior: "instant", block: "start" });
+    // Snap instantly to the dock marker — "auto" would defer to the global
+    // `scroll-behavior: smooth` CSS rule, and locking scroll right after would
+    // freeze body overflow mid-animation, stranding the page wherever the
+    // smooth scroll had reached. Aiming at the marker rather than the section's
+    // top also guarantees we land in the docked band, not mid-flight.
+    (dockRef.current ?? sectionRef.current)?.scrollIntoView({ behavior: "instant", block: "start" });
 
     lockScroll();
     lockedRef.current = true;
 
-    const lastDelay = Math.max(...SCRIPT.map(s => s.delay), ...LOG_LINES.map(l => l.t));
+    const lastDelay = Math.max(
+      ...TRANSFER_SCRIPT.map(s => s.delay),
+      ...TRANSFER_LOG_LINES.map(l => l.t),
+    );
 
-    SCRIPT.forEach((step, i) => {
+    TRANSFER_SCRIPT.forEach((step, i) => {
       setTimeout(() => {
-        if (step.typing !== undefined) setShowTyping(step.typing);
+        if (step.typing !== undefined) setTransferTyping(step.typing);
         if (step.show?.length) {
-          setVisibleMsgs(prev => {
+          setVisibleTransferMsgs(prev => {
             const n = new Set(prev);
             step.show!.forEach(id => n.add(id));
             return n;
           });
         }
-        if (step.features?.length) {
-          setVisibleFeat(prev => {
-            const n = new Set(prev);
-            step.features!.forEach(id => n.add(id));
-            return n;
-          });
-        }
-        if (i === SCRIPT.length - 1) setAnimDone(true);
+        if (step.statusLines !== undefined) setStatusLineCount(step.statusLines);
+        if (i === TRANSFER_SCRIPT.length - 1) setTransferDone(true);
       }, step.delay);
     });
 
-    LOG_LINES.forEach(line => {
+    TRANSFER_LOG_LINES.forEach(line => {
       setTimeout(() => {
         setVisibleLogs(prev => [...prev, line]);
       }, line.t);
@@ -382,22 +486,22 @@ export default function DemoSection() {
     }, lastDelay + 200);
   };
 
-  // Never leave the page locked if the section unmounts mid-run
+  // Never leave the page locked if the section unmounts mid-run.
   useEffect(() => {
     return () => {
       if (lockedRef.current) { unlockScroll(); lockedRef.current = false; }
     };
   }, []);
 
-  // Cursor hint animation — desktop only, runs once on first demo completion
+  // Cursor hint animation — desktop only, runs once on first demo completion.
+  // Every phase is about the Inter-CAD transfer that just played: the derived
+  // feature breakdown, the transfer log, and the intent web.
   useEffect(() => {
-    if (!animDone) return;
-    // Phones have no cursor hint at all (sidebar/mesh targets live behind the
-    // hamburger shelf there) — let the Inter-CAD button start breathing
-    // immediately, and point at the hamburger once instead of running the
-    // desktop click-through sequence.
+    if (!transferDone) return;
+    // Phones have no cursor hint at all (sidebar/panel targets live behind the
+    // hamburger shelf there) — point at the hamburger once instead of running
+    // the desktop click-through sequence.
     if (typeof window !== "undefined" && window.innerWidth < 640) {
-      setCursorHintDone(true);
       if (sessionStorage.getItem("mobileHamburgerHintPlayed") !== "true") {
         sessionStorage.setItem("mobileHamburgerHintPlayed", "true");
         setShowMobileHint(true);
@@ -408,12 +512,18 @@ export default function DemoSection() {
     }
     if (cursorRunning.current) return;
     // Only show cursor hint on the very first playthrough
-    if (sessionStorage.getItem("cursorHintPlayed") === "true") {
-      setCursorHintDone(true);
-      return;
-    }
+    if (sessionStorage.getItem("cursorHintPlayed") === "true") return;
 
     const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
+
+    // Inter-CAD targets live in a scrollable panel, so a target can sit below
+    // the fold. Bring it into view (the body itself is locked, so only the
+    // panel scrolls) and let the scroll settle before measuring its rect.
+    const ensureVisible = async (el: HTMLElement | null) => {
+      if (!el) return;
+      el.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      await sleep(450);
+    };
 
     // A single click phase: move to an element, show tooltip, click, run the action, dwell.
     const clickPhase = async (
@@ -423,6 +533,7 @@ export default function DemoSection() {
       opts: { firstMove?: boolean; dwellAfter?: number } = {},
     ) => {
       if (!el) return;
+      await ensureVisible(el);
       const r = el.getBoundingClientRect();
       setCursor(c => ({
         ...c,
@@ -443,13 +554,14 @@ export default function DemoSection() {
     };
 
     // Like clickPhase, but only points + shows the tooltip — never clicks and
-    // never runs an action. The real transfer must be a genuine user click.
+    // never runs an action. Starting the second demo must be a genuine user click.
     const hoverPhase = async (
       el: HTMLElement | null,
       tooltip: string,
       opts: { firstMove?: boolean; dwellAfter?: number } = {},
     ) => {
       if (!el) return;
+      await ensureVisible(el);
       const r = el.getBoundingClientRect();
       setCursor(c => ({
         ...c,
@@ -469,15 +581,13 @@ export default function DemoSection() {
       await sleep(2000);
 
       // Read fresh state at animation start
-      const startedOnLogs        = activeTabRef.current === "logs";
-      const thinkingAlreadyOpen  = expandedSetRef.current.has("think1");
-      const meshAlreadyOpen      = showMeshRef.current;
+      const startedOnLogs = activeTabRef.current === "logs";
 
-      // Build phase list adaptively.
-      // - Started on logs: cursor first returns to Conversation (inverts default),
-      //   skip the "switch to logs" phase (they've seen it).
-      // - Started on conversation: default flow — expand thinking, then show logs.
-      // Skip expand-thinking if it's already expanded; skip mesh if already open.
+      // The breakdown accordions live inside InterCadPanel and own their state,
+      // so the tour dispatches a real DOM click rather than setting state here.
+      const derivedBtn = document.querySelector<HTMLElement>('[data-intercad-btn="derived"]');
+      const derivedAlreadyOpen = derivedBtn?.getAttribute("aria-expanded") === "true";
+
       let first = true;
       const step = async (
         ref: HTMLElement | null,
@@ -489,71 +599,49 @@ export default function DemoSection() {
         first = false;
       };
 
+      // Phase A — if the user wandered onto the Logs tab mid-run, bring them
+      // back to the conversation first (and skip the "show logs" phase later).
       if (startedOnLogs) {
-        // Phase A: back to conversation
         await step(
           convTabRef.current,
-          "back to conversation",
+          "back to the transfer",
           () => setActiveTab("conversation"),
           1400,
         );
-        // Phase B: expand thinking (if not already)
-        if (!thinkingAlreadyOpen) {
-          await step(
-            document.querySelector<HTMLElement>('[data-thinking-btn="think1"]'),
-            "expand thinking",
-            () => setExpandedSet(prev => { const n = new Set(prev); n.add("think1"); return n; }),
-          );
-        }
-        // Phase C: open mesh (if not already)
-        if (!meshAlreadyOpen) {
-          await step(
-            meshBtnRef.current,
-            "view the model locally",
-            () => setShowMesh(true),
-            1500,
-          );
-        }
-        // Phase D: point at Inter-CAD import — hover only, never auto-clicked
-        if (transferStateRef.current === "idle") {
-          await hoverPhase(interCadRef.current, "View Inter-Cad Project", { firstMove: first });
-          first = false;
-        }
-      } else {
-        // Phase A: expand thinking (if not already)
-        if (!thinkingAlreadyOpen) {
-          await step(
-            document.querySelector<HTMLElement>('[data-thinking-btn="think1"]'),
-            "expand thinking",
-            () => setExpandedSet(prev => { const n = new Set(prev); n.add("think1"); return n; }),
-          );
-        }
-        // Phase B: switch to logs
+      }
+
+      // Phase B — open the derived/non-direct breakdown: the part of the
+      // transfer that isn't a 1:1 feature swap, and the reason this is hard.
+      if (!derivedAlreadyOpen) {
+        await step(
+          derivedBtn,
+          "features with no direct equivalent",
+          () => derivedBtn?.click(),
+          2400,
+        );
+      }
+
+      // Phase C — the transfer log, feature by feature.
+      if (!startedOnLogs) {
         await step(
           logsTabRef.current,
-          "view the interaction log",
+          "view the transfer log",
           () => setActiveTab("logs"),
-          2200,
+          2400,
         );
-        // Phase C: open mesh (if not already)
-        if (!meshAlreadyOpen) {
-          await step(
-            meshBtnRef.current,
-            "view the model locally",
-            () => setShowMesh(true),
-            1500,
-          );
-        }
-        // Phase D: point at Inter-CAD import — hover only, never auto-clicked
-        if (transferStateRef.current === "idle") {
-          await hoverPhase(interCadRef.current, "View Inter-Cad Project", { firstMove: first });
-          first = false;
-        }
       }
+
+      // Phase D — the intent web: the software-neutral graph the transfer
+      // was rebuilt from. Hover only; it's a 3D canvas the user should drive.
+      await hoverPhase(
+        document.querySelector<HTMLElement>("[data-intercad-web]"),
+        "drag the intent web to explore",
+        { firstMove: first, dwellAfter: 2600 },
+      );
+      first = false;
 
       setCursor(c => ({ ...c, visible: false, tooltip: "" }));
       sessionStorage.setItem("cursorHintPlayed", "true");
-      setCursorHintDone(true);
 
       // Only unlock now that the tour is done — the finishing timeout in
       // startDemo deliberately left this locked so the tour's target
@@ -566,7 +654,7 @@ export default function DemoSection() {
 
     run();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [animDone]);
+  }, [transferDone]);
 
   const toggleThink = (id: string) =>
     setExpandedSet(prev => {
@@ -575,60 +663,6 @@ export default function DemoSection() {
       return n;
     });
 
-  const toggleVarGroup = (label: string) =>
-    setExpandedVars(prev => {
-      const n = new Set(prev);
-      n.has(label) ? n.delete(label) : n.add(label);
-      return n;
-    });
-
-  // Real user click (never auto-triggered by the cursor hint) — re-snaps the
-  // page back onto the live demo, locks scroll, and replays the transfer
-  // conversation in the same chat pane before swapping the middle panel.
-  // Once the transfer has already run, clicking again just flips the middle
-  // panel back to the Inter-CAD breakdown instead of re-playing the chat.
-  const startTransfer = () => {
-    if (transferState === "playing") return;
-    if (transferState === "done") { setActivePanel("interCad"); return; }
-    setTransferState("playing");
-
-    // Snap instantly — "auto" would defer to the global `scroll-behavior: smooth`
-    // CSS rule, and locking scroll right after would freeze body overflow
-    // mid-animation, stranding the page wherever the smooth scroll had reached.
-    sectionRef.current?.scrollIntoView({ behavior: "instant", block: "start" });
-    setActiveTab("conversation");
-    setShelfOpen(false);
-
-    lockScroll();
-    transferLockedRef.current = true;
-
-    const lastDelay = Math.max(...TRANSFER_SCRIPT.map(s => s.delay));
-
-    TRANSFER_SCRIPT.forEach(step => {
-      setTimeout(() => {
-        if (step.typing !== undefined) setTransferTyping(step.typing);
-        if (step.show?.length) {
-          setVisibleTransferMsgs(prev => {
-            const n = new Set(prev);
-            step.show!.forEach(id => n.add(id));
-            return n;
-          });
-        }
-        if (step.statusLines !== undefined) setStatusLineCount(step.statusLines);
-      }, step.delay);
-    });
-
-    setTimeout(() => {
-      if (transferLockedRef.current) {
-        unlockScroll();
-        transferLockedRef.current = false;
-      }
-      setTransferState("done");
-      setActivePanel("interCad");
-    }, lastDelay + 400);
-  };
-
-  const visibleItems = MESSAGES.filter(m => visibleMsgs.has(m.id));
   const visibleTransferItems = TRANSFER_MESSAGES.filter(m => visibleTransferMsgs.has(m.id));
 
   return (
@@ -636,12 +670,35 @@ export default function DemoSection() {
       id="live-demo"
       ref={sectionRef}
       className="relative bg-[#f8fafc] border-t border-[#dbe6f5]"
-      style={{ height: "100svh" }}
+      style={{ height: `${RUNWAY_SVH}svh` }}
     >
+      {/* Scroll target for startDemo. Parking this at the top of the viewport
+          lands the runway inside the docked band, so launching the demo can
+          never strand the window mid-flight. */}
+      <div
+        ref={dockRef}
+        aria-hidden
+        className="pointer-events-none absolute left-0 h-px w-px"
+        style={{ top: `${DOCK_MARKER_TOP_SVH}svh` }}
+      />
 
-      {/* ── Solid-bg stage — the window floats inside this, inset with padding ── */}
-      <div className="flex h-full w-full items-center justify-center p-3 sm:p-6 lg:p-10">
-        <div className="relative flex h-full w-full max-w-[1400px] flex-col overflow-hidden rounded-2xl border border-[#dbe6f5] bg-[#ffffff] shadow-2xl">
+      {/* The runway scrolls; this stage stays put and the device flies across it */}
+      <div className="sticky top-0" style={{ height: "100svh" }}>
+        {/* ── Solid-bg stage — gives the flight its vanishing point ── */}
+        <div
+          className="flex h-full w-full items-center justify-center overflow-hidden p-3 sm:p-6 lg:p-10"
+          style={{ perspective: "1600px" }}
+        >
+          {/* Flying wrapper — the one node the scroll handler writes to. The
+              device shell reads --chrome off it; the window rides along. */}
+          <div
+            ref={flyRef}
+            className="relative flex h-full w-full max-w-[1400px] flex-col"
+            style={{ willChange: "transform, opacity" }}
+          >
+            <DeviceShell kind={device} />
+
+            <div className="relative z-10 flex h-full w-full flex-col overflow-hidden rounded-2xl border border-[#dbe6f5] bg-[#ffffff] shadow-2xl">
           {/* Start gate — the demo never auto-plays; the user launches it */}
           {!started && (
             <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-slate-100/85 backdrop-blur-[3px] px-4">
@@ -681,7 +738,7 @@ export default function DemoSection() {
                 >
                   <span className="flex-shrink-0 text-[#3b82f6] leading-none animate-pulse">←</span>
                   <span className="min-w-0 flex-1 truncate text-[11px] leading-none text-[#3b82f6]">
-                    Tap here to view the model & more demos
+                    Tap here to view the transfer breakdown
                   </span>
                 </button>
               )}
@@ -709,23 +766,15 @@ export default function DemoSection() {
             {/* Nav */}
             <nav className="px-2 pt-3 space-y-px">
               {[
-                { label: "Part Studios",       active: !showInterCad, accent: "#3b82f6", onClick: () => setActivePanel("partStudio") },
-                { label: "Documents",          active: false,         accent: "#3b82f6", onClick: undefined },
-                { label: "Assemblies",         active: false,         accent: "#3b82f6", onClick: undefined },
-                { label: "Variables",          active: false,         accent: "#3b82f6", onClick: undefined },
-                {
-                  label: "Inter-CAD Transfer",
-                  active: showInterCad,
-                  accent: "#06b6d4",
-                  onClick: transferState === "done" ? () => setActivePanel("interCad") : undefined,
-                },
+                { label: "Inter-CAD Transfer", active: true,  accent: "#06b6d4" },
+                { label: "Documents",          active: false, accent: "#3b82f6" },
+                { label: "Assemblies",         active: false, accent: "#3b82f6" },
+                { label: "Variables",          active: false, accent: "#3b82f6" },
+                { label: "Part Studios",       active: false, accent: "#3b82f6" },
               ].map(item => (
                 <div
                   key={item.label}
-                  onClick={item.onClick}
                   className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm sm:text-xs select-none ${
-                    item.onClick ? "cursor-pointer hover:bg-[#e2e8f0]" : ""
-                  } ${
                     item.active ? "bg-[#eef2f9] text-[#334155]" : "text-[#64748b]"
                   }`}
                 >
@@ -744,13 +793,11 @@ export default function DemoSection() {
                 Recent
               </p>
               {HISTORY.map(h => {
-                const active = h.active && !showInterCad;
-                const clickable = h.id === "mug";
+                const active = h.id === "transfer";
                 return (
                   <div
                     key={h.id}
-                    onClick={clickable ? () => setActivePanel("partStudio") : undefined}
-                    className={`rounded-md px-3 py-2.5 ${clickable ? "cursor-pointer hover:bg-[#e2e8f0]" : ""} ${
+                    className={`rounded-md px-3 py-2.5 ${
                       active ? "bg-[#eef2f9] border-l-2 border-[#3b82f6]" : ""
                     }`}
                   >
@@ -773,190 +820,37 @@ export default function DemoSection() {
               })}
             </div>
 
-            {/* Inter-CAD import entry — user-initiated only, never auto-clicked */}
-            <div className="px-2 pt-2 pb-2 border-t border-[#dbe6f5]">
-              <p className="px-3 pb-2 pt-2 text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide">
-                Inter-CAD
-              </p>
-              <button
-                ref={interCadRef}
-                onClick={startTransfer}
-                disabled={transferState === "playing"}
-                className={`w-full rounded-md text-left px-3 py-2.5 border transition-colors group ${
-                  showInterCad
-                    ? "border-blue-500 bg-blue-500/10"
-                    : transferState === "idle" && cursorHintDone
-                      ? "breathe-blue border-blue-300"
-                      : "border-[#dbe6f5] hover:border-blue-300"
-                }`}
-              >
-                <p className={`text-sm sm:text-xs truncate transition-colors ${
-                  showInterCad ? "text-[#334155]" : "text-[#64748b] group-hover:text-[#334155]"
-                }`}>
-                  {INTER_CAD.label}
-                </p>
-                <p className={`text-[11px] sm:text-[10px] transition-colors ${
-                  showInterCad ? "text-blue-600" : "text-[#64748b] group-hover:text-blue-600"
-                }`}>
-                  {INTER_CAD.sub}
-                </p>
-              </button>
-            </div>
-
             <div className="mt-auto p-4 border-t border-[#dbe6f5]">
               <p className="text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide">Settings</p>
             </div>
           </aside>
 
-          {/* ── Middle: Part Studio panel ── */}
+          {/* ── Middle: Inter-CAD breakdown / Part Studio panel ── */}
           <div
             className="hidden sm:flex flex-col border-r border-[#dbe6f5] bg-[#f8fafc]"
             style={{ width: "clamp(200px, 32%, 320px)", flexShrink: 0 }}
           >
-            {/* Tabs — Inter-CAD only exists once the transfer has been triggered */}
+            {/* Tabs */}
             <div className="flex items-center gap-1 border-b border-[#dbe6f5] px-3 py-2 flex-shrink-0">
-              <button
-                onClick={() => setActivePanel("partStudio")}
-                className={`rounded-md px-3 py-1.5 text-xs sm:text-[11px] font-medium transition-colors ${
-                  !showInterCad
-                    ? "bg-[#eef2f9] text-[#0f172a]"
-                    : "text-[#94a3b8] hover:text-[#475569] hover:bg-[#f1f5f9]"
-                }`}
-              >
-                Model Gen
-              </button>
-              {transferState !== "idle" && (
-                <button
-                  onClick={() => setActivePanel("interCad")}
-                  className={`rounded-md px-3 py-1.5 text-xs sm:text-[11px] font-medium transition-colors ${
-                    showInterCad
-                      ? "bg-[#eef2f9] text-[#0f172a]"
-                      : "text-[#94a3b8] hover:text-[#475569] hover:bg-[#f1f5f9]"
-                  }`}
-                >
-                  Inter-CAD
-                </button>
-              )}
+              <span className="rounded-md px-3 py-1.5 text-xs sm:text-[11px] font-medium bg-[#eef2f9] text-[#0f172a]">
+                Inter-CAD
+              </span>
             </div>
 
-            {showInterCad ? (
-              <div className="flex-1 overflow-y-auto px-4 py-3">
-                <InterCadPanel />
-              </div>
-            ) : (
-            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-4">
-              {/* Feature tree */}
-              <div>
-                <p className="text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide mb-2">
-                  Feature Tree
-                </p>
-                <div className="space-y-0.5">
-                  {FEATURES.map(f => (
-                    <div
-                      key={f.id}
-                      className={`flex items-center gap-2 py-0.5 transition-all duration-400 ${
-                        visibleFeat.has(f.id)
-                          ? "opacity-100 translate-x-0"
-                          : "opacity-0 -translate-x-2"
-                      }`}
-                    >
-                      <FeatureIcon type={f.icon} />
-                      <span className="font-mono text-xs sm:text-[10px] text-[#475569]">{f.name}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Variables — drill-down accordion */}
-              {visibleMsgs.has("result") && (
-                <div className="rounded-md border border-[#dbe6f5] bg-[#eef2f9] overflow-hidden">
-                  <p className="px-3 pt-2.5 pb-1.5 text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide border-b border-[#dbe6f5]">
-                    Live Variables
-                  </p>
-                  {VAR_GROUPS.map(group => (
-                    <div key={group.label} className="border-b border-[#dbe6f5] last:border-0">
-                      <button
-                        onClick={() => toggleVarGroup(group.label)}
-                        className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-[#e2e8f0] transition-colors"
-                      >
-                        <span
-                          className="text-[10px] text-[#64748b] flex-shrink-0 transition-transform duration-150"
-                          style={{ display: "inline-block", transform: expandedVars.has(group.label) ? "rotate(90deg)" : "rotate(0deg)" }}
-                        >
-                          ▶
-                        </span>
-                        <span className="text-xs sm:text-[11px] font-medium text-[#475569]">
-                          {group.label}
-                        </span>
-                        <span className="ml-auto font-mono text-[10px] sm:text-[8px] text-[#94a3b8]">
-                          {group.vars.length}
-                        </span>
-                      </button>
-                      {expandedVars.has(group.label) && (
-                        <div className="px-3 pb-2 space-y-1 border-t border-[#eef2f9]">
-                          {group.vars.map(([name, val, unit]) => (
-                            <div key={name} className="flex items-center justify-between py-0.5">
-                              <span className="font-mono text-[11px] sm:text-[9px] text-[#64748b]">{name}</span>
-                              <span className="font-mono text-[11px] sm:text-[9px] text-[#3b82f6]">
-                                {val} <span className="text-[#94a3b8]">{unit}</span>
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Mesh button / inline viewer */}
-              {visibleMsgs.has("result") && (
-                <>
-                  {!showMesh ? (
-                    <button
-                      ref={meshBtnRef}
-                      onClick={() => setShowMesh(true)}
-                      className="w-full rounded-md flex items-center justify-center gap-1.5 border border-[#dbe6f5] hover:border-[#334155] bg-[#0f172a] hover:bg-black py-2 text-xs sm:text-[11px] font-medium text-white transition-colors"
-                    >
-                      ↗ View mesh model
-                    </button>
-                  ) : (
-                    <div className="rounded-md overflow-hidden border border-black bg-black" style={{ boxShadow: "0 4px 20px rgba(0,0,0,0.25)" }}>
-                      <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/10">
-                        <span className="text-[11px] sm:text-[10px] font-medium text-white/80">
-                          Local model
-                        </span>
-                        <button
-                          onClick={() => setShowMesh(false)}
-                          className="font-mono text-sm text-white/50 hover:text-white transition-colors leading-none"
-                        >
-                          ×
-                        </button>
-                      </div>
-                      <div className="overflow-hidden" style={{ height: 240 }}>
-                        <MugModelViewer />
-                      </div>
-                      <p className="px-3 py-1.5 text-[11px] sm:text-[10px] text-white/40">
-                        Drag to rotate · scroll to zoom
-                      </p>
-                    </div>
-                  )}
-                </>
-              )}
+            {/* Breakdown builds in step with the transfer conversation */}
+            <div className="flex-1 overflow-y-auto px-4 py-3">
+              <InterCadPanel stage={statusLineCount} />
             </div>
-            )}
 
             {/* Status bar */}
             <div className="flex items-center gap-2 px-4 py-2 border-t border-[#dbe6f5]">
               <span
                 className={`h-1.5 w-1.5 flex-shrink-0 ${
-                  (showInterCad ? transferState === "done" : animDone) ? "bg-[#3b82f6]" : "bg-[#cbd5e1] animate-pulse"
+                  transferDone ? "bg-[#3b82f6]" : "bg-[#cbd5e1] animate-pulse"
                 }`}
               />
               <span className="text-[11px] sm:text-[10px] text-[#94a3b8]">
-                {showInterCad
-                  ? "Transferred · 13 features mapped"
-                  : animDone ? "Complete · 6 features · 9 variables" : "Generating…"}
+                {transferDone ? "Transferred · 13 features mapped" : "Transferring…"}
               </span>
             </div>
           </div>
@@ -997,21 +891,6 @@ export default function DemoSection() {
             {/* Conversation tab */}
             {activeTab === "conversation" && (
               <div ref={chatRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-                {visibleItems.map(item => (
-                  <ChatMessage
-                    key={item.id}
-                    item={item}
-                    expanded={expandedSet.has(item.id)}
-                    onToggle={() => toggleThink(item.id)}
-                  />
-                ))}
-                {transferState !== "idle" && visibleTransferItems.length > 0 && (
-                  <div className="flex items-center gap-2 py-1">
-                    <div className="h-px flex-1 bg-[#dbe6f5]" />
-                    <span className="text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide">Inter-CAD transfer</span>
-                    <div className="h-px flex-1 bg-[#dbe6f5]" />
-                  </div>
-                )}
                 {visibleTransferItems.map(item => (
                   <ChatMessage
                     key={item.id}
@@ -1022,20 +901,6 @@ export default function DemoSection() {
                   />
                 ))}
                 {transferTyping && (
-                  <div className="flex items-center gap-2.5">
-                    <PAvatar />
-                    <div className="flex gap-1 pt-0.5">
-                      {[0, 120, 240].map(d => (
-                        <span
-                          key={d}
-                          className="h-1.5 w-1.5 rounded-full bg-[#3b82f6] animate-bounce"
-                          style={{ animationDelay: `${d}ms` }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {showTyping && (
                   <div className="flex items-center gap-2.5">
                     <PAvatar />
                     <div className="flex gap-1 pt-0.5">
@@ -1065,7 +930,7 @@ export default function DemoSection() {
                     {line.text}
                   </p>
                 ))}
-                {!animDone && visibleLogs.length > 0 && (
+                {!transferDone && visibleLogs.length > 0 && (
                   <span className="text-[#3b82f6] animate-pulse">▌</span>
                 )}
               </div>
@@ -1075,11 +940,11 @@ export default function DemoSection() {
             <div className="px-5 py-3 border-t border-[#dbe6f5] flex-shrink-0">
               <div className="flex items-center gap-2 rounded-lg border border-[#dbe6f5] bg-[#ffffff] px-3 py-2.5">
                 <span className="flex-1 text-sm sm:text-xs text-[#94a3b8] select-none">
-                  {animDone
-                    ? "Design complete — scroll or swipe to return to the site"
-                    : started
+                  {!started
+                    ? "Awaiting input…"
+                    : !transferDone
                       ? "Demo in progress…"
-                      : "Awaiting input…"}
+                      : "Demo complete — scroll or swipe to return to the site"}
                 </span>
                 <span className="rounded-md text-[11px] sm:text-[10px] text-[#94a3b8] border border-[#dbe6f5] px-2 py-0.5">
                   ↑
@@ -1115,21 +980,15 @@ export default function DemoSection() {
               {/* Nav */}
               <nav className="px-2 pt-3 space-y-px border-b border-[#dbe6f5] pb-3">
                 {[
-                  { label: "Part Studios",       active: !showInterCad, accent: "#3b82f6", onClick: () => setActivePanel("partStudio") },
-                  { label: "Documents",          active: false,         accent: "#3b82f6", onClick: undefined },
-                  { label: "Assemblies",         active: false,         accent: "#3b82f6", onClick: undefined },
-                  { label: "Variables",          active: false,         accent: "#3b82f6", onClick: undefined },
-                  {
-                    label: "Inter-CAD Transfer",
-                    active: showInterCad,
-                    accent: "#06b6d4",
-                    onClick: transferState === "done" ? () => setActivePanel("interCad") : undefined,
-                  },
+                  { label: "Inter-CAD Transfer", active: true,  accent: "#06b6d4" },
+                  { label: "Documents",          active: false, accent: "#3b82f6" },
+                  { label: "Assemblies",         active: false, accent: "#3b82f6" },
+                  { label: "Variables",          active: false, accent: "#3b82f6" },
+                  { label: "Part Studios",       active: false, accent: "#3b82f6" },
                 ].map(item => (
                   <div
                     key={item.label}
-                    onClick={item.onClick}
-                    className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm sm:text-xs select-none ${item.onClick ? "cursor-pointer" : ""} ${
+                    className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm sm:text-xs select-none ${
                       item.active ? "bg-[#eef2f9] text-[#334155]" : "text-[#64748b]"
                     }`}
                   >
@@ -1143,13 +1002,11 @@ export default function DemoSection() {
               <div className="px-2 pt-4 border-b border-[#dbe6f5] pb-4">
                 <p className="px-3 pb-2 text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide">Recent</p>
                 {HISTORY.map(h => {
-                  const active = h.active && !showInterCad;
-                  const clickable = h.id === "mug";
+                  const active = h.id === "transfer";
                   return (
                     <div
                       key={h.id}
-                      onClick={clickable ? () => setActivePanel("partStudio") : undefined}
-                      className={`rounded-md px-3 py-2.5 ${clickable ? "cursor-pointer" : ""} ${active ? "bg-[#eef2f9] border-l-2 border-[#3b82f6]" : ""}`}
+                      className={`rounded-md px-3 py-2.5 ${active ? "bg-[#eef2f9] border-l-2 border-[#3b82f6]" : ""}`}
                     >
                       <p className={`text-sm sm:text-xs truncate ${active ? "text-[#334155]" : "text-[#64748b]"}`}>{h.label}</p>
                       <p className={`text-[11px] sm:text-[10px] ${active ? "text-[#64748b]" : "text-[#94a3b8]"}`}>{h.sub}</p>
@@ -1158,136 +1015,28 @@ export default function DemoSection() {
                 })}
               </div>
 
-              {/* Inter-CAD import entry */}
-              <div className="px-2 pt-4 border-b border-[#dbe6f5] pb-4">
-                <p className="px-3 pb-2 text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide">Inter-CAD</p>
-                <button
-                  onClick={startTransfer}
-                  disabled={transferState === "playing"}
-                  className={`w-full rounded-md text-left px-3 py-2.5 border transition-colors group ${
-                    showInterCad
-                      ? "border-blue-500 bg-blue-500/10"
-                      : transferState === "idle" && cursorHintDone
-                        ? "breathe-blue border-blue-300"
-                        : "border-[#dbe6f5]"
-                  }`}
-                >
-                  <p className={`text-sm sm:text-xs truncate ${showInterCad ? "text-[#334155]" : "text-[#64748b]"}`}>
-                    {INTER_CAD.label}
-                  </p>
-                  <p className={`text-[11px] sm:text-[10px] ${showInterCad ? "text-blue-600" : "text-[#64748b]"}`}>
-                    {INTER_CAD.sub}
-                  </p>
-                </button>
-              </div>
-
-              {/* Tabs — Inter-CAD only exists once the transfer has been triggered */}
+              {/* Tabs */}
               <div className="flex items-center gap-1 border-b border-[#dbe6f5] px-3 py-2">
-                <button
-                  onClick={() => setActivePanel("partStudio")}
-                  className={`rounded-md px-3 py-1.5 text-xs sm:text-[11px] font-medium transition-colors ${
-                    !showInterCad ? "bg-[#eef2f9] text-[#0f172a]" : "text-[#94a3b8]"
-                  }`}
-                >
-                  Model Gen
-                </button>
-                {transferState !== "idle" && (
-                  <button
-                    onClick={() => setActivePanel("interCad")}
-                    className={`rounded-md px-3 py-1.5 text-xs sm:text-[11px] font-medium transition-colors ${
-                      showInterCad ? "bg-[#eef2f9] text-[#0f172a]" : "text-[#94a3b8]"
-                    }`}
-                  >
-                    Inter-CAD
-                  </button>
-                )}
+                <span className="rounded-md px-3 py-1.5 text-xs sm:text-[11px] font-medium bg-[#eef2f9] text-[#0f172a]">
+                  Inter-CAD
+                </span>
               </div>
 
-              {showInterCad ? (
-                <div className="px-4 pt-4 pb-6">
-                  <InterCadPanel />
-                </div>
-              ) : (
-              <>
-              {/* Feature tree */}
-              <div className="px-4 pt-4 border-b border-[#dbe6f5] pb-4">
-                <p className="text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide mb-2">Feature Tree · mug_v1</p>
-                <div className="space-y-0.5">
-                  {FEATURES.map(f => (
-                    <div key={f.id} className={`flex items-center gap-2 py-0.5 transition-all duration-300 ${visibleFeat.has(f.id) ? "opacity-100" : "opacity-0"}`}>
-                      <FeatureIcon type={f.icon} />
-                      <span className="font-mono text-xs sm:text-[10px] text-[#475569]">{f.name}</span>
-                    </div>
-                  ))}
-                </div>
+              {/* Breakdown builds in step with the transfer conversation */}
+              <div className="px-4 pt-4 pb-6">
+                <InterCadPanel stage={statusLineCount} />
               </div>
-
-              {/* Variables */}
-              {visibleMsgs.has("result") && (
-                <div className="px-4 pt-4 border-b border-[#dbe6f5] pb-4">
-                  <p className="text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide mb-2">Live Variables</p>
-                  <div className="rounded-md border border-[#dbe6f5] bg-[#eef2f9] overflow-hidden">
-                    {VAR_GROUPS.map(group => (
-                      <div key={group.label} className="border-b border-[#dbe6f5] last:border-0">
-                        <button
-                          onClick={() => toggleVarGroup(group.label)}
-                          className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-[#e2e8f0] transition-colors"
-                        >
-                          <span
-                            className="text-[10px] text-[#64748b] flex-shrink-0 transition-transform duration-150"
-                            style={{ display: "inline-block", transform: expandedVars.has(group.label) ? "rotate(90deg)" : "rotate(0deg)" }}
-                          >▶</span>
-                          <span className="text-xs sm:text-[11px] font-medium text-[#475569]">{group.label}</span>
-                          <span className="ml-auto font-mono text-[10px] sm:text-[8px] text-[#94a3b8]">{group.vars.length}</span>
-                        </button>
-                        {expandedVars.has(group.label) && (
-                          <div className="px-3 pb-2 space-y-1 border-t border-[#eef2f9]">
-                            {group.vars.map(([name, val, unit]) => (
-                              <div key={name} className="flex items-center justify-between py-0.5">
-                                <span className="font-mono text-[11px] sm:text-[9px] text-[#64748b]">{name}</span>
-                                <span className="font-mono text-[11px] sm:text-[9px] text-[#3b82f6]">{val} <span className="text-[#94a3b8]">{unit}</span></span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Mesh viewer */}
-              {visibleMsgs.has("result") && (
-                <div className="px-4 pt-4 pb-6">
-                  {!showMesh ? (
-                    <button
-                      onClick={() => setShowMesh(true)}
-                      className="w-full rounded-md flex items-center justify-center gap-1.5 border border-[#dbe6f5] hover:border-[#334155] bg-[#0f172a] hover:bg-black py-2 text-xs sm:text-[11px] font-medium text-white transition-colors"
-                    >
-                      ↗ View mesh model
-                    </button>
-                  ) : (
-                    <div className="rounded-md overflow-hidden border border-black bg-black">
-                      <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/10">
-                        <span className="text-[11px] sm:text-[10px] font-medium text-white/80">Local model</span>
-                        <button onClick={() => setShowMesh(false)} className="font-mono text-sm text-white/50 hover:text-white transition-colors leading-none">×</button>
-                      </div>
-                      <div className="overflow-hidden" style={{ height: 220 }}>
-                        <MugModelViewer />
-                      </div>
-                      <p className="px-3 py-1.5 text-[11px] sm:text-[10px] text-white/40">Drag to rotate · scroll to zoom</p>
-                    </div>
-                  )}
-                </div>
-              )}
-              </>
-              )}
             </div>
           </div>
-        </div>
-      </div>
+            </div>{/* window */}
+          </div>{/* flying wrapper */}
+        </div>{/* stage */}
+      </div>{/* sticky */}
 
-      {/* ── Fake cursor hint (tablet and up) ── */}
+      {/* ── Fake cursor hint (tablet and up) ──
+          Deliberately outside the stage: `perspective` and `transform` both
+          make an ancestor the containing block for `position: fixed`, which
+          would pin this to the flying window instead of the viewport. */}
       <div className="hidden sm:block pointer-events-none">
         <div
           className="fixed z-[999] transition-[left,top] duration-700 ease-out"
@@ -1459,30 +1208,3 @@ function ChatMessage({
   return null;
 }
 
-function FeatureIcon({ type }: { type: "sketch" | "plane" | "solid" }) {
-  if (type === "sketch") {
-    // pencil / sketch icon
-    return (
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="flex-shrink-0">
-        <path d="M8.5 1.5L10.5 3.5L4 10H2V8L8.5 1.5Z" stroke="#5a7aff" strokeWidth="1" strokeLinejoin="round" />
-        <circle cx="9.5" cy="2.5" r="1" fill="#5a7aff" opacity="0.4" />
-      </svg>
-    );
-  }
-  if (type === "plane") {
-    // plane / rectangle icon
-    return (
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="flex-shrink-0">
-        <rect x="1.5" y="3" width="9" height="6" rx="0.5" stroke="#475569" strokeWidth="1" />
-        <line x1="1.5" y1="6" x2="10.5" y2="6" stroke="#475569" strokeWidth="0.5" strokeDasharray="1.5 1" />
-      </svg>
-    );
-  }
-  // solid / extrude icon
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="flex-shrink-0">
-      <rect x="2" y="4" width="7" height="6" rx="0.5" stroke="#475569" strokeWidth="1" />
-      <path d="M2 4L5 2H9L9 8" stroke="#475569" strokeWidth="1" strokeLinejoin="round" />
-    </svg>
-  );
-}

@@ -21,8 +21,9 @@ type Stage =
   | "exiting";
 
 const introTypingPrompts: TypewriterPrompt[] = [
-  { text: "make me a base plate with 6 through holes and 4 m6 holes for mounting", holdMs: 2400 },
-  { text: "design an L-bracket with two M4 bolt holes, 2mm wall thickness, 40mm legs", holdMs: 2400 },
+  { text: "map my drivetrain assembly — every feature, constraint, and dependency", holdMs: 2400 },
+  { text: "gather the design intent behind the gearbox housing's feature tree", holdMs: 2400 },
+  { text: "explain how the motor mount is constrained across the whole model", holdMs: 2400 },
 ];
 
 function clampOffset(x: number, y: number) {
@@ -185,6 +186,9 @@ export default function NodeIntro() {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [show3D, setShow3D] = useState(false);
+  // Flips once the 3D scene has painted its first frame — the 2D node fades
+  // only then, so its size-matched 3D twin is already visible underneath.
+  const [graphReady, setGraphReady] = useState(false);
   const [zoom3D, setZoom3D] = useState(false);
   const [showRipple, setShowRipple] = useState(false);
   const [slideIndex, setSlideIndex] = useState<0 | 1 | 2 | 3>(0);
@@ -251,6 +255,9 @@ export default function NodeIntro() {
       raf1 = requestAnimationFrame(() => {
         raf2 = requestAnimationFrame(() => setArrived(true));
       });
+      // rAF never fires in a hidden tab (background-tab load) — without this
+      // timer fallback the node would stay stranded 90vh below forever.
+      schedule(() => setArrived(true), 600);
       schedule(() => setStage("drag-hint"), 1300);
       return () => {
         cancelAnimationFrame(raf1);
@@ -385,6 +392,8 @@ export default function NodeIntro() {
       >
         {/* ── Slide 0: node interaction + feature graph ── */}
         <div className="relative h-screen w-full flex-shrink-0">
+          <div className="bg-drift pointer-events-none absolute left-1/2 top-1/2 h-[320px] w-[320px] rounded-full bg-blue-400/10 blur-3xl sm:h-[560px] sm:w-[560px]" />
+          <div className="bg-drift-alt pointer-events-none absolute left-1/2 top-1/2 h-[260px] w-[260px] rounded-full bg-violet-400/10 blur-3xl sm:h-[420px] sm:w-[420px]" />
           <div
             className={`pointer-events-none absolute left-1/2 top-[14%] -translate-x-1/2 text-center transition-opacity duration-500 ${
               caption ? "opacity-100" : "opacity-0"
@@ -400,8 +409,11 @@ export default function NodeIntro() {
             className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center"
             style={{
               top: showGraph ? "50%" : "24%",
-              transition: "top 900ms cubic-bezier(0.65,0,0.35,1), opacity 500ms ease",
-              opacity: show3D ? 0 : 1,
+              // Quick handoff fade: the 3D root underneath is size- and
+              // position-matched to this node, so a short fade reads as the
+              // same object rather than a swap.
+              transition: "top 900ms cubic-bezier(0.65,0,0.35,1), opacity 180ms ease",
+              opacity: graphReady ? 0 : 1,
               pointerEvents: show3D ? "none" : undefined,
             }}
           >
@@ -449,7 +461,11 @@ export default function NodeIntro() {
               small centered box. */}
           {show3D && (
             <div className="absolute inset-0">
-              <NodeGraph3D zoom={zoom3D} onZoomDone={() => setStage("carousel")} />
+              <NodeGraph3D
+                zoom={zoom3D}
+                onZoomDone={() => setStage("carousel")}
+                onReady={() => setGraphReady(true)}
+              />
             </div>
           )}
         </div>
@@ -465,7 +481,7 @@ export default function NodeIntro() {
         <BigTextSlide
           show={slideIndex >= 2}
           glow="violet"
-          lines={[{ text: "The next" }, { text: "Intra-Software Git for CAD", italic: true }]}
+          lines={[{ text: "The next" }, { text: "Inter-Software Git for CAD", italic: true }]}
           subLine="and also the best reasoning AI CAD engine"
         />
 

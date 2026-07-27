@@ -23,10 +23,10 @@ export default function Home() {
           <div className="max-w-3xl mx-auto flex flex-col items-center text-center gap-6">
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#3b82f6]">Releasing Soon</p>
             <h2 className="text-3xl font-black leading-tight text-[#0f172a] sm:text-4xl lg:text-5xl">
-              Stop modeling by hand.
+              Stop rebuilding the same model.
             </h2>
             <p className="max-w-xl text-sm leading-6 text-[#475569] sm:text-base">
-              Describe the part. Get back real, editable CAD. Join the waitlist and be first in line when Parametra releases.
+              Move a design between CAD tools with its feature tree intact. Join the waitlist and be first in line when Parametra releases.
             </p>
             <button
               type="button"

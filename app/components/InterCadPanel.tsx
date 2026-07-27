@@ -26,7 +26,16 @@ const DERIVED_MAP: [string, string, string][] = [
   ["Appearance · Ceramic Gloss",   "MugBody (Appearance)", "Fusion attaches appearance directly to the body — Onshape stores it as a separate part property, reapplied post-transfer."],
 ];
 
-export default function InterCadPanel() {
+// `stage` mirrors DemoSection's transfer statusLineCount so the panel builds
+// in step with the conversation instead of arriving fully populated:
+//   0 — nothing yet (awaiting transfer)
+//   1 — "finding project"            → document header
+//   2 — "gathering intent web"       → intent web
+//   3 — "mapping direct conversions" → direct feature map
+//   4 — "replicating non-direct"     → derived / non-direct map
+//   5 — processed (complete)
+// Defaults to 5 so any standalone use renders the finished panel.
+export default function InterCadPanel({ stage = 5 }: { stage?: number }) {
   const [openDirect, setOpenDirect]   = useState(true);
   const [openDerived, setOpenDerived] = useState(false);
 
@@ -36,85 +45,110 @@ export default function InterCadPanel() {
         <p className="text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide mb-2">
           Inter-CAD Transfer
         </p>
-        <p className="text-sm text-[#475569]">Daily Mug</p>
-        <p className="text-[11px] sm:text-[10px] text-[#64748b] mt-0.5">from Fusion 360 → Onshape</p>
+        {stage >= 1 ? (
+          <div className="animate-fade-in">
+            <p className="text-sm text-[#475569]">Daily Mug</p>
+            <p className="text-[11px] sm:text-[10px] text-[#64748b] mt-0.5">from Fusion 360 → Onshape</p>
+          </div>
+        ) : (
+          <p className="text-[11px] sm:text-[10px] text-[#94a3b8]">awaiting transfer…</p>
+        )}
       </div>
 
       {/* A — Direct feature map */}
-      <div className="rounded-md border border-[#dbe6f5] bg-[#eef2f9] overflow-hidden">
-        <button
-          onClick={() => setOpenDirect(v => !v)}
-          className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-[#e2e8f0] transition-colors"
-        >
-          <span
-            className="text-[10px] text-[#64748b] flex-shrink-0 transition-transform duration-150"
-            style={{ display: "inline-block", transform: openDirect ? "rotate(90deg)" : "rotate(0deg)" }}
+      {stage >= 3 && (
+        <div className="animate-fade-up rounded-md border border-[#dbe6f5] bg-[#eef2f9] overflow-hidden">
+          <button
+            onClick={() => setOpenDirect(v => !v)}
+            data-intercad-btn="direct"
+            aria-expanded={openDirect}
+            className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-[#e2e8f0] transition-colors"
           >
-            ▶
-          </span>
-          <span className="text-xs sm:text-[11px] font-medium text-[#475569]">
-            Direct Feature Map
-          </span>
-          <span className="ml-auto font-mono text-[10px] sm:text-[8px] text-[#94a3b8]">{DIRECT_MAP.length}</span>
-        </button>
-        {openDirect && (
-          <div className="px-3 pb-2.5 space-y-1.5 border-t border-[#dbe6f5] pt-2">
-            {DIRECT_MAP.map(([fusion, onshape]) => (
-              <div key={fusion} className="flex items-center gap-1.5 py-0.5">
-                <span className="font-mono text-[11px] sm:text-[9px] text-[#06b6d4] truncate">{fusion}</span>
-                <span className="font-mono text-[11px] sm:text-[9px] text-[#94a3b8] flex-shrink-0">→</span>
-                <span className="font-mono text-[11px] sm:text-[9px] text-[#3b82f6] truncate">{onshape}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+            <span
+              className="text-[10px] text-[#64748b] flex-shrink-0 transition-transform duration-150"
+              style={{ display: "inline-block", transform: openDirect ? "rotate(90deg)" : "rotate(0deg)" }}
+            >
+              ▶
+            </span>
+            <span className="text-xs sm:text-[11px] font-medium text-[#475569]">
+              Direct Feature Map
+            </span>
+            <span className="ml-auto font-mono text-[10px] sm:text-[8px] text-[#94a3b8]">{DIRECT_MAP.length}</span>
+          </button>
+          {openDirect && (
+            <div className="px-3 pb-2.5 space-y-1.5 border-t border-[#dbe6f5] pt-2">
+              {DIRECT_MAP.map(([fusion, onshape]) => (
+                <div key={fusion} className="flex items-center gap-1.5 py-0.5">
+                  <span className="font-mono text-[11px] sm:text-[9px] text-[#06b6d4] truncate">{fusion}</span>
+                  <span className="font-mono text-[11px] sm:text-[9px] text-[#94a3b8] flex-shrink-0">→</span>
+                  <span className="font-mono text-[11px] sm:text-[9px] text-[#3b82f6] truncate">{onshape}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* B — Non-direct / derived feature map */}
-      <div className="rounded-md border border-[#dbe6f5] bg-[#eef2f9] overflow-hidden">
-        <button
-          onClick={() => setOpenDerived(v => !v)}
-          className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-[#e2e8f0] transition-colors"
-        >
-          <span
-            className="text-[10px] text-[#64748b] flex-shrink-0 transition-transform duration-150"
-            style={{ display: "inline-block", transform: openDerived ? "rotate(90deg)" : "rotate(0deg)" }}
+      {stage >= 4 && (
+        <div className="animate-fade-up rounded-md border border-[#dbe6f5] bg-[#eef2f9] overflow-hidden">
+          {/* data-intercad-btn is how DemoSection's cursor tour finds and clicks
+              this accordion — the open/closed state lives here, not up there. */}
+          <button
+            onClick={() => setOpenDerived(v => !v)}
+            data-intercad-btn="derived"
+            aria-expanded={openDerived}
+            className="w-full flex items-center gap-1.5 px-3 py-2 hover:bg-[#e2e8f0] transition-colors"
           >
-            ▶
-          </span>
-          <span className="text-xs sm:text-[11px] font-medium text-[#475569]">
-            Derived / Non-Direct Map
-          </span>
-          <span className="ml-auto font-mono text-[10px] sm:text-[8px] text-[#94a3b8]">{DERIVED_MAP.length}</span>
-        </button>
-        {openDerived && (
-          <div className="px-3 pb-2.5 space-y-2.5 border-t border-[#dbe6f5] pt-2">
-            {DERIVED_MAP.map(([fusion, onshape, note]) => (
-              <div key={fusion} className="space-y-0.5">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-mono text-[11px] sm:text-[9px] text-[#06b6d4] truncate">{fusion}</span>
-                  <span className="font-mono text-[11px] sm:text-[9px] text-[#94a3b8] flex-shrink-0">⇢</span>
-                  <span className="font-mono text-[11px] sm:text-[9px] text-[#d97706] truncate">{onshape}</span>
+            <span
+              className="text-[10px] text-[#64748b] flex-shrink-0 transition-transform duration-150"
+              style={{ display: "inline-block", transform: openDerived ? "rotate(90deg)" : "rotate(0deg)" }}
+            >
+              ▶
+            </span>
+            <span className="text-xs sm:text-[11px] font-medium text-[#475569]">
+              Derived / Non-Direct Map
+            </span>
+            <span className="ml-auto font-mono text-[10px] sm:text-[8px] text-[#94a3b8]">{DERIVED_MAP.length}</span>
+          </button>
+          {openDerived && (
+            <div className="px-3 pb-2.5 space-y-2.5 border-t border-[#dbe6f5] pt-2">
+              {DERIVED_MAP.map(([fusion, onshape, note]) => (
+                <div key={fusion} className="space-y-0.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono text-[11px] sm:text-[9px] text-[#06b6d4] truncate">{fusion}</span>
+                    <span className="font-mono text-[11px] sm:text-[9px] text-[#94a3b8] flex-shrink-0">⇢</span>
+                    <span className="font-mono text-[11px] sm:text-[9px] text-[#d97706] truncate">{onshape}</span>
+                  </div>
+                  <p className="text-[11px] sm:text-[10px] text-[#64748b] leading-4">{note}</p>
                 </div>
-                <p className="text-[11px] sm:text-[10px] text-[#64748b] leading-4">{note}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* C — Interactive intent web */}
-      <div className="rounded-md border border-[#dbe6f5] bg-[#eef2f9] overflow-hidden">
-        <p className="px-3 pt-2.5 pb-1.5 text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide border-b border-[#dbe6f5]">
-          Intent Web
-        </p>
-        <div className="overflow-hidden" style={{ height: 260 }}>
-          <IntentWebViewer />
+      {stage >= 2 && (
+        <div data-intercad-web className="animate-fade-up rounded-md border border-[#dbe6f5] bg-[#eef2f9] overflow-hidden">
+          <p className="px-3 pt-2.5 pb-1.5 text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide border-b border-[#dbe6f5]">
+            Intent Web
+          </p>
+          <div className="overflow-hidden" style={{ height: 260 }}>
+            <IntentWebViewer />
+          </div>
+          <p className="px-3 py-1.5 text-[11px] sm:text-[10px] text-[#94a3b8]">
+            drag a node to move it · drag background to rotate · scroll to zoom
+          </p>
         </div>
-        <p className="px-3 py-1.5 text-[11px] sm:text-[10px] text-[#94a3b8]">
-          drag a node to move it · drag background to rotate · scroll to zoom
+      )}
+
+      {/* Pending pulse while the transfer is still streaming in */}
+      {stage >= 1 && stage < 5 && (
+        <p className="font-mono text-[11px] sm:text-[10px] text-[#3b82f6]">
+          <span className="animate-pulse">▌</span> transferring…
         </p>
-      </div>
+      )}
     </div>
   );
 }

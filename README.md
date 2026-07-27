@@ -16,12 +16,12 @@ The homepage is a single-page marketing experience with:
 - platform tree showing Onshape, Fusion 360, and SolidWorks paths
 - CTA band, partners section, and footer
 
-The live demo never auto-starts. A user must click the overlay button to launch it; that click scrolls the page to the demo and locks body scroll until the scripted run completes.
+The live demo never auto-starts. A user must click the overlay button to launch it; that click scrolls the page to the demo and locks body scroll until the scripted run completes. The gated run is the **Inter-CAD transfer** — the site's focus. Text-to-CAD generation is a secondary run, played only when the user clicks its sidebar entry.
 
 ### Additional routes
 
 - `/about` — team story + scroll-snap founder cards
-- `/how-it-works` — product vision, prompt/drawing intake, and pipeline explanation
+- `/how-it-works` — **hidden**: still builds and is reachable by direct URL, but unlinked from all navigation and marked `noindex`. Kept for later use.
 - `/signup` — standalone waitlist form
 - `/contact` — standalone contact form
 - `/privacy-policy`

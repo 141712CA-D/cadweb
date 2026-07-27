@@ -50,6 +50,31 @@ function Reveal({
   );
 }
 
+// Marker-style emphasis: a thick rounded bar that grows in under the phrase
+// once it scrolls into view. Absolutely positioned, so the draw-in never
+// shifts surrounding text on any breakpoint.
+function MarkUnderline({
+  children,
+  color = "red",
+}: {
+  children: ReactNode;
+  color?: "red" | "blue";
+}) {
+  const { ref, visible } = useReveal<HTMLSpanElement>(0.9);
+  return (
+    <span ref={ref} className="relative inline-block">
+      <span className="relative z-10">{children}</span>
+      <span
+        aria-hidden
+        className={`absolute left-0 bottom-[-0.08em] h-[0.18em] w-full origin-left rounded-full transition-transform duration-700 delay-300 ${
+          color === "red" ? "bg-red-400" : "bg-[#3b82f6]"
+        } ${visible ? "scale-x-100" : "scale-x-0"}`}
+        style={{ transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)" }}
+      />
+    </span>
+  );
+}
+
 function StampWord({
   children,
   size = "lg",
@@ -131,11 +156,8 @@ export default function PitchPage() {
 
           <Reveal className="delay-200">
             <p className="max-w-xl text-lg leading-8 text-[#475569] sm:text-xl">
-              They trap{" "}
-              <span className="underline decoration-red-400 decoration-2 underline-offset-4">
-                your feature information
-              </span>{" "}
-              — the constraints and relations you worked hard to create.
+              They trap <MarkUnderline color="red">your feature information</MarkUnderline> — the
+              constraints and relations you worked hard to create.
             </p>
           </Reveal>
         </div>
@@ -150,14 +172,12 @@ export default function PitchPage() {
             </Reveal>
             <Reveal className="delay-100">
               <h2 className="text-[clamp(2rem,9.5vw,2.75rem)] font-black leading-tight text-[#0f172a] sm:text-5xl lg:text-6xl">
-                The{" "}
-                <span className="underline decoration-[#3b82f6] decoration-4 underline-offset-4">first</span>{" "}
-                AI CAD interoperability tool.
+                The <MarkUnderline color="blue">first</MarkUnderline> AI CAD interoperability tool.
               </h2>
             </Reveal>
             <Reveal className="delay-200">
               <p className="rounded-full border border-[#dbe6f5] bg-[#f8fafc] px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] text-[#3b82f6] sm:text-sm">
-                Kind of Like Inter-CAD Software Git
+                The Git for CAD
               </p>
             </Reveal>
           </div>
@@ -204,7 +224,7 @@ export default function PitchPage() {
 
         <Reveal className="relative z-10">
           <p className="rounded-full border border-[#dbe6f5] bg-[#eef2f9] px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] text-[#3b82f6] sm:text-sm">
-            Try applying it to any CAD system
+            Work in ANY CAD system, unbounded
           </p>
         </Reveal>
 

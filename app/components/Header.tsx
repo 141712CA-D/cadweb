@@ -85,13 +85,8 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
           <div className="flex items-center gap-2 sm:gap-3">
 
             {/* Desktop nav links */}
-            <Link
-              href="/how-it-works"
-              className="hidden sm:block rounded-md font-mono text-xs uppercase tracking-widest px-4 py-2 border border-[#dbe6f5] text-[#475569] hover:border-[#3b82f6] hover:text-[#3b82f6] transition-all duration-200"
-            >
-              How It Works
-            </Link>
-
+            {/* /how-it-works is intentionally unlinked — the page still exists
+                and is reachable by direct URL, but it's hidden from navigation. */}
             <Link
               href="/pitch"
               className="hidden sm:block rounded-md font-mono text-xs uppercase tracking-widest px-4 py-2 border border-[#dbe6f5] text-[#475569] hover:border-[#3b82f6] hover:text-[#3b82f6] transition-all duration-200"
@@ -151,13 +146,6 @@ export default function Header({ onJoinWaitlist }: HeaderProps) {
                   className="absolute right-0 top-12 w-44 rounded-md border border-[#dbe6f5] overflow-hidden shadow-lg"
                   style={{ background: "rgba(255,255,255,0.97)", backdropFilter: "blur(20px)" }}
                 >
-                  <Link
-                    href="/how-it-works"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 font-mono text-xs uppercase tracking-widest text-[#475569] hover:text-[#3b82f6] hover:bg-[#eef2f9] transition-colors"
-                  >
-                    How It Works
-                  </Link>
                   <Link
                     href="/pitch"
                     onClick={() => setMenuOpen(false)}
