@@ -114,9 +114,9 @@ Scripted mock-app demo (fake Parametra desktop window: sidebar, breakdown panel,
 
 #### Device flight (`lib/deviceFlight.ts` + `DeviceShell.tsx`)
 
-The section is a **`RUNWAY_SVH` (240svh) scroll runway** with a `sticky top-0`, 100svh stage inside it. The window rides one continuous 3D arc across that runway: in from the back-left as a MacBook (`sm+`) or phone (`<sm`), rotating upright and dissolving its shell as it docks, still while it's readable, then outward past the camera to the right, fading.
+The section is a **`RUNWAY_SVH` (170svh) scroll runway** with a `sticky top-0`, 100svh stage inside it. The window flies in from the back-left as a MacBook (`sm+`) or phone (`<sm`), rotating upright and dissolving its shell as it docks — **and then stays put**. There is deliberately **no fly-out**: once docked it holds position for the rest of the runway and leaves the same way any other section does, by scrolling off the top. (An outward exit arc was built and then removed — don't reintroduce it.)
 
-- `flightAt(p)` is pure and unit-tested (`__tests__/lib/deviceFlight.test.ts`) — entry `[0, ENTRY_END]`, docked `[ENTRY_END, EXIT_START]` (0.24–0.76), exit `[EXIT_START, 1]`. The docked band returns `DOCKED_FRAME`, whose `transform` is `none` so docked text renders crisp.
+- `flightAt(p)` is pure and unit-tested (`__tests__/lib/deviceFlight.test.ts`) — entry `[0, ENTRY_END)` (0.42), docked `[ENTRY_END, 1]`. The docked band returns `DOCKED_FRAME`, whose `transform` is `none` so docked text renders crisp; a test walks the whole band asserting nothing moves.
 - The scroll handler writes **straight to the DOM** on one element (transform, opacity, `--chrome`, `pointer-events`) via rAF — the demo subtree is far too heavy to re-render per frame. Nothing here is React state.
 - `DeviceShell` is pure CSS (`.device-*` in `globals.css`) sized off the single `--chrome` var: `1` = full body, `0` = every layer collapsed to zero size and opacity, leaving the window untouched.
 - **The dock marker** (`DOCK_MARKER_TOP_SVH`, an absolutely-positioned 1px div) is what `startDemo` scrolls to. Aiming at the section's top instead would land progress at 0 — the window still mid-flight — so keep them in sync if the band constants change.
