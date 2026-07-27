@@ -136,9 +136,13 @@ interface NodeGraph3DProps {
   // Fires after the first painted frame — the intro uses this to fade the 2D
   // DOM node only once its 3D twin is actually on screen underneath it.
   onReady?: () => void;
+  // Fires if the scene can't come up at all — e.g. the three.js chunk 404s
+  // because the tab holds HTML from a previous (preview) deployment, or WebGL
+  // is unavailable. The intro uses this to skip ahead instead of hanging.
+  onError?: () => void;
 }
 
-export default function NodeGraph3D({ zoom, onZoomDone, onReady }: NodeGraph3DProps) {
+export default function NodeGraph3D({ zoom, onZoomDone, onReady, onError }: NodeGraph3DProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const zoomRef = useRef(zoom);
   zoomRef.current = zoom;
@@ -146,6 +150,8 @@ export default function NodeGraph3D({ zoom, onZoomDone, onReady }: NodeGraph3DPr
   onZoomDoneRef.current = onZoomDone;
   const onReadyRef = useRef(onReady);
   onReadyRef.current = onReady;
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -161,6 +167,10 @@ export default function NodeGraph3D({ zoom, onZoomDone, onReady }: NodeGraph3DPr
     let cleanup = () => {};
 
     (async () => {
+      try {
+      // On a preview deployment, a tab holding HTML from an older build can
+      // 404 this hashed chunk (deployment skew) — the catch below turns that
+      // into onError instead of a silent hang.
       const THREE = await import("three");
       if (cancelled) return;
 
@@ -398,6 +408,11 @@ export default function NodeGraph3D({ zoom, onZoomDone, onReady }: NodeGraph3DPr
         renderer.dispose();
         if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement);
       };
+      } catch {
+        // Chunk failed to load or WebGL refused to initialize — report up so
+        // the intro can skip the 3D beat rather than stall on a locked screen.
+        if (!cancelled) onErrorRef.current?.();
+      }
     })();
 
     return () => {

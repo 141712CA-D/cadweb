@@ -5,7 +5,16 @@ import dynamic from "next/dynamic";
 import { lockScroll, unlockScroll } from "@/lib/scrollLock";
 import { useTypewriter, type TypewriterPrompt } from "@/lib/useTypewriter";
 
-const NodeGraph3D = dynamic(() => import("./NodeGraph3D"), { ssr: false });
+// If the hashed chunk 404s (stale tab against a newer preview deployment),
+// fall back to an empty component — the graph-stage watchdog below then skips
+// the 3D beat instead of leaving the intro hung on a scroll-locked screen.
+const NodeGraph3D = dynamic(
+  () =>
+    import("./NodeGraph3D").catch(() => ({
+      default: (() => null) as unknown as (typeof import("./NodeGraph3D"))["default"],
+    })),
+  { ssr: false },
+);
 
 const SESSION_KEY = "nodeIntroPlayed";
 
@@ -197,6 +206,9 @@ export default function NodeIntro() {
 
   const initRef = useRef(false);
   const lockedRef = useRef(false);
+  // Mirrors for the watchdog timers below — they fire from stale closures.
+  const stageRef = useRef<Stage>("checking");
+  const graphReadyRef = useRef(false);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const pointerIdRef = useRef<number | null>(null);
   const dragStartRef = useRef<{ x: number; y: number; offsetX: number; offsetY: number } | null>(null);
@@ -236,6 +248,12 @@ export default function NodeIntro() {
     setStage("fly-in");
     schedule(() => setShowSkip(true), 1500);
 
+    // Warm the 3D chunks now, minutes before they're needed at click time —
+    // on preview deployments this closes most of the window where a redeploy
+    // invalidates the hashed chunk URLs this HTML refers to.
+    import("./NodeGraph3D").catch(() => {});
+    import("three").catch(() => {});
+
     return () => {
       clearAllTimers();
       if (lockedRef.current) {
@@ -244,6 +262,10 @@ export default function NodeIntro() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    stageRef.current = stage;
+  }, [stage]);
 
   // Per-stage choreography.
   useEffect(() => {
@@ -278,6 +300,16 @@ export default function NodeIntro() {
       // completes, which is what actually advances to "carousel".
       schedule(() => setShow3D(true), 950);
       schedule(() => setZoom3D(true), 950 + 4300);
+      // Watchdogs — the intro must NEVER hang here with scroll locked. If the
+      // 3D scene hasn't painted a frame within its window (chunk 404 on a
+      // stale preview deployment, WebGL unavailable), skip its beat; and no
+      // matter what, force the carousel if onZoomDone never lands.
+      schedule(() => {
+        if (stageRef.current === "graph" && !graphReadyRef.current) setStage("carousel");
+      }, 4500);
+      schedule(() => {
+        if (stageRef.current === "graph") setStage("carousel");
+      }, 9000);
     }
 
     if (stage === "carousel") {
@@ -464,7 +496,13 @@ export default function NodeIntro() {
               <NodeGraph3D
                 zoom={zoom3D}
                 onZoomDone={() => setStage("carousel")}
-                onReady={() => setGraphReady(true)}
+                onReady={() => {
+                  graphReadyRef.current = true;
+                  setGraphReady(true);
+                }}
+                onError={() => {
+                  if (stageRef.current === "graph") setStage("carousel");
+                }}
               />
             </div>
           )}
