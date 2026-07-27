@@ -3,6 +3,13 @@ import DevBanner from "../components/DevBanner";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
+// Hidden page — no longer linked from the header, footer, or hero while the
+// site focuses on Inter-CAD transfer. Kept intact (and reachable by direct URL)
+// so it can be brought back later; noindex keeps it out of search results.
+export const metadata = {
+  robots: { index: false, follow: false },
+};
+
 const processingSteps = [
   {
     eyebrow: "Layer 01",

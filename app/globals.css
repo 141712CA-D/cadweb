@@ -154,9 +154,47 @@ html {
   animation: fade-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* ── Ink stamp: entrance for the pitch page's "F**K [X]" beats. A short
+   press-down with a slight overshoot — reads like a rubber stamp set onto
+   paper, and settles at a -2deg tilt (the tilt lives in the final keyframe
+   because fill-mode: forwards overrides any class-level transform). ── */
+@keyframes stamp-slam {
+  0%   { opacity: 0; transform: translateY(10px) scale(1.16) rotate(0.5deg); }
+  65%  { opacity: 1; transform: translateY(0) scale(0.985) rotate(-2.5deg); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotate(-2deg); }
+}
+
+.animate-stamp-slam {
+  opacity: 0;
+  animation: stamp-slam 650ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
 .animate-fade-in {
   opacity: 0;
   animation: fade-in 1s ease forwards;
+}
+
+/* ── Reduced motion: entrance animations collapse to a plain fade, ambient
+   drift stops. The logo variant re-pins brightness(0) since it normally
+   lives inside the animation's own filter keyframes. ── */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-fade-in,
+  .animate-grand-reveal,
+  .animate-grand-reveal-logo,
+  .animate-pop-from-bottom,
+  .animate-stamp-slam {
+    animation: fade-in 300ms ease forwards;
+  }
+
+  .animate-grand-reveal-logo {
+    filter: brightness(0);
+  }
+
+  .bg-drift,
+  .bg-drift-alt {
+    animation: none;
+  }
 }
 
 .delay-100 { animation-delay: 100ms; }
@@ -224,6 +262,140 @@ html {
 
 .breathe-blue {
   animation: breathe-blue 2.2s ease-in-out infinite;
+}
+
+/* ── Live-demo device shell ────────────────────────────────────────────────
+   The demo window flies into the section as a MacBook (desktop) or a phone
+   (mobile) and dissolves into a bare window as it docks. DemoSection writes a
+   single custom property each scroll frame — `--chrome`, 1 = full device body,
+   0 = docked — on the flying wrapper, and every layer here derives its own
+   geometry from it. At 0 they all collapse to zero size and zero opacity, so
+   the docked window is left completely untouched. Geometry is expressed in
+   px against the window's own box, so it scales with the 3D transform.
+   See lib/deviceFlight.ts for the flight path itself. */
+
+.device-shell {
+  --bezel: calc(14px * var(--chrome, 0));
+  --edge: calc(3px * var(--chrome, 0));
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: var(--chrome, 0);
+  pointer-events: none;
+}
+
+.device-shell--phone {
+  --bezel: calc(11px * var(--chrome, 0));
+  --edge: calc(2.5px * var(--chrome, 0));
+}
+
+/* Outer body — brushed aluminium lid on the laptop, titanium rail on the phone */
+.device-body {
+  position: absolute;
+  inset: calc(-1 * (var(--bezel) + var(--edge)));
+  border-radius: calc(16px + 12px * var(--chrome, 0));
+  background: linear-gradient(155deg, #e8ebee 0%, #c3c9d0 42%, #9aa2aa 100%);
+  box-shadow: 0 45px 90px -35px rgba(15, 23, 42, 0.6);
+}
+
+.device-shell--phone .device-body {
+  border-radius: calc(16px + 30px * var(--chrome, 0));
+  background: linear-gradient(155deg, #b9bfc6 0%, #7d848c 45%, #5b6169 100%);
+}
+
+/* Black screen bezel the window sits inside */
+.device-bezel {
+  position: absolute;
+  inset: calc(-1 * var(--bezel));
+  border-radius: calc(16px + 7px * var(--chrome, 0));
+  background: linear-gradient(180deg, #17191d, #0a0c0f);
+}
+
+.device-shell--phone .device-bezel {
+  border-radius: calc(16px + 26px * var(--chrome, 0));
+}
+
+/* Laptop camera dot, centred in the top bezel strip */
+.device-camera {
+  position: absolute;
+  left: 50%;
+  top: calc(-0.5 * var(--bezel));
+  width: calc(4px * var(--chrome, 0));
+  height: calc(4px * var(--chrome, 0));
+  border-radius: 999px;
+  background: #2b3138;
+  transform: translate(-50%, -50%);
+}
+
+/* Phone dynamic island — sits in the bezel, never over the window content */
+.device-island {
+  position: absolute;
+  left: 50%;
+  top: calc(-0.62 * var(--bezel));
+  width: calc(56px * var(--chrome, 0));
+  height: calc(6px * var(--chrome, 0));
+  border-radius: 999px;
+  background: #05070a;
+  transform: translate(-50%, -50%);
+}
+
+.device-button {
+  position: absolute;
+  width: calc(2.5px * var(--chrome, 0));
+  border-radius: 999px;
+  background: #6b727a;
+}
+
+.device-button--power {
+  right: calc(-1 * (var(--bezel) + var(--edge) + 2px * var(--chrome, 0)));
+  top: 26%;
+  height: 9%;
+}
+
+.device-button--vol {
+  left: calc(-1 * (var(--bezel) + var(--edge) + 2px * var(--chrome, 0)));
+  top: 22%;
+  height: 13%;
+}
+
+/* Laptop deck below the lid, tapered, with its thumb notch */
+.device-base {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + var(--bezel) + var(--edge));
+  width: 109%;
+  height: calc(13px * var(--chrome, 0));
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, #e4e8ec 0%, #b6bdc4 55%, #8d949c 100%);
+  clip-path: polygon(0 0, 100% 0, 98.4% 100%, 1.6% 100%);
+  border-radius: 0 0 8px 8px;
+}
+
+.device-notch {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + var(--bezel) + var(--edge));
+  width: 12%;
+  height: calc(4.5px * var(--chrome, 0));
+  transform: translateX(-50%);
+  background: #98a0a8;
+  border-radius: 0 0 999px 999px;
+}
+
+/* Contact shadow — sells the device as sitting in space, not pasted on */
+.device-shadow {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + var(--bezel) + var(--edge) + 13px * var(--chrome, 0));
+  width: 78%;
+  height: calc(30px * var(--chrome, 0));
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(15, 23, 42, 0.28), rgba(15, 23, 42, 0) 72%);
+}
+
+.device-shell--phone .device-shadow {
+  top: calc(100% + var(--bezel) + var(--edge));
+  width: 62%;
 }
 
 /* ── Typewriter cursor ── */

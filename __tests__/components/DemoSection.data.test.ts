@@ -7,6 +7,7 @@ import {
   LOG_LINES,
   TRANSFER_MESSAGES,
   TRANSFER_SCRIPT,
+  TRANSFER_LOG_LINES,
 } from "@/app/components/DemoSection";
 
 // The demo is data-driven: the SCRIPT/LOG_LINES timelines reference MESSAGES
@@ -98,5 +99,30 @@ describe("DemoSection transfer script data", () => {
     for (let i = 1; i < TRANSFER_SCRIPT.length; i++) {
       expect(TRANSFER_SCRIPT[i].delay).toBeGreaterThan(TRANSFER_SCRIPT[i - 1].delay);
     }
+  });
+
+  it("ends by showing the transfer result card", () => {
+    expect(TRANSFER_SCRIPT[TRANSFER_SCRIPT.length - 1].show).toContain("tresult");
+  });
+
+  it("emits transfer log lines in chronological order", () => {
+    for (let i = 1; i < TRANSFER_LOG_LINES.length; i++) {
+      expect(TRANSFER_LOG_LINES[i].t).toBeGreaterThanOrEqual(TRANSFER_LOG_LINES[i - 1].t);
+    }
+  });
+
+  it("keeps the transfer log inside the scripted conversation's window", () => {
+    // The Logs tab is meant to run alongside the chat — a log line landing
+    // after the run has already unlocked scroll would never be seen.
+    const lastStep = TRANSFER_SCRIPT[TRANSFER_SCRIPT.length - 1].delay;
+    expect(Math.max(...TRANSFER_LOG_LINES.map((l) => l.t))).toBeLessThanOrEqual(lastStep);
+  });
+
+  it("matches the on-screen copy: 13 features mapped (7 direct + 6 replicated)", () => {
+    // The result card / status bar copy hardcodes these counts.
+    const done = TRANSFER_LOG_LINES[TRANSFER_LOG_LINES.length - 1].text;
+    expect(done).toContain("13 features mapped");
+    expect(done).toContain("7 direct");
+    expect(done).toContain("6 replicated");
   });
 });

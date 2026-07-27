@@ -4,28 +4,9 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import DemoSection from "./DemoSection";
 import { isPageTransitioning } from "@/lib/pageTransitionState";
-import { useTypewriter } from "@/lib/useTypewriter";
-
-const prompt =
-  "make me a base plate with 6 through holes and 4 m6 holes for mounting. The whole base plate should be 15x35cm";
-
-const typingPrompts = [
-  { text: prompt, holdMs: 5000 },
-  { text: "design an L-bracket with two M4 bolt holes, 2mm wall thickness, 40mm legs", holdMs: 2200 },
-  { text: "create a cylindrical enclosure 60mm diameter, 80mm tall with a snap-fit lid", holdMs: 2200 },
-  { text: "build a spur gear — 24 teeth, module 1.5, 8mm bore, 5mm face width", holdMs: 2200 },
-];
+import { DOCK_ANCHOR_ID } from "@/lib/deviceFlight";
 
 const INTER_CAD_STEPS = ["scanned model", "software-neutral json", "transferred feature-rich design"];
-
-// Slide-fade transition classes shared by every crossfading hero element —
-// active sits at rest, inactive drifts slightly right and fades out, so
-// every switch reads as a consistent rightward slide+fade rather than a hard cut.
-function slideFadeClass(active: boolean) {
-  return `absolute inset-0 transition-all duration-700 ease-out ${
-    active ? "translate-x-0 opacity-100" : "pointer-events-none translate-x-6 opacity-0"
-  }`;
-}
 
 const platformStages = [
   {
@@ -177,21 +158,11 @@ interface HeroProps {
 
 export default function Hero({ onJoinWaitlist }: HeroProps) {
   const treeRef = useRef<HTMLDivElement>(null);
-  const demoVideoRef = useRef<HTMLVideoElement>(null);
   const nodeVideoRef = useRef<HTMLVideoElement>(null);
   const [platformIndex, setPlatformIndex] = useState(0);
   const activePlatformStage = platformStages[platformIndex];
   const [showNudge, setShowNudge] = useState(false);
   const [demoInView, setDemoInView] = useState(false);
-
-  // Cycles which "pitch" is showing — the reasoning-agent prompt box + gears
-  // video, or the inter-CAD transfer flow + node-graph video — on a timer.
-  const [heroState, setHeroState] = useState<0 | 1>(0);
-
-  useEffect(() => {
-    const id = setInterval(() => setHeroState((s) => (s === 0 ? 1 : 0)), 6500);
-    return () => clearInterval(id);
-  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -203,34 +174,26 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Force the hero videos to behave like GIFs: always playing, even when the
-  // tab is backgrounded or the browser tries to pause them. Muted + playsInline
+  // Force the hero video to behave like a GIF: always playing, even when the
+  // tab is backgrounded or the browser tries to pause it. Muted + playsInline
   // keeps autoplay policy happy; we re-issue play() on any pause/visibility change.
-  // Both videos stay mounted and playing at all times (only opacity toggles
-  // between them) so switching states is an instant crossfade, never a restart.
   useEffect(() => {
-    const videos = [demoVideoRef.current, nodeVideoRef.current].filter((v): v is HTMLVideoElement => v !== null);
-    if (!videos.length) return;
+    const video = nodeVideoRef.current;
+    if (!video) return;
 
     const forcePlay = () => {
-      videos.forEach((video) => {
-        const p = video.play();
-        if (p) p.catch(() => {});
-      });
+      const p = video.play();
+      if (p) p.catch(() => {});
     };
 
     forcePlay();
-    videos.forEach((video) => {
-      video.addEventListener("pause", forcePlay);
-      video.addEventListener("loadeddata", forcePlay);
-    });
+    video.addEventListener("pause", forcePlay);
+    video.addEventListener("loadeddata", forcePlay);
     document.addEventListener("visibilitychange", forcePlay);
 
     return () => {
-      videos.forEach((video) => {
-        video.removeEventListener("pause", forcePlay);
-        video.removeEventListener("loadeddata", forcePlay);
-      });
+      video.removeEventListener("pause", forcePlay);
+      video.removeEventListener("loadeddata", forcePlay);
       document.removeEventListener("visibilitychange", forcePlay);
     };
   }, []);
@@ -243,6 +206,18 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Jump to the demo's dock marker, not the top of its section — the section
+  // starts a scroll runway the window flies in along, so landing at its top
+  // drops you at the far end of that flight with the window still tiny,
+  // rotated, and deliberately not clickable. The marker sits at the point the
+  // flight has finished and the demo is interactive.
+  const scrollToDemo = () => {
+    setShowNudge(false);
+    const target =
+      document.getElementById(DOCK_ANCHOR_ID) ?? document.getElementById("live-demo");
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   // Track whether the live-demo section is on screen. Uses IntersectionObserver
   // (not scroll events) so it still fires while DemoSection has the body scroll
@@ -257,8 +232,6 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
-
-  const { text: typedText } = useTypewriter(typingPrompts);
 
   useEffect(() => {
     let frame = 0;
@@ -285,42 +258,25 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#3b82f6] mb-6">Parametra · v1.0 · Releasing Soon</p>
 
-          <div className="relative min-h-[76px] max-w-2xl sm:min-h-[101px] lg:min-h-[126px]">
-            <h1 className={`${slideFadeClass(heroState === 0)} text-balance text-4xl font-black leading-[1.05] tracking-tight text-[#0f172a] sm:text-5xl lg:text-6xl`}>
-              One prompt.<br />Real CAD.
-            </h1>
-            <h1 className={`${slideFadeClass(heroState === 1)} text-balance text-4xl font-black leading-[1.05] tracking-tight text-[#0f172a] sm:text-5xl lg:text-6xl`}>
-              Intra-Software Git<br />for CAD
-            </h1>
-          </div>
+          <h1 className="max-w-2xl text-balance text-4xl font-black leading-[1.05] tracking-tight text-[#0f172a] sm:text-5xl lg:text-6xl">
+            Inter-Software Git<br />for CAD
+          </h1>
 
           <p className="mt-6 max-w-md text-sm leading-6 text-[#475569] sm:text-base sm:leading-7">
-            Software shouldn&apos;t make engineers wait. Describe the part in plain English — Parametra hands back a model you can actually edit, not a rendering.
+            Your model shouldn&apos;t be trapped in the tool that made it. Parametra moves a design between Fusion 360, SolidWorks, and Onshape with its feature tree intact — not a dead STEP export.
           </p>
 
-          <div className="relative mt-8 min-h-[152px] sm:min-h-[158px]">
-            <div className={`${slideFadeClass(heroState === 0)} rounded-lg border border-[#dbe6f5] bg-[#eef2f9] p-4`}>
-              <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#64748b]">Try a prompt</p>
-              <p className="relative mt-3 font-mono text-sm leading-7 text-[#0f172a]">
-                <span className="invisible select-none" aria-hidden="true">{typingPrompts[0].text}</span>
-                <span className="absolute inset-0">
-                  {typedText}<span className="cursor-blink ml-px text-[#3b82f6]">|</span>
-                </span>
-              </p>
-            </div>
-
-            <div className={`${slideFadeClass(heroState === 1)} rounded-lg border border-[#dbe6f5] bg-[#eef2f9] p-4`}>
-              <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#64748b]">Inter-CAD transfer</p>
-              <div className="mt-3 flex flex-col items-start gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-                {INTER_CAD_STEPS.map((step, i) => (
-                  <div key={step} className="flex items-center gap-2">
-                    <span className="rounded-md border border-[#dbe6f5] bg-[#f8fafc] px-2.5 py-1.5 font-mono text-xs text-[#0f172a]">
-                      {step}
-                    </span>
-                    {i < INTER_CAD_STEPS.length - 1 && <span className="font-mono text-xs text-[#94a3b8]">→</span>}
-                  </div>
-                ))}
-              </div>
+          <div className="mt-8 rounded-lg border border-[#dbe6f5] bg-[#eef2f9] p-4">
+            <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#64748b]">Inter-CAD transfer</p>
+            <div className="mt-3 flex flex-col items-start gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+              {INTER_CAD_STEPS.map((step, i) => (
+                <div key={step} className="flex items-center gap-2">
+                  <span className="rounded-md border border-[#dbe6f5] bg-[#f8fafc] px-2.5 py-1.5 font-mono text-xs text-[#0f172a]">
+                    {step}
+                  </span>
+                  {i < INTER_CAD_STEPS.length - 1 && <span className="font-mono text-xs text-[#94a3b8]">→</span>}
+                </div>
+              ))}
             </div>
           </div>
 
@@ -341,34 +297,22 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
                 Join the Waitlist
               </Link>
             )}
-            <Link
-              href="/how-it-works"
-              className="font-mono text-xs uppercase tracking-widest text-[#64748b] hover:text-[#3b82f6] transition-colors"
+            <button
+              type="button"
+              onClick={scrollToDemo}
+              className="cursor-pointer font-mono text-xs uppercase tracking-widest text-[#64748b] hover:text-[#3b82f6] transition-colors"
             >
-              How it works →
-            </Link>
+              See a transfer →
+            </button>
           </div>
         </div>
 
         <div className="flex flex-col gap-5">
           <p className="text-sm leading-6 text-[#475569]">
-            Every model comes back as a native Onshape part studio — sketches, features, and dimensions fully intact. Export to Fusion 360 or SolidWorks when the job calls for it.
+            Parametra reads the source model down to its design intent, stores it as a software-neutral graph, and rebuilds it natively in the target CAD tool — features, sketches, and dimensions still editable on the other side.
           </p>
           <div className="rounded-lg border border-[#dbe6f5] bg-[#eef2f9] p-4 overflow-hidden">
             <div className="relative bg-[#f8fafc]">
-              <video
-                ref={demoVideoRef}
-                src="/demoVideo.mp4"
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload="auto"
-                disablePictureInPicture
-                controls={false}
-                tabIndex={-1}
-                className={`block h-auto w-full object-contain transition-opacity duration-700 ${heroState === 0 ? "opacity-100" : "opacity-0"}`}
-              />
               <video
                 ref={nodeVideoRef}
                 src="/node-demo-video.mov"
@@ -380,15 +324,15 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
                 disablePictureInPicture
                 controls={false}
                 tabIndex={-1}
-                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${heroState === 1 ? "opacity-100" : "opacity-0"}`}
+                className="block h-auto w-full object-cover"
               />
               <div className="flex items-center justify-between border-t border-[#dbe6f5] bg-[#eef2f9] px-3 py-2">
               <button
-                onClick={() => { setShowNudge(false); document.getElementById("live-demo")?.scrollIntoView({ behavior: "smooth" }); }}
+                onClick={scrollToDemo}
                 className="flex items-center gap-2 group"
               >
                 <span className="text-left font-mono text-[11px] sm:text-[9px] text-[#3b82f6] group-hover:underline underline-offset-2 sm:whitespace-nowrap">
-                  like what you see? scroll down to see Parametra in action
+                  like what you see? scroll down to see a live transfer
                 </span>
                 <span className="text-[#3b82f6] animate-bounce inline-block">↓</span>
               </button>

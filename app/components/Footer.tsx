@@ -11,7 +11,9 @@ const linkClass = "font-mono text-xs text-[#64748b] hover:text-[#3b82f6] transit
 const iconLinkClass =
   "flex items-center gap-2 font-mono text-xs text-[#64748b] hover:text-[#3b82f6] transition-colors";
 
-type FooterPage = "home" | "how-it-works" | "contact" | "signup" | "terms" | "privacy";
+// "how-it-works" is kept here even though the footer no longer links to it —
+// the page still exists (hidden from nav, reachable by direct URL) and passes it.
+type FooterPage = "home" | "how-it-works" | "pitch" | "contact" | "signup" | "terms" | "privacy";
 
 interface FooterProps {
   currentPage?: FooterPage;
@@ -50,9 +52,9 @@ export default function Footer({ currentPage = "home", onJoinWaitlist }: FooterP
           </div>
           <p className="font-mono text-xs text-[#94a3b8]">v1.5.1.1</p>
           <div className="grid grid-cols-3 justify-items-center gap-x-6 gap-y-3">
-            {currentPage !== "how-it-works" && (
-              <Link href="/how-it-works" className={linkClass}>
-                How It Works
+            {currentPage !== "pitch" && (
+              <Link href="/pitch" className={linkClass}>
+                The Pitch
               </Link>
             )}
             {currentPage !== "contact" && (
@@ -91,9 +93,9 @@ export default function Footer({ currentPage = "home", onJoinWaitlist }: FooterP
               <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-[#94a3b8]">
                 Other Pages
               </p>
-              {currentPage !== "how-it-works" && (
-                <Link href="/how-it-works" className={linkClass}>
-                  How It Works
+              {currentPage !== "pitch" && (
+                <Link href="/pitch" className={linkClass}>
+                  The Pitch
                 </Link>
               )}
               {currentPage !== "signup" && waitlistLink}

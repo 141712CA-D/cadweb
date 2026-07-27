@@ -88,6 +88,19 @@ const EDGES: Edge3D[] = [
 ];
 
 const ease = (t: number) => 1 - Math.pow(1 - t, 3);
+const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+// Slight overshoot for node arrivals — they land with a springy settle
+// instead of a flat stop.
+const easeOutBack = (t: number) => {
+  const c1 = 1.70158;
+  const c3 = c1 + 1;
+  return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+};
+
+// How long a spawned node takes to travel from its parent to its own spot.
+const TRAVEL_MS = 750;
+// Camera pull-back from the root close-up to the full-graph framing.
+const INTRO_MS = 2600;
 
 // The graph's world-space bounding box (x spans roughly ±19, y spans 0 to
 // -28), with a little margin for sphere radii and labels.
@@ -95,6 +108,7 @@ const VERTICAL_FOV_DEG = 42;
 const GRAPH_X_HALF = 24;
 const GRAPH_Y_HALF = 17;
 const GRAPH_Y_CENTER = -14;
+const ROOT_R = 2.4;
 
 // Picks a camera distance that fits the whole graph's bounding box for
 // *whatever* aspect ratio the container has — a fixed distance looked fine
@@ -107,17 +121,37 @@ function fitCameraDistance(aspect: number) {
   return Math.max(distanceForHeight, distanceForWidth) * 1.15;
 }
 
+// Camera distance at which the root sphere's projected diameter equals the 2D
+// intro node's on-screen diameter — this is what makes the DOM node → 3D root
+// handoff pixel-continuous, so the graph reads as growing OUT of the clicked
+// node rather than replacing it.
+function matchCameraDistance(canvasHeightPx: number, nodeDiameterPx: number) {
+  const halfV = (VERTICAL_FOV_DEG * Math.PI) / 360;
+  return (ROOT_R * canvasHeightPx) / (Math.tan(halfV) * nodeDiameterPx);
+}
+
 interface NodeGraph3DProps {
   zoom: boolean;
   onZoomDone?: () => void;
+  // Fires after the first painted frame — the intro uses this to fade the 2D
+  // DOM node only once its 3D twin is actually on screen underneath it.
+  onReady?: () => void;
+  // Fires if the scene can't come up at all — e.g. the three.js chunk 404s
+  // because the tab holds HTML from a previous (preview) deployment, or WebGL
+  // is unavailable. The intro uses this to skip ahead instead of hanging.
+  onError?: () => void;
 }
 
-export default function NodeGraph3D({ zoom, onZoomDone }: NodeGraph3DProps) {
+export default function NodeGraph3D({ zoom, onZoomDone, onReady, onError }: NodeGraph3DProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const zoomRef = useRef(zoom);
   zoomRef.current = zoom;
   const onZoomDoneRef = useRef(onZoomDone);
   onZoomDoneRef.current = onZoomDone;
+  const onReadyRef = useRef(onReady);
+  onReadyRef.current = onReady;
+  const onErrorRef = useRef(onError);
+  onErrorRef.current = onError;
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -133,6 +167,10 @@ export default function NodeGraph3D({ zoom, onZoomDone }: NodeGraph3DProps) {
     let cleanup = () => {};
 
     (async () => {
+      try {
+      // On a preview deployment, a tab holding HTML from an older build can
+      // 404 this hashed chunk (deployment skew) — the catch below turns that
+      // into onError instead of a silent hang.
       const THREE = await import("three");
       if (cancelled) return;
 
@@ -142,8 +180,11 @@ export default function NodeGraph3D({ zoom, onZoomDone }: NodeGraph3DProps) {
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(VERTICAL_FOV_DEG, w / h, 0.1, 500);
       let startZ = fitCameraDistance(w / h);
-      camera.position.set(0, GRAPH_Y_CENTER, startZ);
-      camera.lookAt(0, GRAPH_Y_CENTER, 0);
+      // Match the 2D intro node: h-14 (56px) below sm, h-16 (64px) at sm+.
+      const nodePx = window.innerWidth < 640 ? 56 : 64;
+      const closeZ = matchCameraDistance(h, nodePx);
+      camera.position.set(0, 0, closeZ);
+      camera.lookAt(0, 0, 0);
 
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(w, h);
@@ -159,7 +200,27 @@ export default function NodeGraph3D({ zoom, onZoomDone }: NodeGraph3DProps) {
       scene.add(world);
 
       const mountTime = performance.now();
-      const meshIndex = new Map<string, import("three").Mesh>();
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      // Primary-edge tree parentage — every node spawns from its parent's
+      // live position and flies outward to its own spot.
+      const parentOf = new Map<string, string>();
+      EDGES.forEach((e) => {
+        if (e.primary && !parentOf.has(e.to)) parentOf.set(e.to, e.from);
+      });
+
+      interface NodeState {
+        mesh: import("three").Mesh;
+        mat: import("three").MeshBasicMaterial;
+        finalPos: import("three").Vector3;
+        spawnPos: import("three").Vector3 | null;
+        parentId: string | null;
+        revealAt: number;
+        r: number;
+        phase: number;
+      }
+
+      const nodeStates = new Map<string, NodeState>();
 
       const makeLabel = (text: string) => {
         const canvas = document.createElement("canvas");
@@ -177,40 +238,66 @@ export default function NodeGraph3D({ zoom, onZoomDone }: NodeGraph3DProps) {
         return sprite;
       };
 
-      const sprites: { sprite: import("three").Sprite; revealAt: number }[] = [];
+      const sprites: { sprite: import("three").Sprite; nodeId: string; revealAt: number }[] = [];
 
-      NODES.forEach((n) => {
+      NODES.forEach((n, i) => {
+        const isRoot = n.id === "root";
         const geo = new THREE.SphereGeometry(n.r, 20, 20);
-        const mat = new THREE.MeshBasicMaterial({ color: n.accent ? 0x1d4ed8 : 0x3b82f6, transparent: true, opacity: 0 });
+        const mat = new THREE.MeshBasicMaterial({
+          color: n.accent ? 0x1d4ed8 : 0x3b82f6,
+          transparent: true,
+          opacity: isRoot ? 1 : 0,
+        });
         const mesh = new THREE.Mesh(geo, mat);
         mesh.position.set(n.x, n.y, n.z);
-        mesh.scale.setScalar(0.001);
-        mesh.userData.revealAt = mountTime + n.delay;
+        mesh.scale.setScalar(isRoot ? 1 : 0.001);
         world.add(mesh);
-        meshIndex.set(n.id, mesh);
+
+        nodeStates.set(n.id, {
+          mesh,
+          mat,
+          finalPos: new THREE.Vector3(n.x, n.y, n.z),
+          spawnPos: isRoot ? new THREE.Vector3(n.x, n.y, n.z) : null,
+          parentId: parentOf.get(n.id) ?? null,
+          // The root is fully present the moment the scene appears — it IS the
+          // clicked 2D node, so it must never re-animate in.
+          revealAt: isRoot ? mountTime - 1000 : mountTime + n.delay,
+          r: n.r,
+          phase: i * 2.399,
+        });
 
         const label = makeLabel(n.label);
         label.position.set(n.x, n.y + n.r + 1.6, n.z);
         world.add(label);
-        sprites.push({ sprite: label, revealAt: mountTime + n.delay });
+        // Labels trail their node's arrival slightly; the root's fades in
+        // during the first beat of the pull-back.
+        sprites.push({ sprite: label, nodeId: n.id, revealAt: mountTime + (isRoot ? 400 : n.delay + 350) });
       });
 
-      const edgeLines: { mat: import("three").LineBasicMaterial; revealAt: number; target: number }[] = [];
+      const edgeLines: {
+        line: import("three").Line;
+        mat: import("three").LineBasicMaterial;
+        from: string;
+        to: string;
+        revealAt: number;
+        target: number;
+      }[] = [];
       EDGES.forEach((e) => {
-        const from = meshIndex.get(e.from);
-        const to = meshIndex.get(e.to);
+        const from = nodeStates.get(e.from);
+        const to = nodeStates.get(e.to);
         if (!from || !to) return;
-        const geometry = new THREE.BufferGeometry().setFromPoints([from.position, to.position]);
+        const geometry = new THREE.BufferGeometry().setFromPoints([from.mesh.position, to.mesh.position]);
         const mat = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0 });
         const line = new THREE.Line(geometry, mat);
         world.add(line);
-        edgeLines.push({ mat, revealAt: mountTime + e.delay, target: e.primary ? 0.6 : 0.32 });
+        edgeLines.push({ line, mat, from: e.from, to: e.to, revealAt: mountTime + e.delay, target: e.primary ? 0.6 : 0.32 });
       });
 
       let raf: number;
       let zooming = false;
       let zoomStart = 0;
       let doneCalled = false;
+      let readyCalled = false;
 
       const animate = () => {
         raf = requestAnimationFrame(animate);
@@ -223,17 +310,60 @@ export default function NodeGraph3D({ zoom, onZoomDone }: NodeGraph3DProps) {
           zoomStart = now;
         }
 
-        meshIndex.forEach((mesh) => {
-          const t = Math.max(0, Math.min(1, (now - mesh.userData.revealAt) / 380));
-          const s = ease(t);
-          mesh.scale.setScalar(Math.max(0.001, s));
-          (mesh.material as import("three").MeshBasicMaterial).opacity = s;
+        // ── Camera: glide from the root close-up out to the full-graph frame.
+        // The look target descends with the camera, so the root drifts toward
+        // the top of the screen exactly as the tree grows downward out of it.
+        if (!zooming) {
+          const it = reduceMotion ? 1 : Math.min(1, (now - mountTime) / INTRO_MS);
+          const e = easeInOut(it);
+          const cy = GRAPH_Y_CENTER * e;
+          camera.position.set(0, cy, closeZ + (startZ - closeZ) * e);
+          camera.lookAt(0, cy, 0);
+        }
+
+        // ── Nodes: spawn at the parent's live position, fly out to their own,
+        // land with a springy overshoot, then float gently in place.
+        nodeStates.forEach((s) => {
+          if (now < s.revealAt) return;
+          if (!s.spawnPos) {
+            const parent = s.parentId ? nodeStates.get(s.parentId) : null;
+            s.spawnPos = (parent ? parent.mesh.position : s.finalPos).clone();
+          }
+
+          const tt = Math.min(1, (now - s.revealAt) / TRAVEL_MS);
+          s.mesh.position.lerpVectors(s.spawnPos, s.finalPos, ease(tt));
+
+          if (!reduceMotion && tt >= 1) {
+            const settle = Math.min(1, (now - s.revealAt - TRAVEL_MS) / 1200);
+            const t = now * 0.001;
+            s.mesh.position.x += Math.sin(t * 0.7 + s.phase) * 0.28 * settle;
+            s.mesh.position.y += Math.sin(t * 0.9 + s.phase * 1.7) * 0.34 * settle;
+          }
+
+          const st = Math.min(1, (now - s.revealAt) / 420);
+          s.mesh.scale.setScalar(Math.max(0.001, easeOutBack(st)));
+          s.mat.opacity = ease(Math.min(1, (now - s.revealAt) / 300));
         });
-        sprites.forEach(({ sprite, revealAt }) => {
+
+        // ── Labels ride their node.
+        sprites.forEach(({ sprite, nodeId, revealAt }) => {
+          const s = nodeStates.get(nodeId);
+          if (!s) return;
+          sprite.position.set(s.mesh.position.x, s.mesh.position.y + s.r + 1.6, s.mesh.position.z);
           const t = Math.max(0, Math.min(1, (now - revealAt) / 380));
           (sprite.material as import("three").SpriteMaterial).opacity = ease(t);
         });
-        edgeLines.forEach(({ mat, revealAt, target }) => {
+
+        // ── Edges: endpoints track live node positions every frame, so each
+        // line visibly stretches out with the child it carries.
+        edgeLines.forEach(({ line, mat, from, to, revealAt, target }) => {
+          const a = nodeStates.get(from);
+          const b = nodeStates.get(to);
+          if (!a || !b) return;
+          const positions = line.geometry.attributes.position;
+          positions.setXYZ(0, a.mesh.position.x, a.mesh.position.y, a.mesh.position.z);
+          positions.setXYZ(1, b.mesh.position.x, b.mesh.position.y, b.mesh.position.z);
+          positions.needsUpdate = true;
           const t = Math.max(0, Math.min(1, (now - revealAt) / 380));
           mat.opacity = ease(t) * target;
         });
@@ -249,6 +379,11 @@ export default function NodeGraph3D({ zoom, onZoomDone }: NodeGraph3DProps) {
         }
 
         renderer.render(scene, camera);
+
+        if (!readyCalled) {
+          readyCalled = true;
+          onReadyRef.current?.();
+        }
       };
       animate();
 
@@ -259,12 +394,10 @@ export default function NodeGraph3D({ zoom, onZoomDone }: NodeGraph3DProps) {
           renderer.setSize(rw, rh);
           camera.aspect = rw / rh;
           camera.updateProjectionMatrix();
-          // Re-fit the "at rest" distance for the new aspect ratio — but not
-          // mid-zoom, since that's actively animating camera.position.z itself.
-          if (!zooming) {
-            startZ = fitCameraDistance(rw / rh);
-            camera.position.z = startZ;
-          }
+          // Re-fit the "at rest" distance for the new aspect ratio — the
+          // per-frame camera glide picks it up automatically. Never mid-zoom,
+          // since that phase animates camera.position.z itself.
+          if (!zooming) startZ = fitCameraDistance(rw / rh);
         }
       });
       ro.observe(mount);
@@ -275,6 +408,11 @@ export default function NodeGraph3D({ zoom, onZoomDone }: NodeGraph3DProps) {
         renderer.dispose();
         if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement);
       };
+      } catch {
+        // Chunk failed to load or WebGL refused to initialize — report up so
+        // the intro can skip the 3D beat rather than stall on a locked screen.
+        if (!cancelled) onErrorRef.current?.();
+      }
     })();
 
     return () => {

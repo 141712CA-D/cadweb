@@ -30,3 +30,16 @@ globalThis.IntersectionObserver ??=
 
 Element.prototype.scrollTo ??= () => {};
 Element.prototype.scrollIntoView ??= () => {};
+
+// DemoSection queries these to pick a device shell and to honour reduced
+// motion. jsdom has no media engine, so nothing matches.
+window.matchMedia ??= ((query: string) => ({
+  matches: false,
+  media: query,
+  onchange: null,
+  addEventListener() {},
+  removeEventListener() {},
+  addListener() {},
+  removeListener() {},
+  dispatchEvent: () => false,
+})) as unknown as typeof window.matchMedia;
