@@ -6,14 +6,15 @@ import Hero from "./components/Hero";
 import DevBanner from "./components/DevBanner";
 import SignupModal from "./components/SignupModal";
 import Footer from "./components/Footer";
-import NodeIntro from "./components/NodeIntro";
+// Intro animation temporarily disabled — re-enable by restoring this import and <NodeIntro /> below.
+// import NodeIntro from "./components/NodeIntro";
 
 export default function Home() {
   const [signupModalOpen, setSignupModalOpen] = useState(false);
 
   return (
     <>
-      <NodeIntro />
+      {/* <NodeIntro /> */}
       <DevBanner />
       <main className="flex flex-col min-h-screen bg-[#f8fafc]">
         <Header onJoinWaitlist={() => setSignupModalOpen(true)} />

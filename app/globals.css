@@ -174,6 +174,18 @@ html {
   animation: fade-in 1s ease forwards;
 }
 
+/* ── Hero git tree: branches draw themselves in left-to-right on mount.
+   Paths must set pathLength="1" so the dash math is unit-length. ── */
+@keyframes tree-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+.tree-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: tree-draw 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
 /* ── Reduced motion: entrance animations collapse to a plain fade, ambient
    drift stops. The logo variant re-pins brightness(0) since it normally
    lives inside the animation's own filter keyframes. ── */
@@ -194,6 +206,11 @@ html {
   .bg-drift,
   .bg-drift-alt {
     animation: none;
+  }
+
+  .tree-draw {
+    animation: none;
+    stroke-dashoffset: 0;
   }
 }
 

@@ -2,11 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import DemoSection from "./DemoSection";
+import DemoShowcase from "./DemoShowcase";
+import GitTree from "./GitTree";
 import { isPageTransitioning } from "@/lib/pageTransitionState";
-import { DOCK_ANCHOR_ID } from "@/lib/deviceFlight";
-
-const INTER_CAD_STEPS = ["scanned model", "software-neutral json", "transferred feature-rich design"];
 
 const platformStages = [
   {
@@ -158,7 +156,6 @@ interface HeroProps {
 
 export default function Hero({ onJoinWaitlist }: HeroProps) {
   const treeRef = useRef<HTMLDivElement>(null);
-  const nodeVideoRef = useRef<HTMLVideoElement>(null);
   const [platformIndex, setPlatformIndex] = useState(0);
   const activePlatformStage = platformStages[platformIndex];
   const [showNudge, setShowNudge] = useState(false);
@@ -174,31 +171,6 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
     return () => clearTimeout(timer);
   }, []);
 
-  // Force the hero video to behave like a GIF: always playing, even when the
-  // tab is backgrounded or the browser tries to pause it. Muted + playsInline
-  // keeps autoplay policy happy; we re-issue play() on any pause/visibility change.
-  useEffect(() => {
-    const video = nodeVideoRef.current;
-    if (!video) return;
-
-    const forcePlay = () => {
-      const p = video.play();
-      if (p) p.catch(() => {});
-    };
-
-    forcePlay();
-    video.addEventListener("pause", forcePlay);
-    video.addEventListener("loadeddata", forcePlay);
-    document.addEventListener("visibilitychange", forcePlay);
-
-    return () => {
-      video.removeEventListener("pause", forcePlay);
-      video.removeEventListener("loadeddata", forcePlay);
-      document.removeEventListener("visibilitychange", forcePlay);
-    };
-  }, []);
-
-
   useEffect(() => {
     const onScroll = () => {
       if (window.scrollY > 0) setShowNudge(false);
@@ -207,21 +179,13 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Jump to the demo's dock marker, not the top of its section — the section
-  // starts a scroll runway the window flies in along, so landing at its top
-  // drops you at the far end of that flight with the window still tiny,
-  // rotated, and deliberately not clickable. The marker sits at the point the
-  // flight has finished and the demo is interactive.
   const scrollToDemo = () => {
     setShowNudge(false);
-    const target =
-      document.getElementById(DOCK_ANCHOR_ID) ?? document.getElementById("live-demo");
-    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById("live-demo")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  // Track whether the live-demo section is on screen. Uses IntersectionObserver
-  // (not scroll events) so it still fires while DemoSection has the body scroll
-  // locked — otherwise the nudge could get stranded on top of the locked demo.
+  // Track whether the showcase section is on screen so the scroll nudge can
+  // hide once the reader has reached it.
   useEffect(() => {
     const el = document.getElementById("live-demo");
     if (!el) return;
@@ -253,8 +217,8 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
     <section className="relative bg-[#f8fafc] text-[#0f172a]">
       <div className="absolute inset-0 pointer-events-none grid-bg" />
 
-      {/* ── Initial hero ── */}
-      <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-7xl items-center gap-12 px-5 pb-20 pt-36 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
+      {/* ── Initial hero: statement left, git tree right ── */}
+      <div className="relative z-10 mx-auto grid min-h-screen w-full max-w-7xl items-center gap-10 px-5 pb-20 pt-36 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:gap-14 lg:px-8">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#3b82f6] mb-6">Parametra · v1.0 · Releasing Soon</p>
 
@@ -265,20 +229,6 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
           <p className="mt-6 max-w-md text-sm leading-6 text-[#475569] sm:text-base sm:leading-7">
             Your model shouldn&apos;t be trapped in the tool that made it. Parametra moves a design between Fusion 360, SolidWorks, and Onshape with its feature tree intact — not a dead STEP export.
           </p>
-
-          <div className="mt-8 rounded-lg border border-[#dbe6f5] bg-[#eef2f9] p-4">
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#64748b]">Inter-CAD transfer</p>
-            <div className="mt-3 flex flex-col items-start gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-              {INTER_CAD_STEPS.map((step, i) => (
-                <div key={step} className="flex items-center gap-2">
-                  <span className="rounded-md border border-[#dbe6f5] bg-[#f8fafc] px-2.5 py-1.5 font-mono text-xs text-[#0f172a]">
-                    {step}
-                  </span>
-                  {i < INTER_CAD_STEPS.length - 1 && <span className="font-mono text-xs text-[#94a3b8]">→</span>}
-                </div>
-              ))}
-            </div>
-          </div>
 
           <div className="mt-8 flex items-center gap-4">
             {onJoinWaitlist ? (
@@ -302,50 +252,22 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
               onClick={scrollToDemo}
               className="cursor-pointer font-mono text-xs uppercase tracking-widest text-[#64748b] hover:text-[#3b82f6] transition-colors"
             >
-              See a transfer →
+              See the app →
             </button>
           </div>
         </div>
 
-        <div className="flex flex-col gap-5">
-          <p className="text-sm leading-6 text-[#475569]">
-            Parametra reads the source model down to its design intent, stores it as a software-neutral graph, and rebuilds it natively in the target CAD tool — features, sketches, and dimensions still editable on the other side.
+        <div className="flex flex-col gap-4">
+          <GitTree className="w-full" />
+          <p className="text-center text-2xl font-black tracking-tight text-[#0f172a] sm:text-3xl">
+            Own. Your. <span className="text-[#3b82f6]">Workflow.</span>
           </p>
-          <div className="rounded-lg border border-[#dbe6f5] bg-[#eef2f9] p-4 overflow-hidden">
-            <div className="relative bg-[#f8fafc]">
-              <video
-                ref={nodeVideoRef}
-                src="/node-demo-video.mov"
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload="auto"
-                disablePictureInPicture
-                controls={false}
-                tabIndex={-1}
-                className="block h-auto w-full object-cover"
-              />
-              <div className="flex items-center justify-between border-t border-[#dbe6f5] bg-[#eef2f9] px-3 py-2">
-              <button
-                onClick={scrollToDemo}
-                className="flex items-center gap-2 group"
-              >
-                <span className="text-left font-mono text-[11px] sm:text-[9px] text-[#3b82f6] group-hover:underline underline-offset-2 sm:whitespace-nowrap">
-                  like what you see? scroll down to see a live transfer
-                </span>
-                <span className="text-[#3b82f6] animate-bounce inline-block">↓</span>
-              </button>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* ── Live demo video ── */}
-      <div className="relative z-10">
-        <DemoSection />
-      </div>
+      {/* ── Application showcase (the interactive mock-app demo lives in
+          DemoSection.tsx, currently unmounted) ── */}
+      <DemoShowcase />
 
       {/* ── Scroll nudge ── */}
       <div

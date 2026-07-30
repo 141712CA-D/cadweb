@@ -194,7 +194,7 @@ export default function PitchPage() {
             <Reveal className="rounded-lg border border-[#dbe6f5] bg-[#f8fafc] p-5" threshold={0.2}>
               <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#3b82f6]">Live Transfer</p>
               <video
-                src="/node-demo-video.mov"
+                src="/graph_recording.mov"
                 autoPlay
                 loop
                 muted

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import { lockScroll, unlockScroll } from "../../lib/scrollLock";
 import DeviceShell, { type DeviceKind } from "./DeviceShell";
 import {
@@ -15,350 +14,269 @@ import {
   type FlightFrame,
 } from "../../lib/deviceFlight";
 
-const InterCadPanel = dynamic(() => import("./InterCadPanel"), { ssr: false });
-
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type MsgType = "user" | "thinking" | "assistant" | "result" | "status";
-interface Msg {
-  id: string;
-  type: MsgType;
-  text?: string;
-  lines?: string[];
+export type AppView = "home" | "pulling" | "graph" | "history";
+
+export interface AppStep {
+  delay: number;
+  view?: AppView;
+  pullStatus?: string;
+  header?: "capture";
+  badges?: boolean;
+  docs?: number;
+  studios?: number;
+  chips?: number;
+  nodes?: number;
+  done?: boolean;
 }
 
-interface Step {
-  delay: number;
-  show?: string[];
-  features?: string[];
-  typing?: boolean;
+export interface HistoryEvent {
+  t: number;
+  level: "info" | "ok" | "warn";
+  text: string;
+  time: string;
+}
+
+export type NodeKind = "folder" | "document" | "partstudio" | "tab" | "workflow";
+
+export interface GraphNode {
+  id: string;
+  label: string;
+  kind: NodeKind;
+  x: number;
+  y: number;
+}
+
+export interface GraphEdge {
+  from: string;
+  to: string;
+  accent?: boolean;
 }
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 //
-// The live demo plays ONE scripted run: the Inter-CAD transfer
-// (TRANSFER_MESSAGES / TRANSFER_SCRIPT / TRANSFER_LOG_LINES). The middle
-// panel's Inter-CAD breakdown builds progressively in step with it via the
-// `stage` prop on InterCadPanel.
-//
-// The text-to-CAD generation data below (MESSAGES / SCRIPT / FEATURES /
-// VAR_GROUPS / LOG_LINES) is intentionally NOT wired into the live demo
-// anymore — it's kept exported for the data-invariant tests and for reuse
-// if the generation demo returns elsewhere.
+// The live demo plays ONE scripted run mirroring the real Parametra desktop
+// app: Pull from Onshape → Home dashboard populates → Intent graph builds.
+// Everything on screen is driven by these exported constants — covered by the
+// invariant tests in __tests__/components/DemoSection.data.test.ts, so run
+// `npm test` after editing any of them.
 
-// ── Text-to-CAD generation data (not surfaced in the live demo) ──────────────
-
-export const MESSAGES: Msg[] = [
-  {
-    id: "u1",
-    type: "user",
-    text: "make in a new part studio a mug for my daily coffee",
-  },
-  {
-    id: "think1",
-    type: "thinking",
-    lines: [
-      'intent → new_part_studio: true, object: "mug"',
-      "geometry class → revolve_with_handle",
-      "missing params: height, base_dia, wall_thickness, handle",
-    ],
-  },
-  {
-    id: "a1",
-    type: "assistant",
-    text: "I'll set up a new Part Studio for your mug. A few quick questions:\n\n1. How tall? (typical: 85–105 mm)\n2. Base diameter? (typical: 65–80 mm)\n3. Wall thickness? I'll default to 4 mm if you're unsure.",
-  },
-  {
-    id: "u2",
-    type: "user",
-    text: "about 95mm tall, 70mm base, default wall is fine",
-  },
-  {
-    id: "think2",
-    type: "thinking",
-    lines: [
-      "height=95.0 mm ✓",
-      "base_dia=70.0 mm ✓",
-      "wall=4.0 mm (default) ✓",
-      "taper → mid_dia=82.0, top_dia=76.0",
-    ],
-  },
-  {
-    id: "a2",
-    type: "assistant",
-    text: "Got it — height, base, and wall locked in.\n\nLast thing: handle size? Standard grip is 12 mm wide × 55 mm tall.",
-  },
-  { id: "u3", type: "user", text: "standard handle works" },
-  {
-    id: "think3",
-    type: "thinking",
-    lines: [
-      "handle_width=12.0 ✓  handle_height=55.0 ✓",
-      "building feature tree…",
-      "  Sketch_Base → Revolve1 → Shell1",
-      "  Sketch_Handle → Extrude_Handle → Fillet1",
-      "Onshape API → document created ✓",
-    ],
-  },
-  { id: "result", type: "result" },
+export const DOCUMENTS: { id: string; name: string; fetches: string; time: string }[] = [
+  { id: "tbs",    name: "TBS Lucid Pro Stack - F4 FC + 60A 3-6S AM32 4-in-1 ESC", fetches: "1 fetch", time: "13:28" },
+  { id: "ms",     name: "MasterSketch",                                            fetches: "1 fetch", time: "13:28" },
+  { id: "hqprop", name: "HQProp Durable T5×3 Toothpick Propeller",                 fetches: "1 fetch", time: "13:28" },
+  { id: "hglrc",  name: "HGLRC SPECTER 2004 1800KV brushless motor",               fetches: "1 fetch", time: "13:28" },
 ];
 
-// icon: "sketch" | "plane" | "solid"
-export const FEATURES: { id: string; name: string; icon: "sketch" | "plane" | "solid" }[] = [
-  { id: "f1",  name: "BaseProfile",  icon: "sketch" },
-  { id: "f2",  name: "MidPlane",     icon: "plane"  },
-  { id: "f3",  name: "MidProfile",   icon: "sketch" },
-  { id: "f4",  name: "TopPlane",     icon: "plane"  },
-  { id: "f5",  name: "TopProfile",   icon: "sketch" },
-  { id: "f6",  name: "MugBody",      icon: "solid"  },
-  { id: "f7",  name: "MugHollow",    icon: "solid"  },
-  { id: "f8",  name: "BaseRim",      icon: "solid"  },
-  { id: "f9",  name: "TopRim",       icon: "solid"  },
-  { id: "f10", name: "HandlePlane",  icon: "plane"  },
-  { id: "f11", name: "HandleOuter",  icon: "sketch" },
-  { id: "f12", name: "Handle",       icon: "solid"  },
+export const PART_STUDIOS: { id: string; name: string; meta: string; status: "partial" | "success" }[] = [
+  { id: "gorilla", name: "Gorilla mounting pattern with standoff", meta: "3 features · 934 warn", status: "partial" },
+  { id: "ps1",     name: "Part Studio 1",                          meta: "0 features",            status: "success" },
 ];
 
-export const VAR_GROUPS: { label: string; vars: [string, string, string][] }[] = [
-  {
-    label: "Body",
-    vars: [
-      ["base_dia",  "70.0", "mm"],
-      ["mid_dia",   "82.0", "mm"],
-      ["top_dia",   "76.0", "mm"],
-      ["height",    "95.0", "mm"],
-      ["wall",      "4.0",  "mm"],
-    ],
-  },
-  {
-    label: "Handle",
-    vars: [
-      ["handle_width",  "12.0", "mm"],
-      ["handle_height", "55.0", "mm"],
-      ["handle_offset", "20.0", "mm"],
-      ["handle_depth",  "10.0",  "mm"],
-    ],
-  },
+export const SESSION_CHIPS: string[] = [
+  "HGLRC SPECTER 2004 1800KV brushless motor",
+  "HQProp Durable T5×3 Toothpick Propeller",
+  "MasterSketch · MasterSketch",
+  "TBS Lucid Pro Stack - F4 FC + 60A AM32",
 ];
 
-// Recent documents. "Daily Mug" is the transferred document — it's the active
-// one because the transfer is the primary demo.
-const HISTORY = [
-  { id: "transfer", label: "Daily Mug",          sub: "Fusion 360 → Onshape" },
-  { id: "bracket",  label: "M6_bracket_v2",      sub: "Part Studio"          },
-  { id: "gear",     label: "spur_gear_set",      sub: "Assembly"             },
-  { id: "clamp",    label: "shaft_clamp_30mm",   sub: "Part Studio"          },
+// Intent-graph nodes, ordered hub-first so the scripted bloom reveals the
+// structure before its leaves. Positions live in a 1000×560 viewBox.
+export const GRAPH_NODES: GraphNode[] = [
+  { id: "wf",    label: "Example Workflow",               kind: "workflow",   x: 500, y: 330 },
+  { id: "tbs",   label: "TBS Lucid Pro Stack - F4 FC…",   kind: "workflow",   x: 455, y: 155 },
+  { id: "hglrc", label: "HGLRC SPECTER 2004 1800KV b…",   kind: "folder",     x: 615, y: 415 },
+  { id: "hqp-f", label: "HQProp T5x3",                    kind: "folder",     x: 255, y: 175 },
+  { id: "ms-d",  label: "MasterSketch",                   kind: "document",   x: 365, y: 400 },
+  { id: "hqp-d", label: "HQProp Durable T5x3 Toothpi…",   kind: "document",   x: 330, y: 235 },
+  { id: "gor2",  label: "Gorilla mounting pattern wi…",   kind: "document",   x: 680, y: 190 },
+  { id: "ms-p",  label: "MasterSketch",                   kind: "partstudio", x: 275, y: 355 },
+  { id: "ps1b",  label: "Part Studio 1",                  kind: "partstudio", x: 640, y: 490 },
+  { id: "pcb1",  label: "PCB Studio",                     kind: "tab",        x: 560, y: 100 },
+  { id: "ps1a",  label: "Part Studio 1",                  kind: "tab",        x: 420, y: 105 },
+  { id: "rnd",   label: "3D rendering.png",               kind: "tab",        x: 665, y: 120 },
+  { id: "gor1",  label: "Gorilla mounting pattern wi…",   kind: "tab",        x: 510, y: 75  },
+  { id: "gor3",  label: "Gorilla mounting pattern wi…",   kind: "tab",        x: 415, y: 218 },
+  { id: "ecad",  label: "EX ECAD Files",                  kind: "tab",        x: 448, y: 190 },
+  { id: "prop",  label: "Propeller Dimensions",           kind: "tab",        x: 478, y: 228 },
+  { id: "asm1",  label: "Assembly 1",                     kind: "tab",        x: 350, y: 300 },
+  { id: "bom1",  label: "BOM : Assembly 1",               kind: "tab",        x: 655, y: 305 },
+  { id: "spec",  label: "Spec Sheet",                     kind: "tab",        x: 505, y: 362 },
+  { id: "eff",   label: "Efficacy Table",                 kind: "tab",        x: 705, y: 352 },
+  { id: "mot",   label: "Motor Dimensions",               kind: "tab",        x: 695, y: 442 },
+  { id: "fvs",   label: "FrameVarsStudio",                kind: "tab",        x: 300, y: 448 },
+  { id: "asm2",  label: "Assembly 1",                     kind: "tab",        x: 520, y: 452 },
+  { id: "bom2",  label: "BOM : Assembly 1",               kind: "tab",        x: 430, y: 482 },
+  { id: "pcb2",  label: "PCB Studio",                     kind: "tab",        x: 500, y: 498 },
+  { id: "pack",  label: "Packing List",                   kind: "tab",        x: 568, y: 502 },
+  { id: "draw",  label: "Drawings",                       kind: "tab",        x: 602, y: 520 },
 ];
 
-export const SCRIPT: Step[] = [
-  { delay: 700,   show: ["u1"] },
-  { delay: 1500,  typing: true },
-  { delay: 3200,  show: ["think1", "a1"], typing: false },
-  { delay: 4600,  show: ["u2"] },
-  { delay: 5400,  typing: true },
-  { delay: 7200,  show: ["think2", "a2"], typing: false },
-  { delay: 8600,  show: ["u3"] },
-  { delay: 9400,  typing: true },
-  { delay: 11000, show: ["think3"], features: ["f1","f2","f3","f4"], typing: false },
-  { delay: 11800, features: ["f5","f6","f7","f8"] },
-  { delay: 12600, features: ["f9","f10","f11","f12"] },
-  { delay: 13600, show: ["result"] },
+export const GRAPH_EDGES: GraphEdge[] = [
+  { from: "wf",    to: "tbs" },
+  { from: "wf",    to: "hglrc" },
+  { from: "wf",    to: "ms-d" },
+  { from: "wf",    to: "asm1" },
+  { from: "wf",    to: "spec" },
+  { from: "wf",    to: "bom1" },
+  { from: "wf",    to: "gor3" },
+  { from: "tbs",   to: "pcb1" },
+  { from: "tbs",   to: "ps1a" },
+  { from: "tbs",   to: "gor1" },
+  { from: "tbs",   to: "rnd" },
+  { from: "tbs",   to: "gor2" },
+  { from: "tbs",   to: "ecad" },
+  { from: "tbs",   to: "prop" },
+  { from: "tbs",   to: "hqp-d" },
+  { from: "hqp-f", to: "hqp-d" },
+  { from: "hqp-d", to: "gor3" },
+  { from: "ms-d",  to: "ms-p" },
+  { from: "ms-p",  to: "fvs", accent: true },
+  { from: "hglrc", to: "eff" },
+  { from: "hglrc", to: "mot", accent: true },
+  { from: "hglrc", to: "asm2" },
+  { from: "hglrc", to: "bom2" },
+  { from: "hglrc", to: "pcb2" },
+  { from: "hglrc", to: "pack" },
+  { from: "hglrc", to: "ps1b" },
+  { from: "hglrc", to: "draw" },
+  { from: "gor2",  to: "rnd" },
 ];
 
-// ── Log lines (timed to match the script) ────────────────────────────────────
-interface LogLine { t: number; level: "info" | "api" | "ok" | "warn"; text: string }
-export const LOG_LINES: LogLine[] = [
-  { t: 700,   level: "info", text: '[NLM]  parsing → intent=new_part_studio, object="mug"' },
-  { t: 900,   level: "info", text: "[NLM]  geometry class → revolve_with_handle" },
-  { t: 1100,  level: "info", text: "[NLM]  missing params: height, base_dia, wall, handle" },
-  { t: 3200,  level: "info", text: "[INTERP] emitting clarification request (3 params)" },
-  { t: 4600,  level: "info", text: "[NLM]  user reply → height=95mm, base_dia=70mm, wall=default" },
-  { t: 4800,  level: "info", text: "[INTERP] resolved: height=95.0 base_dia=70.0 wall=4.0" },
-  { t: 5000,  level: "info", text: "[INTERP] computing taper: mid_dia=82.0 top_dia=76.0" },
-  { t: 7200,  level: "info", text: "[INTERP] emitting clarification request (1 param)" },
-  { t: 8600,  level: "info", text: "[NLM]  user reply → handle=standard" },
-  { t: 8800,  level: "info", text: "[INTERP] resolved: handle_width=12.0 handle_height=55.0" },
-  { t: 9000,  level: "info", text: "[REASON] building feature tree…" },
-  { t: 9200,  level: "info", text: "[EXEC]  POST /api/documents  → 200 OK  (doc_id: d3361738f)" },
-  { t: 9400,  level: "api",  text: "[EXEC]  POST /api/partstudios/d3361738f/features  (BaseProfile)" },
-  { t: 9600,  level: "ok",   text: "        ↳ 200  feature_id=fid_001  t=143ms" },
-  { t: 9800,  level: "api",  text: "[EXEC]  POST /api/partstudios/d3361738f/features  (MidPlane)" },
-  { t: 9950,  level: "ok",   text: "        ↳ 200  feature_id=fid_002  t=98ms" },
-  { t: 10100, level: "api",  text: "[EXEC]  POST /api/partstudios/d3361738f/features  (MidProfile)" },
-  { t: 10250, level: "ok",   text: "        ↳ 200  feature_id=fid_003  t=112ms" },
-  { t: 10400, level: "api",  text: "[EXEC]  POST /api/partstudios/d3361738f/features  (TopPlane)" },
-  { t: 10530, level: "ok",   text: "        ↳ 200  feature_id=fid_004  t=91ms" },
-  { t: 10650, level: "api",  text: "[EXEC]  POST /api/partstudios/d3361738f/features  (TopProfile)" },
-  { t: 10780, level: "ok",   text: "        ↳ 200  feature_id=fid_005  t=105ms" },
-  { t: 10900, level: "api",  text: "[EXEC]  POST /api/partstudios/d3361738f/features  (MugBody)" },
-  { t: 11050, level: "ok",   text: "        ↳ 200  feature_id=fid_006  t=187ms" },
-  { t: 11200, level: "api",  text: "[EXEC]  POST /api/partstudios/d3361738f/features  (MugHollow)" },
-  { t: 11360, level: "ok",   text: "        ↳ 200  feature_id=fid_007  t=203ms" },
-  { t: 11500, level: "api",  text: "[EXEC]  POST /api/partstudios/d3361738f/features  (BaseRim)" },
-  { t: 11640, level: "ok",   text: "        ↳ 200  feature_id=fid_008  t=134ms" },
-  { t: 11800, level: "api",  text: "[EXEC]  POST /api/partstudios/d3361738f/features  (TopRim)" },
-  { t: 11940, level: "ok",   text: "        ↳ 200  feature_id=fid_009  t=129ms" },
-  { t: 12100, level: "api",  text: "[EXEC]  POST /api/partstudios/d3361738f/features  (HandlePlane)" },
-  { t: 12230, level: "ok",   text: "        ↳ 200  feature_id=fid_010  t=88ms" },
-  { t: 12380, level: "api",  text: "[EXEC]  POST /api/partstudios/d3361738f/features  (HandleOuter)" },
-  { t: 12510, level: "ok",   text: "        ↳ 200  feature_id=fid_011  t=118ms" },
-  { t: 12660, level: "api",  text: "[EXEC]  POST /api/partstudios/d3361738f/features  (Handle)" },
-  { t: 12800, level: "ok",   text: "        ↳ 200  feature_id=fid_012  t=211ms" },
-  { t: 13000, level: "api",  text: "[EXEC]  POST /api/variables/d3361738f  (9 vars)" },
-  { t: 13150, level: "ok",   text: "        ↳ 200  variables bound  t=74ms" },
-  { t: 13400, level: "ok",   text: "[DONE]  12 features · 9 variables · total=4.2s" },
+// Session events streamed into the History tab while the run plays — the
+// timestamps are relative to startDemo, like a log timeline.
+export const HISTORY_EVENTS: HistoryEvent[] = [
+  { t: 300,  level: "info", text: "Pull from Onshape started",                          time: "13:28" },
+  { t: 900,  level: "info", text: "Opening 5 Part Studios…",                            time: "13:28" },
+  { t: 2700, level: "ok",   text: "Fetched TBS Lucid Pro Stack - F4 FC + AM32 ESC",     time: "13:28" },
+  { t: 3100, level: "ok",   text: "Fetched MasterSketch",                               time: "13:28" },
+  { t: 3500, level: "ok",   text: "Fetched HQProp Durable T5×3 Toothpick Propeller",    time: "13:28" },
+  { t: 3900, level: "ok",   text: "Fetched HGLRC SPECTER 2004 1800KV brushless motor",  time: "13:28" },
+  { t: 4600, level: "info", text: "Capture opened · Part Studio 1",                     time: "13:28" },
+  { t: 5100, level: "warn", text: "Rebuild finished partial — 2 warnings raised",       time: "13:28" },
+  { t: 6300, level: "info", text: "Intent graph build started",                         time: "13:28" },
+  { t: 8900, level: "ok",   text: "Intent graph ready · 27 nodes · 28 edges",           time: "13:28" },
 ];
 
-// ── Primary run: Inter-CAD transfer conversation ─────────────────────────────
-
-export const TRANSFER_MESSAGES: Msg[] = [
-  {
-    id: "tu1",
-    type: "user",
-    text: "transfer my Daily Mug model from Fusion360 to Onshape",
-  },
-  {
-    id: "tstatus",
-    type: "status",
-    lines: [
-      "finding project",
-      "gathering intent web",
-      'mapping direct feature conversions into new onshape document called "Daily Mug"',
-      "replicating non-direct features",
-      "processed model",
-    ],
-  },
-  {
-    id: "ta1",
-    type: "assistant",
-    text: "Daily Mug is now live in Onshape — 7 features carried over directly, 6 replicated to match Onshape's feature set.\n\nOpen the breakdown on the left to see exactly how each Fusion feature translated, and drag through the intent web to explore the mapping.",
-  },
-  { id: "tresult", type: "result" },
+export const APP_SCRIPT: AppStep[] = [
+  { delay: 300,  view: "pulling", pullStatus: "Contacting Onshape…" },
+  { delay: 900,  pullStatus: "Opening 5 Part Studios…" },
+  { delay: 1900, pullStatus: "Reading feature trees…" },
+  { delay: 2600, view: "home", header: "capture", docs: 1 },
+  { delay: 3000, docs: 2 },
+  { delay: 3400, docs: 3 },
+  { delay: 3800, docs: 4 },
+  { delay: 4300, studios: 1 },
+  { delay: 4800, studios: 2, badges: true },
+  { delay: 5800, view: "graph" },
+  { delay: 6000, chips: 1 },
+  { delay: 6200, chips: 2 },
+  { delay: 6400, chips: 3 },
+  { delay: 6600, chips: 4 },
+  { delay: 6900, nodes: 3 },
+  { delay: 7300, nodes: 8 },
+  { delay: 7700, nodes: 14 },
+  { delay: 8100, nodes: 20 },
+  { delay: 8500, nodes: 27 },
+  { delay: 9300, done: true },
 ];
 
-interface TransferStep { delay: number; show?: string[]; statusLines?: number; typing?: boolean }
+// ── Shared palette (self-contained dark theme, like a product screenshot) ────
 
-export const TRANSFER_SCRIPT: TransferStep[] = [
-  { delay: 400,  show: ["tu1"] },
-  { delay: 1200, typing: true },
-  { delay: 2400, show: ["tstatus"], typing: false },
-  { delay: 2500, statusLines: 1 },
-  { delay: 3600, statusLines: 2 },
-  { delay: 5000, statusLines: 3 },
-  { delay: 6300, statusLines: 4 },
-  { delay: 7500, statusLines: 5 },
-  { delay: 8300, show: ["ta1"] },
-  { delay: 9200, show: ["tresult"] },
+const NODE_STYLE: Record<NodeKind, { color: string; r: number }> = {
+  workflow:   { color: "#f59e0b", r: 11 },
+  folder:     { color: "#3b82f6", r: 8 },
+  document:   { color: "#8b5cf6", r: 7 },
+  partstudio: { color: "#c084fc", r: 6 },
+  tab:        { color: "#94a9c9", r: 5 },
+};
+
+const LEGEND: { label: string; color: string }[] = [
+  { label: "folder",      color: "#3b82f6" },
+  { label: "document",    color: "#8b5cf6" },
+  { label: "part studio", color: "#c084fc" },
+  { label: "other tab",   color: "#94a9c9" },
 ];
 
-// Log lines for the transfer run — timed against TRANSFER_SCRIPT so the Logs
-// tab stays in step with the conversation.
-export const TRANSFER_LOG_LINES: LogLine[] = [
-  { t: 400,  level: "info", text: '[NLM]  parsing → intent=inter_cad_transfer, object="Daily Mug"' },
-  { t: 600,  level: "info", text: "[NLM]  source=fusion360  target=onshape" },
-  { t: 900,  level: "info", text: '[SCAN] locating project "Daily Mug" in Fusion 360 hub' },
-  { t: 2500, level: "api",  text: "[SCAN] GET /f360/projects/daily-mug/timeline" },
-  { t: 2700, level: "ok",   text: "        ↳ 200  13 timeline nodes  t=214ms" },
-  { t: 3600, level: "info", text: "[INTENT] lifting timeline → software-neutral intent web" },
-  { t: 3800, level: "info", text: "[INTENT] resolved 13 nodes · 21 dependency edges" },
-  { t: 4100, level: "warn", text: "[INTENT] 3 inline sketch planes have no Onshape equivalent" },
-  { t: 4300, level: "warn", text: "[INTENT] 2 implicit fillet edge loops need re-derivation" },
-  { t: 5000, level: "info", text: "[MAP]  direct conversions → 7 features" },
-  { t: 5100, level: "api",  text: "[EXEC] POST /api/documents  (Daily Mug)" },
-  { t: 5200, level: "ok",   text: "        ↳ 200  doc_id=a91c4b7e2  t=168ms" },
-  { t: 5300, level: "api",  text: "[EXEC] Sketch1 → BaseProfile" },
-  { t: 5380, level: "ok",   text: "        ↳ 200  feature_id=fid_001  t=141ms" },
-  { t: 5460, level: "api",  text: "[EXEC] Sketch2 → MidProfile" },
-  { t: 5540, level: "ok",   text: "        ↳ 200  feature_id=fid_002  t=118ms" },
-  { t: 5620, level: "api",  text: "[EXEC] Sketch3 → TopProfile" },
-  { t: 5700, level: "ok",   text: "        ↳ 200  feature_id=fid_003  t=124ms" },
-  { t: 5780, level: "api",  text: "[EXEC] Sketch4 → HandleOuter" },
-  { t: 5860, level: "ok",   text: "        ↳ 200  feature_id=fid_004  t=109ms" },
-  { t: 5940, level: "api",  text: "[EXEC] Revolve1 → MugBody" },
-  { t: 6020, level: "ok",   text: "        ↳ 200  feature_id=fid_005  t=203ms" },
-  { t: 6100, level: "api",  text: "[EXEC] Shell1 → MugHollow" },
-  { t: 6180, level: "ok",   text: "        ↳ 200  feature_id=fid_006  t=176ms" },
-  { t: 6260, level: "api",  text: "[EXEC] Extrude1 → Handle" },
-  { t: 6340, level: "ok",   text: "        ↳ 200  feature_id=fid_007  t=152ms" },
-  { t: 6440, level: "info", text: "[REPL] 6 features have no direct equivalent — replicating" },
-  { t: 6560, level: "api",  text: "[REPL] inline sketch plane (Mid) ⇢ MidPlane" },
-  { t: 6660, level: "ok",   text: "        ↳ 200  feature_id=fid_008  t=96ms" },
-  { t: 6780, level: "api",  text: "[REPL] inline sketch plane (Top) ⇢ TopPlane" },
-  { t: 6880, level: "ok",   text: "        ↳ 200  feature_id=fid_009  t=91ms" },
-  { t: 7000, level: "api",  text: "[REPL] inline sketch plane (Handle) ⇢ HandlePlane" },
-  { t: 7100, level: "ok",   text: "        ↳ 200  feature_id=fid_010  t=88ms" },
-  { t: 7220, level: "api",  text: "[REPL] implicit fillet loop (Base) ⇢ BaseRim" },
-  { t: 7340, level: "ok",   text: "        ↳ 200  feature_id=fid_011  t=187ms" },
-  { t: 7460, level: "api",  text: "[REPL] implicit fillet loop (Top) ⇢ TopRim" },
-  { t: 7580, level: "ok",   text: "        ↳ 200  feature_id=fid_012  t=174ms" },
-  { t: 7700, level: "api",  text: "[REPL] appearance · Ceramic Gloss ⇢ part property" },
-  { t: 7820, level: "ok",   text: "        ↳ 200  applied  t=64ms" },
-  { t: 7960, level: "info", text: "[VERIFY] rebuild regenerated clean — 0 errors, 0 warnings" },
-  { t: 8100, level: "ok",   text: "[DONE]  13 features mapped · 7 direct · 6 replicated · total=8.1s" },
+const INTEROP_ITEMS = [
+  "Intent graph",
+  "Timeline",
+  "Sketches",
+  "Parameters",
+  "Readiness",
+  "Risks",
+  "Dependencies",
+  "Raw JSON",
 ];
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function DemoSection() {
-  const sectionRef  = useRef<HTMLDivElement>(null);
-  const chatRef     = useRef<HTMLDivElement>(null);
-  const startedRef  = useRef(false);
-  const lockedRef   = useRef(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const startedRef = useRef(false);
+  const lockedRef  = useRef(false);
 
-  // Always start empty (SSR-safe) — fast-forward to complete state in useEffect if already played
-  const [started,      setStarted]      = useState(false);
-  const [expandedSet,  setExpandedSet]  = useState<Set<string>>(new Set());
-  const [activeTab,    setActiveTab]    = useState<"conversation" | "logs">("conversation");
-  const [visibleLogs,  setVisibleLogs]  = useState<LogLine[]>([]);
-  const [shelfOpen,    setShelfOpen]    = useState(false);
+  // Always start empty (SSR-safe) — fast-forward to complete state in useEffect
+  // if the demo already played this session.
+  const [started, setStarted] = useState(false);
+  const [view, setView]             = useState<AppView>("home");
+  const [headerCapture, setHeaderCapture] = useState(false);
+  const [badges, setBadges]         = useState(false);
+  const [pullStatus, setPullStatus] = useState("Contacting Onshape…");
+  const [docCount, setDocCount]     = useState(0);
+  const [studioCount, setStudioCount] = useState(0);
+  const [chipCount, setChipCount]   = useState(0);
+  const [nodeCount, setNodeCount]   = useState(0);
+  const [historyShown, setHistoryShown] = useState<HistoryEvent[]>([]);
+  const [done, setDone]             = useState(false);
+  const [signedIn, setSignedIn]     = useState(false);
+  const [shelfOpen, setShelfOpen]   = useState(false);
+  const [showMobileHint, setShowMobileHint] = useState(false);
 
-  // Primary run — Inter-CAD transfer (played by the start gate)
-  const [visibleTransferMsgs, setVisibleTransferMsgs] = useState<Set<string>>(new Set());
-  const [transferTyping,     setTransferTyping]     = useState(false);
-  const [statusLineCount,    setStatusLineCount]    = useState(0);
-  const [transferDone,       setTransferDone]       = useState(false);
-
-  // Phone-only equivalent of the desktop cursor hint — the breakdown panel
-  // lives behind the hamburger shelf on mobile, so instead of a click-through
-  // sequence we just point at the hamburger once.
-  const [showMobileHint,     setShowMobileHint]     = useState(false);
-
-  const logsRef       = useRef<HTMLDivElement>(null);
-  const logsTabRef    = useRef<HTMLButtonElement>(null);
-  const convTabRef    = useRef<HTMLButtonElement>(null);
+  const historyRef    = useRef<HTMLDivElement>(null);
+  const historyNavRef = useRef<HTMLButtonElement>(null);
+  const graphNavRef   = useRef<HTMLButtonElement>(null);
+  const loginRef      = useRef<HTMLButtonElement>(null);
   const cursorRunning = useRef(false);
 
   // ── Device flight ──────────────────────────────────────────────────────────
-  // The window rides a 3D arc through the section: in from the back-left as a
-  // MacBook/phone, docked while it's readable, then outward past the camera.
+  // The window rides a 3D arc into the section: in from the back-left as a
+  // MacBook/phone, then docked for the rest of the runway.
   const flyRef  = useRef<HTMLDivElement>(null);
   const dockRef = useRef<HTMLDivElement>(null);
   // Which shell flies in. Laptop is the SSR default; the shell is invisible at
   // rest (--chrome: 0), so correcting it on mount can't flash.
   const [device, setDevice] = useState<DeviceKind>("laptop");
 
-  // Ref mirrors state so the async cursor animation reads fresh values
-  // even if the user interacts between transferDone and the animation starting.
-  const activeTabRef = useRef(activeTab);
-  useEffect(() => { activeTabRef.current = activeTab; }, [activeTab]);
-
   // Cursor animation state (desktop-only hint)
   const [cursor, setCursor] = useState({ x: 0, y: 0, visible: false, tooltip: "", clicking: false });
 
-  // On mount: if the demo already played this session, fast-forward the
-  // transfer run to its complete state immediately.
+  const applyStep = (s: AppStep) => {
+    if (s.view) setView(s.view);
+    if (s.pullStatus) setPullStatus(s.pullStatus);
+    if (s.header === "capture") setHeaderCapture(true);
+    if (s.badges) setBadges(true);
+    if (s.docs !== undefined) setDocCount(s.docs);
+    if (s.studios !== undefined) setStudioCount(s.studios);
+    if (s.chips !== undefined) setChipCount(s.chips);
+    if (s.nodes !== undefined) setNodeCount(s.nodes);
+    if (s.done) setDone(true);
+  };
+
+  // On mount: if the demo already played this session, fast-forward the run to
+  // its complete state immediately. sessionStorage is unreadable during SSR, so
+  // this must stay a post-mount state write.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (sessionStorage.getItem("demoAnimPlayed") !== "true") return;
     startedRef.current = true;
     setStarted(true);
-    setVisibleTransferMsgs(new Set(TRANSFER_MESSAGES.map(m => m.id)));
-    setStatusLineCount(
-      TRANSFER_MESSAGES.find(m => m.type === "status")?.lines?.length ?? 0,
-    );
-    setVisibleLogs(TRANSFER_LOG_LINES);
-    setTransferDone(true);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    APP_SCRIPT.forEach(applyStep);
+    setHistoryShown(HISTORY_EVENTS);
+    setView("graph");
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Pick the shell that matches the form factor being shown.
   useEffect(() => {
@@ -412,21 +330,15 @@ export default function DemoSection() {
     };
   }, []);
 
-  // Scroll chat pane to bottom on new content
+  // Keep the History feed pinned to the newest event.
   useEffect(() => {
-    const el = chatRef.current;
+    const el = historyRef.current;
     if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-  }, [visibleTransferMsgs, transferTyping, statusLineCount]);
-
-  // Scroll logs pane to bottom
-  useEffect(() => {
-    const el = logsRef.current;
-    if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-  }, [visibleLogs]);
+  }, [historyShown, view]);
 
   // The demo is gated behind an explicit start button — it never auto-plays on
   // scroll. Clicking snaps the section into view, locks scroll, and runs the
-  // Inter-CAD transfer conversation; scroll unlocks when the run completes.
+  // pull → home → intent-graph script; scroll unlocks when the run completes.
   const startDemo = () => {
     if (startedRef.current) return;
     startedRef.current = true;
@@ -443,29 +355,18 @@ export default function DemoSection() {
     lockedRef.current = true;
 
     const lastDelay = Math.max(
-      ...TRANSFER_SCRIPT.map(s => s.delay),
-      ...TRANSFER_LOG_LINES.map(l => l.t),
+      ...APP_SCRIPT.map(s => s.delay),
+      ...HISTORY_EVENTS.map(e => e.t),
     );
 
-    TRANSFER_SCRIPT.forEach((step, i) => {
-      setTimeout(() => {
-        if (step.typing !== undefined) setTransferTyping(step.typing);
-        if (step.show?.length) {
-          setVisibleTransferMsgs(prev => {
-            const n = new Set(prev);
-            step.show!.forEach(id => n.add(id));
-            return n;
-          });
-        }
-        if (step.statusLines !== undefined) setStatusLineCount(step.statusLines);
-        if (i === TRANSFER_SCRIPT.length - 1) setTransferDone(true);
-      }, step.delay);
+    APP_SCRIPT.forEach(step => {
+      setTimeout(() => applyStep(step), step.delay);
     });
 
-    TRANSFER_LOG_LINES.forEach(line => {
+    HISTORY_EVENTS.forEach(event => {
       setTimeout(() => {
-        setVisibleLogs(prev => [...prev, line]);
-      }, line.t);
+        setHistoryShown(prev => [...prev, event]);
+      }, event.t);
     });
 
     setTimeout(() => {
@@ -495,16 +396,16 @@ export default function DemoSection() {
   }, []);
 
   // Cursor hint animation — desktop only, runs once on first demo completion.
-  // Every phase is about the Inter-CAD transfer that just played: the derived
-  // feature breakdown, the transfer log, and the intent web.
+  // It shows off the app's chrome the run itself didn't visit: the History tab
+  // and the account/login chip at the bottom of the sidebar.
   useEffect(() => {
-    if (!transferDone) return;
-    // Phones have no cursor hint at all (sidebar/panel targets live behind the
-    // hamburger shelf there) — point at the hamburger once instead of running
-    // the desktop click-through sequence.
+    if (!done) return;
+    // Phones have no cursor hint at all (the sidebar lives behind the
+    // hamburger shelf there) — point at the hamburger once instead.
     if (typeof window !== "undefined" && window.innerWidth < 640) {
       if (sessionStorage.getItem("mobileHamburgerHintPlayed") !== "true") {
         sessionStorage.setItem("mobileHamburgerHintPlayed", "true");
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot hint gated on sessionStorage, unreadable before mount
         setShowMobileHint(true);
         const t = setTimeout(() => setShowMobileHint(false), 6000);
         return () => clearTimeout(t);
@@ -517,15 +418,6 @@ export default function DemoSection() {
 
     const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 
-    // Inter-CAD targets live in a scrollable panel, so a target can sit below
-    // the fold. Bring it into view (the body itself is locked, so only the
-    // panel scrolls) and let the scroll settle before measuring its rect.
-    const ensureVisible = async (el: HTMLElement | null) => {
-      if (!el) return;
-      el.scrollIntoView({ block: "nearest", behavior: "smooth" });
-      await sleep(450);
-    };
-
     // A single click phase: move to an element, show tooltip, click, run the action, dwell.
     const clickPhase = async (
       el: HTMLElement | null,
@@ -534,7 +426,6 @@ export default function DemoSection() {
       opts: { firstMove?: boolean; dwellAfter?: number } = {},
     ) => {
       if (!el) return;
-      await ensureVisible(el);
       const r = el.getBoundingClientRect();
       setCursor(c => ({
         ...c,
@@ -554,26 +445,17 @@ export default function DemoSection() {
       await sleep(opts.dwellAfter ?? 2000);
     };
 
-    // Like clickPhase, but only points + shows the tooltip — never clicks and
-    // never runs an action. Starting the second demo must be a genuine user click.
+    // Like clickPhase, but only points + shows the tooltip — never clicks.
     const hoverPhase = async (
       el: HTMLElement | null,
       tooltip: string,
-      opts: { firstMove?: boolean; dwellAfter?: number } = {},
+      opts: { dwellAfter?: number } = {},
     ) => {
       if (!el) return;
-      await ensureVisible(el);
       const r = el.getBoundingClientRect();
-      setCursor(c => ({
-        ...c,
-        tooltip: "",
-        x: r.left - 80,
-        y: r.top + r.height / 2 + 20,
-        visible: true,
-        clicking: false,
-      }));
-      await sleep(opts.firstMove ? 300 : 400);
-      setCursor(c => ({ ...c, x: r.left + r.width / 2, y: r.top + r.height / 2, tooltip }));
+      setCursor(c => ({ ...c, tooltip: "" }));
+      await sleep(150);
+      setCursor(c => ({ ...c, x: r.left + r.width / 2, y: r.top + r.height / 2, visible: true, tooltip }));
       await sleep(opts.dwellAfter ?? 2400);
     };
 
@@ -581,65 +463,24 @@ export default function DemoSection() {
       cursorRunning.current = true;
       await sleep(2000);
 
-      // Read fresh state at animation start
-      const startedOnLogs = activeTabRef.current === "logs";
-
-      // The breakdown accordions live inside InterCadPanel and own their state,
-      // so the tour dispatches a real DOM click rather than setting state here.
-      const derivedBtn = document.querySelector<HTMLElement>('[data-intercad-btn="derived"]');
-      const derivedAlreadyOpen = derivedBtn?.getAttribute("aria-expanded") === "true";
-
-      let first = true;
-      const step = async (
-        ref: HTMLElement | null,
-        tooltip: string,
-        action: () => void,
-        dwellAfter?: number,
-      ) => {
-        await clickPhase(ref, tooltip, action, { firstMove: first, dwellAfter });
-        first = false;
-      };
-
-      // Phase A — if the user wandered onto the Logs tab mid-run, bring them
-      // back to the conversation first (and skip the "show logs" phase later).
-      if (startedOnLogs) {
-        await step(
-          convTabRef.current,
-          "back to the transfer",
-          () => setActiveTab("conversation"),
-          1400,
-        );
-      }
-
-      // Phase B — open the derived/non-direct breakdown: the part of the
-      // transfer that isn't a 1:1 feature swap, and the reason this is hard.
-      if (!derivedAlreadyOpen) {
-        await step(
-          derivedBtn,
-          "features with no direct equivalent",
-          () => derivedBtn?.click(),
-          2400,
-        );
-      }
-
-      // Phase C — the transfer log, feature by feature.
-      if (!startedOnLogs) {
-        await step(
-          logsTabRef.current,
-          "view the transfer log",
-          () => setActiveTab("logs"),
-          2400,
-        );
-      }
-
-      // Phase D — the intent web: the software-neutral graph the transfer
-      // was rebuilt from. Hover only; it's a 3D canvas the user should drive.
-      await hoverPhase(
-        document.querySelector<HTMLElement>("[data-intercad-web]"),
-        "drag the intent web to explore",
-        { firstMove: first, dwellAfter: 2600 },
+      // Phase A — the History tab: the session's event feed.
+      await clickPhase(
+        historyNavRef.current,
+        "every fetch, capture, and warning",
+        () => setView("history"),
+        { firstMove: true, dwellAfter: 2600 },
       );
-      first = false;
+
+      // Phase B — the account chip: point only, signing in stays a real click.
+      await hoverPhase(loginRef.current, "sign in to sync your captures", { dwellAfter: 2200 });
+
+      // Phase C — back to the intent graph to end where the run ended.
+      await clickPhase(
+        graphNavRef.current,
+        "back to the intent graph",
+        () => setView("graph"),
+        { dwellAfter: 1400 },
+      );
 
       setCursor(c => ({ ...c, visible: false, tooltip: "" }));
       sessionStorage.setItem("cursorHintPlayed", "true");
@@ -654,17 +495,24 @@ export default function DemoSection() {
     };
 
     run();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [transferDone]);
+   
+  }, [done]);
 
-  const toggleThink = (id: string) =>
-    setExpandedSet(prev => {
-      const n = new Set(prev);
-      n.has(id) ? n.delete(id) : n.add(id);
-      return n;
-    });
+  // Sidebar navigation is inert while the scripted run drives the view.
+  const navigate = (v: AppView) => {
+    if (!done) return;
+    setView(v);
+    setShelfOpen(false);
+  };
 
-  const visibleTransferItems = TRANSFER_MESSAGES.filter(m => visibleTransferMsgs.has(m.id));
+  const sidebarProps = {
+    view,
+    done,
+    signedIn,
+    historyCount: historyShown.length,
+    onNavigate: navigate,
+    onToggleSignIn: () => setSignedIn(s => !s),
+  };
 
   return (
     <section
@@ -701,336 +549,168 @@ export default function DemoSection() {
           >
             <DeviceShell kind={device} />
 
-            <div className="relative z-10 flex h-full w-full flex-col overflow-hidden rounded-2xl border border-[#dbe6f5] bg-[#ffffff] shadow-2xl">
-          {/* Start gate — the demo never auto-plays; the user launches it */}
-          {!started && (
-            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-slate-100/85 backdrop-blur-[3px] px-4">
-              <button
-                onClick={startDemo}
-                className="flex items-center gap-3 rounded-lg border border-[#3b82f6] bg-[#ffffff] px-6 py-3.5 text-sm font-medium text-[#3b82f6] transition-colors hover:bg-[#3b82f6] hover:text-white shadow-sm"
-                style={{ boxShadow: "0 0 24px rgba(59,130,246,0.15)" }}
-              >
-                <span className="text-[10px]">▶</span>
-                Start mock application
-              </button>
-              <p className="text-xs text-[#64748b] text-center">
-                Guided run — scrolling locks until it finishes
-              </p>
-            </div>
-          )}
-          {/* Title bar */}
-          <div className="flex items-center gap-4 px-4 py-2.5 border-b border-[#dbe6f5] bg-[#f8fafc] flex-shrink-0">
-            {/* Phone only: hamburger + inline hint — fixed row height so the
-                hint appearing/disappearing never nudges the title bar's height */}
-            <div className="flex sm:hidden h-5 min-w-0 flex-1 items-center gap-2.5 overflow-hidden">
-              <button
-                className="flex flex-shrink-0 items-center gap-1.5"
-                onClick={() => { setShelfOpen(true); setShowMobileHint(false); }}
-                aria-label="Open file panel"
-              >
-                <span className="flex flex-col gap-1">
-                  <span className={`block h-0.5 w-5 transition-colors ${showMobileHint ? "bg-[#3b82f6]" : "bg-[#64748b]"}`} />
-                  <span className={`block h-0.5 w-5 transition-colors ${showMobileHint ? "bg-[#3b82f6]" : "bg-[#64748b]"}`} />
-                  <span className={`block h-0.5 w-4 transition-colors ${showMobileHint ? "bg-[#3b82f6]" : "bg-[#64748b]"}`} />
-                </span>
-              </button>
-              {showMobileHint && (
-                <button
-                  onClick={() => { setShelfOpen(true); setShowMobileHint(false); }}
-                  className="flex min-w-0 flex-1 items-center gap-1.5 animate-fade-in"
-                >
-                  <span className="flex-shrink-0 text-[#3b82f6] leading-none animate-pulse">←</span>
-                  <span className="min-w-0 flex-1 truncate text-[11px] leading-none text-[#3b82f6]">
-                    Tap here to view the transfer breakdown
-                  </span>
-                </button>
-              )}
-            </div>
-            {/* Tablet and up: traffic lights */}
-            <div className="hidden sm:flex items-center gap-1.5 flex-shrink-0">
-              <div className="h-3 w-3 rounded-full bg-[#ff5f57]" />
-              <div className="h-3 w-3 rounded-full bg-[#febc2e]" />
-              <div className="h-3 w-3 rounded-full bg-[#28c840]" />
-            </div>
-          </div>
-
-          {/* App body — fills remaining window height; scrolls horizontally if the
-              sidebar + middle panel + chat can't all fit (e.g. iPad widths) */}
-          <div className="flex flex-1 min-h-0 overflow-x-auto">
-
-            {/* ── Left sidebar ── */}
-            <aside className="hidden sm:flex w-52 flex-shrink-0 flex-col border-r border-[#dbe6f5] bg-[#ffffff]">
-            {/* Brand */}
-            <div className="px-4 py-3 border-b border-[#dbe6f5] flex items-center gap-2">
-              <span className="font-mono text-sm sm:text-xs text-[#3b82f6] tracking-[0.1em]">Parametra</span>
-              <span className="font-mono text-[10px] sm:text-[8px] text-[#94a3b8]">v1.0</span>
-            </div>
-
-            {/* Nav */}
-            <nav className="px-2 pt-3 space-y-px">
-              {[
-                { label: "Inter-CAD Transfer", active: true,  accent: "#06b6d4" },
-                { label: "Documents",          active: false, accent: "#3b82f6" },
-                { label: "Assemblies",         active: false, accent: "#3b82f6" },
-                { label: "Variables",          active: false, accent: "#3b82f6" },
-                { label: "Part Studios",       active: false, accent: "#3b82f6" },
-              ].map(item => (
-                <div
-                  key={item.label}
-                  className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm sm:text-xs select-none ${
-                    item.active ? "bg-[#eef2f9] text-[#334155]" : "text-[#64748b]"
-                  }`}
-                >
-                  <span
-                    className="h-1 w-1 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: item.active ? item.accent : "#dbe6f5" }}
-                  />
-                  {item.label}
-                </div>
-              ))}
-            </nav>
-
-            {/* Design history */}
-            <div className="px-2 pt-4">
-              <p className="px-3 pb-2 text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide">
-                Recent
-              </p>
-              {HISTORY.map(h => {
-                const active = h.id === "transfer";
-                return (
-                  <div
-                    key={h.id}
-                    className={`rounded-md px-3 py-2.5 ${
-                      active ? "bg-[#eef2f9] border-l-2 border-[#3b82f6]" : ""
-                    }`}
+            <div className="relative z-10 flex h-full w-full flex-col overflow-hidden rounded-2xl border border-[#23262e] bg-[#0b0d11] shadow-2xl">
+              {/* Start gate — the demo never auto-plays; the user launches it */}
+              {!started && (
+                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-[#0b0d11]/85 backdrop-blur-[3px] px-4">
+                  <button
+                    onClick={startDemo}
+                    className="flex items-center gap-3 rounded-lg border border-[#3b82f6] bg-[#11151d] px-6 py-3.5 text-sm font-medium text-[#60a5fa] transition-colors hover:bg-[#3b82f6] hover:text-white"
+                    style={{ boxShadow: "0 0 24px rgba(59,130,246,0.2)" }}
                   >
-                    <p
-                      className={`text-sm sm:text-xs truncate ${
-                        active ? "text-[#334155]" : "text-[#64748b]"
-                      }`}
-                    >
-                      {h.label}
-                    </p>
-                    <p
-                      className={`text-[11px] sm:text-[10px] ${
-                        active ? "text-[#64748b]" : "text-[#94a3b8]"
-                      }`}
-                    >
-                      {h.sub}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mt-auto p-4 border-t border-[#dbe6f5]">
-              <p className="text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide">Settings</p>
-            </div>
-          </aside>
-
-          {/* ── Middle: Inter-CAD breakdown / Part Studio panel ── */}
-          <div
-            className="hidden sm:flex flex-col border-r border-[#dbe6f5] bg-[#f8fafc]"
-            style={{ width: "clamp(200px, 32%, 320px)", flexShrink: 0 }}
-          >
-            {/* Tabs */}
-            <div className="flex items-center gap-1 border-b border-[#dbe6f5] px-3 py-2 flex-shrink-0">
-              <span className="rounded-md px-3 py-1.5 text-xs sm:text-[11px] font-medium bg-[#eef2f9] text-[#0f172a]">
-                Inter-CAD
-              </span>
-            </div>
-
-            {/* Breakdown builds in step with the transfer conversation */}
-            <div className="flex-1 overflow-y-auto px-4 py-3">
-              <InterCadPanel stage={statusLineCount} />
-            </div>
-
-            {/* Status bar */}
-            <div className="flex items-center gap-2 px-4 py-2 border-t border-[#dbe6f5]">
-              <span
-                className={`h-1.5 w-1.5 flex-shrink-0 ${
-                  transferDone ? "bg-[#3b82f6]" : "bg-[#cbd5e1] animate-pulse"
-                }`}
-              />
-              <span className="text-[11px] sm:text-[10px] text-[#94a3b8]">
-                {transferDone ? "Transferred · 13 features mapped" : "Transferring…"}
-              </span>
-            </div>
-          </div>
-
-          {/* ── Right: Chat panel ── */}
-          <div className="flex flex-col flex-1 min-w-[300px] bg-[#ffffff]">
-            {/* Tabs */}
-            <div className="flex items-center gap-1 border-b border-[#dbe6f5] px-4 py-2 flex-shrink-0">
-              <button
-                ref={convTabRef}
-                onClick={() => setActiveTab("conversation")}
-                className={`rounded-md px-3 py-1.5 text-xs sm:text-[11px] font-medium transition-colors ${
-                  activeTab === "conversation"
-                    ? "bg-[#eef2f9] text-[#0f172a]"
-                    : "text-[#94a3b8] hover:text-[#475569] hover:bg-[#f1f5f9]"
-                }`}
-              >
-                Conversation
-              </button>
-              <button
-                ref={logsTabRef}
-                onClick={() => setActiveTab("logs")}
-                className={`rounded-md px-3 py-1.5 text-xs sm:text-[11px] font-medium transition-colors ${
-                  activeTab === "logs"
-                    ? "bg-[#eef2f9] text-[#0f172a]"
-                    : "text-[#94a3b8] hover:text-[#475569] hover:bg-[#f1f5f9]"
-                }`}
-              >
-                Logs
-                {visibleLogs.length > 0 && (
-                  <span className="ml-1.5 font-mono text-[10px] sm:text-[8px] text-[#64748b]">
-                    {visibleLogs.length}
-                  </span>
-                )}
-              </button>
-            </div>
-
-            {/* Conversation tab */}
-            {activeTab === "conversation" && (
-              <div ref={chatRef} className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-                {visibleTransferItems.map(item => (
-                  <ChatMessage
-                    key={item.id}
-                    item={item}
-                    expanded={expandedSet.has(item.id)}
-                    onToggle={() => toggleThink(item.id)}
-                    statusLineCount={statusLineCount}
-                  />
-                ))}
-                {transferTyping && (
-                  <div className="flex items-center gap-2.5">
-                    <PAvatar />
-                    <div className="flex gap-1 pt-0.5">
-                      {[0, 120, 240].map(d => (
-                        <span
-                          key={d}
-                          className="h-1.5 w-1.5 rounded-full bg-[#3b82f6] animate-bounce"
-                          style={{ animationDelay: `${d}ms` }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Logs tab */}
-            {activeTab === "logs" && (
-              <div ref={logsRef} className="flex-1 overflow-y-auto px-4 py-3 font-mono text-[11px] sm:text-[9px] leading-[1.8] space-y-0">
-                {visibleLogs.map((line, i) => (
-                  <p key={i} className={
-                    line.level === "ok"   ? "text-[#3b82f6]" :
-                    line.level === "api"  ? "text-[#06b6d4]" :
-                    line.level === "warn" ? "text-[#d97706]" :
-                                           "text-[#64748b]"
-                  }>
-                    {line.text}
+                    <span className="text-[10px]">▶</span>
+                    Start mock application
+                  </button>
+                  <p className="text-xs text-[#64748b] text-center">
+                    Guided run — scrolling locks until it finishes
                   </p>
-                ))}
-                {!transferDone && visibleLogs.length > 0 && (
-                  <span className="text-[#3b82f6] animate-pulse">▌</span>
-                )}
-              </div>
-            )}
+                </div>
+              )}
 
-            {/* Decorative input */}
-            <div className="px-5 py-3 border-t border-[#dbe6f5] flex-shrink-0">
-              <div className="flex items-center gap-2 rounded-lg border border-[#dbe6f5] bg-[#ffffff] px-3 py-2.5">
-                <span className="flex-1 text-sm sm:text-xs text-[#94a3b8] select-none">
+              {/* Title bar */}
+              <div className="flex items-center gap-4 px-4 py-2.5 border-b border-[#1c2027] bg-[#0e1014] flex-shrink-0">
+                {/* Phone only: hamburger + inline hint — fixed row height so the
+                    hint appearing/disappearing never nudges the title bar */}
+                <div className="flex sm:hidden h-5 min-w-0 flex-1 items-center gap-2.5 overflow-hidden">
+                  <button
+                    className="flex flex-shrink-0 items-center gap-1.5"
+                    onClick={() => { setShelfOpen(true); setShowMobileHint(false); }}
+                    aria-label="Open navigation"
+                  >
+                    <span className="flex flex-col gap-1">
+                      <span className={`block h-0.5 w-5 transition-colors ${showMobileHint ? "bg-[#3b82f6]" : "bg-[#8a94a6]"}`} />
+                      <span className={`block h-0.5 w-5 transition-colors ${showMobileHint ? "bg-[#3b82f6]" : "bg-[#8a94a6]"}`} />
+                      <span className={`block h-0.5 w-4 transition-colors ${showMobileHint ? "bg-[#3b82f6]" : "bg-[#8a94a6]"}`} />
+                    </span>
+                  </button>
+                  {showMobileHint ? (
+                    <button
+                      onClick={() => { setShelfOpen(true); setShowMobileHint(false); }}
+                      className="flex min-w-0 flex-1 items-center gap-1.5 animate-fade-in"
+                    >
+                      <span className="flex-shrink-0 text-[#3b82f6] leading-none animate-pulse">←</span>
+                      <span className="min-w-0 flex-1 truncate text-[11px] leading-none text-[#3b82f6]">
+                        Tap here to explore the app
+                      </span>
+                    </button>
+                  ) : (
+                    <span className="text-xs font-medium text-[#8a94a6]">Parametra</span>
+                  )}
+                </div>
+                {/* Tablet and up: traffic lights + centred window title */}
+                <div className="hidden sm:flex items-center gap-1.5 flex-shrink-0">
+                  <div className="h-3 w-3 rounded-full bg-[#ff5f57]" />
+                  <div className="h-3 w-3 rounded-full bg-[#febc2e]" />
+                  <div className="h-3 w-3 rounded-full bg-[#28c840]" />
+                </div>
+                <span className="hidden sm:block absolute left-1/2 -translate-x-1/2 text-xs font-semibold text-[#8a94a6]">
+                  Parametra
+                </span>
+              </div>
+
+              {/* App header */}
+              <div className="flex items-center gap-3 border-b border-[#1c2027] bg-[#0b0d11] px-4 py-3 flex-shrink-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/logo.svg"
+                  alt=""
+                  className="h-6 w-6 flex-shrink-0"
+                  style={{ filter: "brightness(0) invert(1)" }}
+                />
+                {headerCapture ? (
+                  <div className="flex min-w-0 items-baseline gap-2">
+                    <span className="truncate text-sm font-bold text-[#f1f5f9]">Part Studio 1</span>
+                    <span className="hidden xs:block text-xs text-[#64748b] flex-shrink-0">Part Studio</span>
+                  </div>
+                ) : (
+                  <span className="text-sm font-bold text-[#f1f5f9]">No capture open</span>
+                )}
+
+                <div className="ml-auto flex items-center gap-2 flex-shrink-0">
+                  {badges && (
+                    <>
+                      <span className="rounded-full bg-[#26221a] px-3 py-1 text-[11px] font-medium text-[#fbbf24] animate-fade-in">
+                        partial
+                      </span>
+                      <span className="hidden sm:block rounded-full bg-[#26221a] px-3 py-1 text-[11px] font-medium text-[#fbbf24] animate-fade-in">
+                        2 warnings
+                      </span>
+                    </>
+                  )}
+                  <span className="hidden md:block rounded-full bg-[#22262e] px-4 py-1.5 text-xs font-medium text-[#e2e8f0]">
+                    Pull from Onshape…
+                  </span>
+                  <span className="hidden lg:block rounded-full bg-[#22262e] px-4 py-1.5 text-xs font-medium text-[#e2e8f0]">
+                    Settings…
+                  </span>
+                </div>
+              </div>
+
+              {/* App body */}
+              <div className="flex flex-1 min-h-0">
+                {/* ── Left sidebar (tablet and up) ── */}
+                <aside className="hidden sm:flex w-48 lg:w-52 flex-shrink-0 flex-col border-r border-[#1c2027] bg-[#0b0d11]">
+                  <Sidebar
+                    {...sidebarProps}
+                    historyNavRef={historyNavRef}
+                    graphNavRef={graphNavRef}
+                    loginRef={loginRef}
+                  />
+                </aside>
+
+                {/* ── Main content ── */}
+                <main className="flex-1 min-w-0 overflow-y-auto bg-[#0b0d11] px-3 py-3 sm:px-5 sm:py-4">
+                  {view === "pulling" && <PullingView status={pullStatus} />}
+                  {view === "home" && <HomeView docCount={docCount} studioCount={studioCount} />}
+                  {view === "graph" && <GraphView chipCount={chipCount} nodeCount={nodeCount} />}
+                  {view === "history" && <HistoryView events={historyShown} scrollRef={historyRef} />}
+                </main>
+              </div>
+
+              {/* Status bar */}
+              <div className="flex items-center gap-2 border-t border-[#1c2027] bg-[#0e1014] px-4 py-2 flex-shrink-0">
+                <span
+                  className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${
+                    done ? "bg-[#22c55e]" : started ? "bg-[#f59e0b] animate-pulse" : "bg-[#3f4854]"
+                  }`}
+                />
+                <span className="text-[11px] text-[#64748b] truncate">
                   {!started
-                    ? "Awaiting input…"
-                    : !transferDone
-                      ? "Demo in progress…"
+                    ? "Awaiting connection…"
+                    : !done
+                      ? "Pulling from Onshape…"
                       : "Demo complete — scroll or swipe to return to the site"}
                 </span>
-                <span className="rounded-md text-[11px] sm:text-[10px] text-[#94a3b8] border border-[#dbe6f5] px-2 py-0.5">
-                  ↑
-                </span>
               </div>
-            </div>
-          </div>
-        </div>
 
-          {/* ── Mobile slide-in shelf ── */}
-          {/* Backdrop */}
-          <div
-            className={`absolute inset-0 z-40 bg-slate-900/40 transition-opacity duration-300 sm:hidden ${
-              shelfOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-            }`}
-            onClick={() => setShelfOpen(false)}
-          />
-          {/* Shelf panel */}
-          <div
-            className={`absolute top-0 left-0 z-50 h-full w-72 flex flex-col bg-[#ffffff] border-r border-[#dbe6f5] transition-transform duration-300 ease-out sm:hidden ${
-              shelfOpen ? "translate-x-0" : "-translate-x-full"
-            }`}
-          >
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[#dbe6f5]">
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-sm sm:text-xs text-[#3b82f6] tracking-[0.1em]">Parametra</span>
-                <span className="font-mono text-[10px] sm:text-[8px] text-[#94a3b8]">v1.0</span>
-              </div>
-              <button onClick={() => setShelfOpen(false)} className="font-mono text-lg text-[#64748b] hover:text-[#334155] leading-none">×</button>
-            </div>
-
-            <div className="flex-1 min-h-0 overflow-y-auto">
-              {/* Nav */}
-              <nav className="px-2 pt-3 space-y-px border-b border-[#dbe6f5] pb-3">
-                {[
-                  { label: "Inter-CAD Transfer", active: true,  accent: "#06b6d4" },
-                  { label: "Documents",          active: false, accent: "#3b82f6" },
-                  { label: "Assemblies",         active: false, accent: "#3b82f6" },
-                  { label: "Variables",          active: false, accent: "#3b82f6" },
-                  { label: "Part Studios",       active: false, accent: "#3b82f6" },
-                ].map(item => (
-                  <div
-                    key={item.label}
-                    className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm sm:text-xs select-none ${
-                      item.active ? "bg-[#eef2f9] text-[#334155]" : "text-[#64748b]"
-                    }`}
-                  >
-                    <span className="h-1 w-1 rounded-full flex-shrink-0" style={{ backgroundColor: item.active ? item.accent : "#dbe6f5" }} />
-                    {item.label}
+              {/* ── Mobile slide-in shelf ── */}
+              <div
+                className={`absolute inset-0 z-40 bg-black/50 transition-opacity duration-300 sm:hidden ${
+                  shelfOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                }`}
+                onClick={() => setShelfOpen(false)}
+              />
+              <div
+                className={`absolute top-0 left-0 z-50 h-full w-64 flex flex-col bg-[#0e1014] border-r border-[#1c2027] transition-transform duration-300 ease-out sm:hidden ${
+                  shelfOpen ? "translate-x-0" : "-translate-x-full"
+                }`}
+              >
+                <div className="flex items-center justify-between px-4 py-3 border-b border-[#1c2027]">
+                  <div className="flex items-center gap-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/logo.svg" alt="" className="h-4 w-4" style={{ filter: "brightness(0) invert(1)" }} />
+                    <span className="font-mono text-xs text-[#e2e8f0] tracking-[0.1em]">Parametra</span>
                   </div>
-                ))}
-              </nav>
-
-              {/* History */}
-              <div className="px-2 pt-4 border-b border-[#dbe6f5] pb-4">
-                <p className="px-3 pb-2 text-[11px] sm:text-[10px] font-semibold text-[#94a3b8] uppercase tracking-wide">Recent</p>
-                {HISTORY.map(h => {
-                  const active = h.id === "transfer";
-                  return (
-                    <div
-                      key={h.id}
-                      className={`rounded-md px-3 py-2.5 ${active ? "bg-[#eef2f9] border-l-2 border-[#3b82f6]" : ""}`}
-                    >
-                      <p className={`text-sm sm:text-xs truncate ${active ? "text-[#334155]" : "text-[#64748b]"}`}>{h.label}</p>
-                      <p className={`text-[11px] sm:text-[10px] ${active ? "text-[#64748b]" : "text-[#94a3b8]"}`}>{h.sub}</p>
-                    </div>
-                  );
-                })}
+                  <button
+                    onClick={() => setShelfOpen(false)}
+                    className="font-mono text-lg text-[#8a94a6] hover:text-[#e2e8f0] leading-none"
+                    aria-label="Close navigation"
+                  >
+                    ×
+                  </button>
+                </div>
+                <Sidebar {...sidebarProps} />
               </div>
-
-              {/* Tabs */}
-              <div className="flex items-center gap-1 border-b border-[#dbe6f5] px-3 py-2">
-                <span className="rounded-md px-3 py-1.5 text-xs sm:text-[11px] font-medium bg-[#eef2f9] text-[#0f172a]">
-                  Inter-CAD
-                </span>
-              </div>
-
-              {/* Breakdown builds in step with the transfer conversation */}
-              <div className="px-4 pt-4 pb-6">
-                <InterCadPanel stage={statusLineCount} />
-              </div>
-            </div>
-          </div>
             </div>{/* window */}
           </div>{/* flying wrapper */}
         </div>{/* stage */}
@@ -1042,7 +722,7 @@ export default function DemoSection() {
           would pin this to the flying window instead of the viewport. */}
       <div className="hidden sm:block pointer-events-none">
         <div
-          className="fixed z-[999] transition-[left,top] duration-700 ease-out"
+          className="fixed z-[999]"
           style={{
             left: cursor.x,
             top: cursor.y,
@@ -1050,164 +730,499 @@ export default function DemoSection() {
             transition: "left 0.7s ease-out, top 0.7s ease-out, opacity 0.3s ease",
           }}
         >
-          {/* Cursor SVG */}
           <svg
             width="20" height="20" viewBox="0 0 20 20" fill="none"
             className={`transition-transform duration-100 ${cursor.clicking ? "scale-75" : "scale-100"}`}
-            style={{ filter: "drop-shadow(0 1px 3px rgba(15,23,42,0.35))" }}
+            style={{ filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.5))" }}
           >
-            <path d="M4 2L4 15L7.5 11.5L10 17L12 16L9.5 10.5L14 10.5L4 2Z" fill="#0f172a" stroke="white" strokeWidth="1.2" strokeLinejoin="round" />
+            <path d="M4 2L4 15L7.5 11.5L10 17L12 16L9.5 10.5L14 10.5L4 2Z" fill="#f1f5f9" stroke="#0b0d11" strokeWidth="1.2" strokeLinejoin="round" />
           </svg>
-          {/* Tooltip */}
           {cursor.tooltip && (
             <div
-              className="absolute left-5 top-0 whitespace-nowrap rounded-md border border-[#3b82f6] bg-[#ffffff] px-2.5 py-1.5 text-[11px] sm:text-[10px] font-medium text-[#3b82f6] shadow-sm"
-              style={{ boxShadow: "0 0 16px rgba(59,130,246,0.15)" }}
+              className="absolute left-5 top-0 whitespace-nowrap rounded-md border border-[#3b82f6] bg-[#11151d] px-2.5 py-1.5 text-[11px] font-medium text-[#60a5fa]"
+              style={{ boxShadow: "0 0 16px rgba(59,130,246,0.25)" }}
             >
               {cursor.tooltip}
             </div>
           )}
         </div>
       </div>
-
     </section>
   );
 }
 
-// ── Sub-components ────────────────────────────────────────────────────────────
+// ── Sidebar ───────────────────────────────────────────────────────────────────
 
-function PAvatar() {
+function Sidebar({
+  view,
+  done,
+  signedIn,
+  historyCount,
+  onNavigate,
+  onToggleSignIn,
+  historyNavRef,
+  graphNavRef,
+  loginRef,
+}: {
+  view: AppView;
+  done: boolean;
+  signedIn: boolean;
+  historyCount: number;
+  onNavigate: (v: AppView) => void;
+  onToggleSignIn: () => void;
+  historyNavRef?: React.Ref<HTMLButtonElement>;
+  graphNavRef?: React.Ref<HTMLButtonElement>;
+  loginRef?: React.Ref<HTMLButtonElement>;
+}) {
+  const itemClass = (active: boolean) =>
+    `flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-[13px] transition-colors ${
+      active
+        ? "bg-[#1b2331] text-[#f1f5f9] font-medium"
+        : "text-[#94a3b8] hover:bg-[#14171d] hover:text-[#cbd5e1]"
+    } ${done ? "cursor-pointer" : "cursor-default"}`;
+
   return (
-    <div className="h-5 w-5 flex-shrink-0 rounded-full flex items-center justify-center bg-black overflow-hidden">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/logo.svg" alt="Parametra" className="h-3 w-3 object-contain" style={{ filter: "brightness(0) invert(1)" }} />
+    <div className="flex flex-1 min-h-0 flex-col">
+      <nav className="flex-1 min-h-0 overflow-y-auto px-2 pt-3 space-y-px">
+        <button className={itemClass(view === "home" || view === "pulling")} onClick={() => onNavigate("home")}>
+          Home
+        </button>
+        <button
+          ref={historyNavRef}
+          className={itemClass(view === "history")}
+          onClick={() => onNavigate("history")}
+        >
+          History
+          {historyCount > 0 && (
+            <span className="rounded-full bg-[#22262e] px-1.5 py-0.5 font-mono text-[9px] text-[#94a3b8]">
+              {historyCount}
+            </span>
+          )}
+        </button>
+
+        <div className="flex items-center justify-between px-3 pt-4 pb-1">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#4b5563]">
+            Inter-op
+          </span>
+          <span className="text-[9px] text-[#4b5563]">⌄</span>
+        </div>
+        {INTEROP_ITEMS.map(item =>
+          item === "Intent graph" ? (
+            <button
+              key={item}
+              ref={graphNavRef}
+              className={itemClass(view === "graph")}
+              onClick={() => onNavigate("graph")}
+            >
+              {item}
+            </button>
+          ) : (
+            <div key={item} className="rounded-lg px-3 py-2 text-[13px] text-[#94a3b8] select-none">
+              {item}
+            </div>
+          ),
+        )}
+      </nav>
+
+      {/* Account / login — pinned to the bottom-left of the app */}
+      <div className="border-t border-[#1c2027] p-3">
+        <button
+          ref={loginRef}
+          data-app-login
+          onClick={onToggleSignIn}
+          className="flex w-full items-center gap-2.5 rounded-lg border border-[#232830] bg-[#14171d] px-3 py-2.5 text-left transition-colors hover:bg-[#1a1e25]"
+        >
+          <span
+            className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
+              signedIn ? "bg-[#2563eb] text-white" : "bg-[#22262e] text-[#94a3b8]"
+            }`}
+          >
+            {signedIn ? "S" : "?"}
+          </span>
+          <span className="min-w-0">
+            {signedIn ? (
+              <>
+                <span className="block truncate text-xs font-medium text-[#f1f5f9]">Sandeep S.</span>
+                <span className="flex items-center gap-1 text-[10px] text-[#22c55e]">
+                  <span className="h-1 w-1 rounded-full bg-[#22c55e]" />
+                  Onshape connected
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="block text-xs font-medium text-[#e2e8f0]">Guest</span>
+                <span className="text-[10px] text-[#60a5fa]">Sign in →</span>
+              </>
+            )}
+          </span>
+        </button>
+      </div>
     </div>
   );
 }
 
-function ChatMessage({
-  item,
-  expanded,
-  onToggle,
-  statusLineCount = 0,
-}: {
-  item: Msg;
-  expanded: boolean;
-  onToggle: () => void;
-  statusLineCount?: number;
-}) {
-  if (item.type === "user") {
-    return (
-      <div className="flex justify-end">
-        <div className="max-w-[78%] rounded-lg border border-[#dbe6f5] bg-[#eef2f9] px-3 py-2">
-          <p className="text-sm sm:text-xs text-[#1e293b] leading-relaxed">{item.text}</p>
-        </div>
+// ── Views ─────────────────────────────────────────────────────────────────────
+
+function PullingView({ status }: { status: string }) {
+  return (
+    <div className="flex h-full min-h-[320px] flex-col items-center justify-center gap-6 rounded-2xl border border-[#1c2027] bg-[#0d1015] px-6 py-10 text-center">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/logo.svg"
+        alt=""
+        className="h-14 w-14 sm:h-20 sm:w-20"
+        style={{ filter: "brightness(0) invert(1) drop-shadow(0 0 24px rgba(59,130,246,0.5))" }}
+      />
+      {/* Stylised branch lines, like a subway map of parallel fetches */}
+      <svg viewBox="0 0 520 130" className="w-full max-w-[400px]" aria-hidden>
+        <path d="M8 18 H200 C230 18 230 62 260 62 H300 C330 62 330 18 360 18 H512" stroke="#f59e0b" strokeWidth="3" fill="none" />
+        <path d="M40 40 H480" stroke="#2dd4bf" strokeWidth="3" fill="none" />
+        <path d="M8 62 H512" stroke="#3b82f6" strokeWidth="3" fill="none" />
+        <path d="M100 84 H460" stroke="#a78bfa" strokeWidth="3" fill="none" />
+        <path d="M8 112 H80 C110 112 110 84 140 84" stroke="#f472b6" strokeWidth="3" fill="none" />
+        {([
+          [8, 18, "#f59e0b"], [360, 18, "#f59e0b"],
+          [150, 40, "#2dd4bf"], [480, 40, "#2dd4bf"],
+          [95, 62, "#3b82f6"], [300, 62, "#3b82f6"], [500, 62, "#3b82f6"],
+          [250, 84, "#a78bfa"], [430, 84, "#a78bfa"],
+          [40, 112, "#f472b6"],
+        ] as [number, number, string][]).map(([cx, cy, c], i) => (
+          <circle key={i} cx={cx} cy={cy} r="5" fill="#0d1015" stroke={c} strokeWidth="2.5" />
+        ))}
+      </svg>
+      <div className="space-y-2">
+        <p className="text-xl font-bold text-[#f1f5f9] sm:text-2xl">Pulling from Onshape</p>
+        <p className="font-mono text-xs text-[#64748b] sm:text-sm">{status}</p>
       </div>
-    );
-  }
-
-  if (item.type === "thinking") {
-    return (
-      <button
-        onClick={onToggle}
-        data-thinking-btn={item.id}
-        className="flex items-start gap-2 text-left w-full group"
-      >
-        <span
-          className="text-[11px] text-[#64748b] group-hover:text-[#475569] transition-colors mt-px flex-shrink-0"
-          style={{ display: "inline-block", transform: expanded ? "rotate(90deg)" : "rotate(0deg)" }}
-        >
-          ▶
-        </span>
-        <div>
-          <span className="text-xs sm:text-[11px] font-medium text-[#64748b] group-hover:text-[#475569] transition-colors">
-            Thinking ({item.lines?.length} steps)
-          </span>
-          {expanded && (
-            <div className="mt-1.5 border-l-2 border-[#dbe6f5] pl-2.5 space-y-0.5">
-              {item.lines?.map((line, i) => (
-                <p key={i} className="font-mono text-[11px] sm:text-[9px] text-[#64748b] leading-5">
-                  {line}
-                </p>
-              ))}
-            </div>
-          )}
-        </div>
-      </button>
-    );
-  }
-
-  if (item.type === "status") {
-    return (
-      <div className="flex items-start gap-2.5">
-        <PAvatar />
-        <div className="flex-1 space-y-0.5 pt-0.5">
-          {item.lines?.slice(0, statusLineCount).map((line, i) => (
-            <p key={i} className="font-mono text-xs sm:text-[10px] text-[#64748b] leading-5">
-              <span className="text-[#3b82f6]">✓</span> {line}
-            </p>
-          ))}
-          {statusLineCount < (item.lines?.length ?? 0) && (
-            <p className="font-mono text-xs sm:text-[10px] text-[#64748b] leading-5">
-              <span className="text-[#3b82f6] animate-pulse">▌</span>
-            </p>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  if (item.type === "assistant") {
-    return (
-      <div className="flex items-start gap-2.5">
-        <PAvatar />
-        <div className="flex-1 max-w-[85%] space-y-2">
-          {item.text?.split("\n\n").map((para, i) => (
-            <p key={i} className="text-sm sm:text-xs text-[#334155] leading-relaxed">
-              {para}
-            </p>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (item.type === "result") {
-    const isTransfer = item.id === "tresult";
-    return (
-      <div className="flex items-start gap-2.5">
-        <PAvatar />
-        <div className="flex-1">
-          <div className="rounded-lg border border-[#dbe6f5] bg-[#ffffff] p-3 space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs sm:text-[10px] text-[#3b82f6]">
-                {isTransfer ? "✓ transferred" : "✓ built"}
-              </span>
-              <span className="text-[11px] sm:text-[10px] text-[#64748b]">
-                {isTransfer ? "Daily Mug · Part Studio" : "mug_v1 · Part Studio"}
-              </span>
-            </div>
-            <p className="text-xs sm:text-[11px] text-[#64748b] leading-5">
-              {isTransfer ? (
-                <>
-                  7 direct · 6 replicated features
-                  <br />
-                  ↳ breakdown and intent web are in the panel to the left.
-                </>
-              ) : (
-                <>
-                  12 features · 9 live variables
-                  <br />
-                  ↳ edit any variable in Onshape and the part rebuilds.
-                </>
-              )}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
+    </div>
+  );
 }
 
+function StatCard({ label, value, dot, amber }: { label: string; value: string; dot?: string; amber?: boolean }) {
+  return (
+    <div className="rounded-xl border border-[#1c2027] bg-[#12151b] px-4 py-3.5">
+      <p className="flex items-center gap-1.5 text-[11px] text-[#94a3b8]">
+        {dot && <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: dot }} />}
+        {label}
+      </p>
+      <p className={`mt-0.5 text-2xl font-bold ${amber ? "text-[#fbbf24]" : "text-[#f1f5f9]"}`}>{value}</p>
+    </div>
+  );
+}
+
+function StatusPill({ status }: { status: "partial" | "success" }) {
+  return status === "partial" ? (
+    <span className="rounded-full bg-[#26221a] px-2.5 py-0.5 text-[10px] font-medium text-[#fbbf24]">partial</span>
+  ) : (
+    <span className="rounded-full bg-[#14231a] px-2.5 py-0.5 text-[10px] font-medium text-[#4ade80]">success</span>
+  );
+}
+
+// Deterministic fetch-activity heatmap — one bright cell (today's pull) and a
+// few dim ones. No randomness: this subtree server-renders.
+const HEATMAP_LIT: Record<number, string> = {
+  [23 * 7 + 3]: "#3b82f6",
+  [20 * 7 + 1]: "#1e3a5f",
+  [16 * 7 + 4]: "#16283f",
+  [9 * 7 + 2]:  "#16283f",
+};
+
+function FetchHeatmap() {
+  return (
+    <div className="rounded-2xl border border-[#1c2027] bg-[#12151b] p-4 sm:p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <p className="text-sm font-bold text-[#f1f5f9]">Fetch activity</p>
+          <p className="text-[11px] text-[#64748b]">Last 26 weeks · shaded relative to the busiest day</p>
+        </div>
+        <div className="flex items-center gap-1.5 text-[10px] text-[#64748b]">
+          Less
+          {["#1a1e25", "#1e3a5f", "#2563eb", "#3b82f6"].map(c => (
+            <span key={c} className="h-2.5 w-2.5 rounded-[3px]" style={{ backgroundColor: c }} />
+          ))}
+          More
+        </div>
+      </div>
+      <div className="mt-3 flex gap-2 overflow-x-auto">
+        <div className="flex flex-col justify-between py-px text-[9px] leading-none text-[#4b5563]">
+          <span>Mon</span>
+          <span>Wed</span>
+          <span>Fri</span>
+          <span className="opacity-0">·</span>
+        </div>
+        <div className="grid grid-flow-col grid-rows-7 gap-[3px]">
+          {Array.from({ length: 26 * 7 }, (_, i) => (
+            <span
+              key={i}
+              className="h-2.5 w-2.5 rounded-[3px]"
+              style={{ backgroundColor: HEATMAP_LIT[i] ?? "#1a1e25" }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HomeView({ docCount, studioCount }: { docCount: number; studioCount: number }) {
+  return (
+    <div className="space-y-3 sm:space-y-4">
+      {/* Hero banner */}
+      <div className="flex flex-col gap-4 rounded-2xl border border-[#1d2635] bg-gradient-to-r from-[#101d36] via-[#0e1524] to-[#0d1117] p-5 sm:flex-row sm:items-center sm:p-6">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/logo.svg"
+          alt=""
+          className="h-12 w-12 flex-shrink-0 sm:h-14 sm:w-14"
+          style={{ filter: "brightness(0) invert(1)" }}
+        />
+        <div className="min-w-0">
+          <p className="text-2xl font-black text-[#f1f5f9] sm:text-3xl">Parametra</p>
+          <p className="text-xs text-[#94a3b8] sm:text-sm">Design-intent capture for parametric CAD.</p>
+        </div>
+        <div className="flex flex-wrap gap-2 sm:ml-auto sm:flex-shrink-0">
+          <span className="rounded-full bg-[#2563eb] px-4 py-1.5 text-xs font-medium text-white">
+            Pull from Onshape…
+          </span>
+          <span className="rounded-full bg-[#22262e] px-4 py-1.5 text-xs font-medium text-[#e2e8f0]">
+            Open capture…
+          </span>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
+        <StatCard label="documents"    value={String(docCount)} dot="#3b82f6" />
+        <StatCard label="fetches today" value={String(docCount)} dot="#22c55e" />
+        <StatCard label="total fetches" value={String(docCount)} dot="#a78bfa" />
+        <StatCard label="systems"      value={docCount > 0 ? "1" : "0"} dot="#f59e0b" />
+      </div>
+
+      {/* Documents + capture details */}
+      <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:grid-cols-2">
+        <div className="rounded-2xl border border-[#1c2027] bg-[#12151b] p-4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#4b5563]">Documents</p>
+          <div className="mt-2 space-y-1.5">
+            {docCount === 0 && (
+              <p className="py-6 text-center text-xs text-[#4b5563]">No documents fetched yet</p>
+            )}
+            {DOCUMENTS.slice(0, docCount).map((doc, i) => (
+              <div
+                key={doc.id}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 animate-fade-in ${
+                  i === 0 ? "bg-[#182335] border border-[#2c405f]" : "border border-transparent"
+                }`}
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-medium text-[#f1f5f9]">{doc.name}</p>
+                  <p className="text-[10px] text-[#64748b]">Onshape</p>
+                </div>
+                <div className="flex-shrink-0 text-right">
+                  <p className="text-[10px] text-[#94a3b8]">{doc.fetches}</p>
+                  <p className="text-[10px] text-[#64748b]">{doc.time}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-[#1c2027] bg-[#12151b] p-4">
+          {docCount === 0 ? (
+            <p className="py-6 text-center text-xs text-[#4b5563]">Select a document to see its capture</p>
+          ) : (
+            <div className="animate-fade-in">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className="min-w-0 flex-1 truncate text-sm font-bold text-[#f1f5f9]">
+                  {DOCUMENTS[0].name}
+                </p>
+                <div className="flex flex-shrink-0 gap-2">
+                  <span className="rounded-full bg-[#22262e] px-3 py-1 text-[10px] font-medium text-[#e2e8f0]">Repull</span>
+                  <span className="rounded-full bg-[#22262e] px-3 py-1 text-[10px] font-medium text-[#e2e8f0]">Open latest capture</span>
+                </div>
+              </div>
+              <p className="mt-1 text-[11px] text-[#64748b]">branches: main · Onshape</p>
+
+              <p className="mt-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#4b5563]">Part Studios</p>
+              <div className="mt-1.5 space-y-1 border-b border-[#1c2027] pb-3">
+                {studioCount === 0 && (
+                  <p className="py-2 text-[11px] text-[#4b5563]">Reading Part Studios…</p>
+                )}
+                {PART_STUDIOS.slice(0, studioCount).map(ps => (
+                  <div key={ps.id} className="flex items-center gap-2 py-1 animate-fade-in">
+                    <p className="min-w-0 flex-1 truncate text-xs text-[#e2e8f0]">{ps.name}</p>
+                    <span className="flex-shrink-0 text-[10px] text-[#64748b]">{ps.meta}</span>
+                    <StatusPill status={ps.status} />
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-3 flex gap-3">
+                <svg viewBox="0 0 24 48" className="h-12 w-6 flex-shrink-0" aria-hidden>
+                  <path d="M18 6 C18 20 6 22 6 40" stroke="#2dd4bf" strokeWidth="2" fill="none" />
+                  <circle cx="18" cy="6" r="3.5" fill="#0d1015" stroke="#2dd4bf" strokeWidth="2" />
+                  <circle cx="6" cy="40" r="3.5" fill="#0d1015" stroke="#2dd4bf" strokeWidth="2" />
+                </svg>
+                <div className="min-w-0 flex-1 space-y-2.5">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="text-xs font-medium text-[#f1f5f9]">2 Part Studios</p>
+                    <p className="flex-shrink-0 text-[10px] text-[#64748b]">Onshape · 13:28</p>
+                  </div>
+                  <div className="flex items-baseline justify-between gap-2">
+                    <p className="text-xs font-medium text-[#f1f5f9]">Session opened</p>
+                    <p className="flex-shrink-0 text-[10px] text-[#64748b]">main · 13:28</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <FetchHeatmap />
+    </div>
+  );
+}
+
+function GraphView({ chipCount, nodeCount }: { chipCount: number; nodeCount: number }) {
+  const shownIndex = new Map(GRAPH_NODES.map((n, i) => [n.id, i]));
+
+  return (
+    <div className="space-y-3 sm:space-y-4">
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
+        <StatCard label="features"  value="1" />
+        <StatCard label="sketches"  value="1" />
+        <StatCard label="variables" value="6" />
+        <StatCard label="rebuild"   value="partial" amber />
+      </div>
+
+      {/* Workflow panel */}
+      <div className="rounded-2xl border border-[#1c2027] bg-[#12151b] p-4 sm:p-5">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <p className="text-base font-bold text-[#f1f5f9] sm:text-lg">Example Workflow</p>
+          <span className="rounded-full bg-[#22262e] px-3 py-1 text-[11px] font-medium text-[#e2e8f0]">Open capture</span>
+          <span className="rounded-full bg-[#22262e] px-3 py-1 text-[11px] font-medium text-[#e2e8f0]">Grab all</span>
+          <div className="hidden items-center gap-2 md:flex">
+            <span className="text-[11px] text-[#94a3b8]">confidence</span>
+            <span className="relative block h-1 w-32 rounded-full bg-[#3b82f6]">
+              <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-[#3b82f6]" />
+            </span>
+            <span className="text-[11px] text-[#e2e8f0]">1.00</span>
+          </div>
+          <p className="ml-auto text-right text-[11px] text-[#94a3b8]">
+            {DOCUMENTS.length} documents · 2 references{"  "}
+            <span className="text-[#e2e8f0]">
+              {GRAPH_NODES.length} nodes · {GRAPH_EDGES.length} edges
+            </span>
+          </p>
+        </div>
+
+        {/* Session chips */}
+        <div className="mt-4 flex items-center gap-2 overflow-x-auto border-b border-[#1c2027] pb-3">
+          <span className="flex-shrink-0 text-[10px] font-semibold uppercase tracking-[0.2em] text-[#4b5563]">
+            Read this session
+          </span>
+          {SESSION_CHIPS.slice(0, chipCount).map(chip => (
+            <span
+              key={chip}
+              className="max-w-[200px] flex-shrink-0 truncate rounded-lg border border-[#2c3340] bg-[#171a20] px-3 py-1.5 text-[11px] text-[#cbd5e1] animate-fade-in"
+            >
+              {chip}
+            </span>
+          ))}
+        </div>
+
+        {/* Graph canvas */}
+        <div className="relative mt-3">
+          <svg viewBox="0 0 1000 560" className="w-full" aria-label="Intent graph">
+            {GRAPH_EDGES.map(edge => {
+              const a = GRAPH_NODES[shownIndex.get(edge.from)!];
+              const b = GRAPH_NODES[shownIndex.get(edge.to)!];
+              const visible =
+                (shownIndex.get(edge.from) ?? 99) < nodeCount &&
+                (shownIndex.get(edge.to) ?? 99) < nodeCount;
+              return (
+                <line
+                  key={`${edge.from}-${edge.to}`}
+                  x1={a.x} y1={a.y} x2={b.x} y2={b.y}
+                  stroke={edge.accent ? "#a78bfa" : "#343b46"}
+                  strokeWidth={edge.accent ? 2 : 1.2}
+                  strokeDasharray={edge.accent ? undefined : "2 6"}
+                  style={{ opacity: visible ? (edge.accent ? 0.9 : 1) : 0, transition: "opacity 500ms ease" }}
+                />
+              );
+            })}
+            {GRAPH_NODES.map((node, i) => {
+              const s = NODE_STYLE[node.kind];
+              return (
+                <g key={node.id} style={{ opacity: i < nodeCount ? 1 : 0, transition: "opacity 500ms ease" }}>
+                  <circle cx={node.x} cy={node.y} r={s.r} fill={s.color} />
+                  <text
+                    x={node.x}
+                    y={node.y + s.r + 16}
+                    textAnchor="middle"
+                    fill="#9ca3af"
+                    fontSize="13"
+                    fontFamily="var(--font-lato), sans-serif"
+                  >
+                    {node.label}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+
+          {/* Help card */}
+          <div className="absolute right-0 top-2 hidden w-60 rounded-xl border border-[#232830] bg-[#171b22]/95 p-4 text-xs leading-5 text-[#94a3b8] lg:block">
+            Double-click a folder to open it, a document to read every Part Studio in it,
+            or one Part Studio to read just that. Lines between documents are dependencies
+            a capture found.
+          </div>
+        </div>
+
+        {/* Legend */}
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+          {LEGEND.map(l => (
+            <span key={l.label} className="flex items-center gap-1.5 text-[11px] text-[#94a3b8]">
+              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: l.color }} />
+              {l.label}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HistoryView({
+  events,
+  scrollRef,
+}: {
+  events: HistoryEvent[];
+  scrollRef: React.Ref<HTMLDivElement>;
+}) {
+  return (
+    <div className="flex h-full min-h-[320px] flex-col rounded-2xl border border-[#1c2027] bg-[#12151b] p-4 sm:p-5">
+      <p className="text-sm font-bold text-[#f1f5f9]">History</p>
+      <p className="text-[11px] text-[#64748b]">Session events · this capture</p>
+      <div ref={scrollRef} className="mt-3 flex-1 space-y-1 overflow-y-auto">
+        {events.length === 0 && (
+          <p className="py-6 text-center text-xs text-[#4b5563]">No events yet — pull from Onshape to begin</p>
+        )}
+        {events.map((e, i) => (
+          <div key={i} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 animate-fade-in">
+            <span
+              className="h-1.5 w-1.5 flex-shrink-0 rounded-full"
+              style={{
+                backgroundColor:
+                  e.level === "ok" ? "#22c55e" : e.level === "warn" ? "#fbbf24" : "#64748b",
+              }}
+            />
+            <p className="min-w-0 flex-1 truncate text-xs text-[#cbd5e1]">{e.text}</p>
+            <span className="flex-shrink-0 font-mono text-[10px] text-[#4b5563]">{e.time}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

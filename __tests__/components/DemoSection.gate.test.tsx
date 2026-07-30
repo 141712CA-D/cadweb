@@ -2,12 +2,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import DemoSection from "@/app/components/DemoSection";
 
-// The gated (primary) run is the Inter-CAD transfer. It ends at
-// max(TRANSFER_SCRIPT delays, TRANSFER_LOG_LINES t) + 200ms unlock.
+// The gated run is the Pull-from-Onshape → Home → Intent-graph script. It ends
+// at max(APP_SCRIPT delays, HISTORY_EVENTS t) + 200ms unlock.
 const FULL_RUN_MS = 12000;
 
-const FIRST_TRANSFER_MSG = "transfer my Daily Mug model from Fusion360 to Onshape";
-const FIRST_GEN_MSG = "make in a new part studio a mug for my daily coffee";
+const PULLING_HEADING = "Pulling from Onshape";
+const GRAPH_META = "27 nodes · 28 edges";
+const DONE_STATUS = "Demo complete — scroll or swipe to return to the site";
 
 beforeEach(() => {
   sessionStorage.clear();
@@ -32,13 +33,13 @@ describe("DemoSection start gate", () => {
       vi.advanceTimersByTime(FULL_RUN_MS);
     });
 
-    // No conversation started, no scroll lock taken.
-    expect(screen.queryByText(FIRST_TRANSFER_MSG)).not.toBeInTheDocument();
+    // No pull started, no scroll lock taken.
+    expect(screen.queryByText(PULLING_HEADING)).not.toBeInTheDocument();
     expect(document.body.style.overflow).toBe("");
     expect(sessionStorage.getItem("demoAnimPlayed")).toBeNull();
   });
 
-  it("locks scroll on start, plays the transfer script, and unlocks when the run completes", () => {
+  it("locks scroll on start, plays the script, and unlocks when the run completes", () => {
     render(<DemoSection />);
 
     fireEvent.click(screen.getByRole("button", { name: /start mock application/i }));
@@ -49,23 +50,24 @@ describe("DemoSection start gate", () => {
     ).not.toBeInTheDocument();
     expect(document.body.style.overflow).toBe("hidden");
 
-    // First scripted transfer message appears at 400ms.
+    // The pulling screen appears at 300ms.
     act(() => {
       vi.advanceTimersByTime(500);
     });
-    expect(screen.getByText(FIRST_TRANSFER_MSG)).toBeInTheDocument();
+    expect(screen.getByText(PULLING_HEADING)).toBeInTheDocument();
     expect(document.body.style.overflow).toBe("hidden");
 
-    // Run to completion: result card shown, scroll released, replay suppressed.
+    // Run to completion: intent graph shown, scroll released, replay suppressed.
     act(() => {
       vi.advanceTimersByTime(FULL_RUN_MS);
     });
-    expect(screen.getByText("✓ transferred")).toBeInTheDocument();
+    expect(screen.getByText(GRAPH_META)).toBeInTheDocument();
+    expect(screen.getByText(DONE_STATUS)).toBeInTheDocument();
     expect(document.body.style.overflow).toBe("");
     expect(sessionStorage.getItem("demoAnimPlayed")).toBe("true");
   });
 
-  it("never plays the text-to-CAD run as part of the gated demo", () => {
+  it("streams the history feed during the run and opens it from the sidebar", () => {
     render(<DemoSection />);
 
     fireEvent.click(screen.getByRole("button", { name: /start mock application/i }));
@@ -73,19 +75,20 @@ describe("DemoSection start gate", () => {
       vi.advanceTimersByTime(FULL_RUN_MS);
     });
 
-    // The second demo is user-initiated only — the gate must not trigger it.
-    expect(screen.queryByText(FIRST_GEN_MSG)).not.toBeInTheDocument();
-    expect(screen.queryByText("✓ built")).not.toBeInTheDocument();
+    // Sidebar renders twice (desktop aside + mobile shelf) — either works.
+    fireEvent.click(screen.getAllByRole("button", { name: /history/i })[0]);
+    expect(screen.getByText("Pull from Onshape started")).toBeInTheDocument();
+    expect(screen.getByText("Intent graph ready · 27 nodes · 28 edges")).toBeInTheDocument();
   });
 
-  it("skips the gate and fast-forwards the transfer when it already played this session", () => {
+  it("skips the gate and fast-forwards the run when it already played this session", () => {
     sessionStorage.setItem("demoAnimPlayed", "true");
     render(<DemoSection />);
 
     expect(
       screen.queryByRole("button", { name: /start mock application/i })
     ).not.toBeInTheDocument();
-    expect(screen.getByText("✓ transferred")).toBeInTheDocument();
+    expect(screen.getByText(GRAPH_META)).toBeInTheDocument();
     expect(document.body.style.overflow).toBe("");
   });
 });

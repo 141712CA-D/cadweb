@@ -9,8 +9,8 @@ Pre-launch marketing site for Parametra.ai, an AI-powered multi-agent CAD design
 - **Colors**: off-white base `#f8fafc`, blue-tinted panels `#eef2f9`, borders `#dbe6f5`, text `#0f172a` (primary) / `#475569` (secondary) / `#64748b` (dim) / `#94a3b8` (extra-dim), accent **blue `#3b82f6`** (hover `#2563eb`). Blue is now the site's own brand accent, so the platform-tree Fusion 360 node uses **cyan** (`cyan-300`/`cyan-500`/`cyan-600`) instead to stay visually distinct from the Onshape-root/brand blue; violet is still used for the SolidWorks node.
 - **Fonts**: Lato (`--font-lato`, sans) + Geist Mono (`--font-geist-mono`) via `next/font/google`. (No longer Geist Sans.)
 - **Style**: rounded corners (`rounded-md`/`rounded-lg`, softened from the old sharp-corner look) on buttons, cards, inputs, and panels; monospace eyebrows/labels in uppercase tracking-widest and terminal-style `[tag]` log lines are still used as a typographic motif.
-- Key CSS classes in `globals.css`: `grid-bg` (now an intentional no-op — the coordinate-grid effect was dropped when softening the aesthetic), `gradient-text`, `header-glass` (light frosted-glass blur), `cursor-blink`, `morph-fade-in/out`, `form-field-enter`, `cad-scan-line`, `cad-pulse` (both currently unused dead CSS), `animate-fade-up/in`, and the `.device-*` family (device shell for the live-demo flight — see DemoSection below).
-- **`DemoSection.tsx` is an intentional exception**: the scripted "mock Parametra desktop app" window (and its child components `InterCadPanel.tsx`, `IntentWebViewer.tsx`) keeps its own self-contained dark/CAD-green palette — like a product screenshot floating on the light page — rather than following the site-shell light theme. Only its outer section wrapper background was updated to blend with the new page background.
+- Key CSS classes in `globals.css`: `grid-bg` (now an intentional no-op — the coordinate-grid effect was dropped when softening the aesthetic), `gradient-text`, `header-glass` (light frosted-glass blur), `cursor-blink`, `morph-fade-in/out`, `form-field-enter`, `cad-scan-line`, `cad-pulse` (both currently unused dead CSS), `animate-fade-up/in`, `tree-draw` (hero git-tree branch draw-in; paths must set `pathLength={1}`), and the `.device-*` family (device shell for the stored DemoSection flight).
+- **The app-window surfaces are an intentional exception**: `DemoShowcase.tsx`'s recording frames and the (currently unmounted) `DemoSection.tsx` mock app keep a self-contained dark palette (near-black `#0b0d11`/`#0e1014` bg, `#12151b` cards, `#1c2027` borders, amber `#fbbf24` warning badges) replicating the real Parametra desktop app — like product screenshots floating on the light page — rather than following the site-shell light theme. (`InterCadPanel.tsx` / `IntentWebViewer.tsx` belonged to the older chat-style mock and are no longer imported anywhere — kept in the repo for reuse.)
 
 ## Stack
 
@@ -20,7 +20,7 @@ Pre-launch marketing site for Parametra.ai, an AI-powered multi-agent CAD design
 - **Captcha**: Cloudflare Turnstile (`@marsidev/react-turnstile`) — widget only; secret-key verification is in the backend
 - **Analytics**: Vercel Speed Insights, mounted in `layout.tsx`
 - **Deployment**: Vercel (GitHub repo `141712CA-D/cadweb`, production branch `main`)
-- **Tests**: Vitest + React Testing Library (jsdom), config in `vitest.config.mts` / `vitest.setup.ts`. Run `npm test` (or `npm run test:watch`). Suites live in `__tests__/`: `lib/` (scrollLock ref-counting, apiUrl, consumeExpired), `components/` (MorphSwitch phases, SignupForm validation/captcha-gating with a mocked Turnstile + fetch, DemoSection script-data invariants). DemoSection's demo data constants (`MESSAGES`, `SCRIPT`, `FEATURES`, `LOG_LINES`, `VAR_GROUPS`, `TRANSFER_MESSAGES`, `TRANSFER_SCRIPT`, `TRANSFER_LOG_LINES`) are exported for the data tests — **run `npm test` after editing either demo script**; the tests enforce id references, chronological delays, that the transfer log fits inside its conversation window, and the "12 features · 9 variables" / "13 features mapped (7 direct + 6 replicated)" copy counts. `DemoSection.gate.test.tsx` asserts the gated run is the transfer; `deviceFlight.test.ts` covers the scroll-driven device flight (band continuity, docked stillness, dock-marker alignment).
+- **Tests**: Vitest + React Testing Library (jsdom), config in `vitest.config.mts` / `vitest.setup.ts`. Run `npm test` (or `npm run test:watch`). Suites live in `__tests__/`: `lib/` (scrollLock ref-counting, apiUrl, consumeExpired), `components/` (MorphSwitch phases, SignupForm validation/captcha-gating with a mocked Turnstile + fetch, DemoSection script-data invariants). DemoSection's demo data constants (`DOCUMENTS`, `PART_STUDIOS`, `SESSION_CHIPS`, `GRAPH_NODES`, `GRAPH_EDGES`, `APP_SCRIPT`, `HISTORY_EVENTS`) are exported for the data tests — **run `npm test` after editing the demo script**; the tests enforce chronological step delays, that reveal counts never shrink or overshoot their data (and finish fully revealed), that graph edges reference real node ids, the "27 nodes · 28 edges" copy, and that History events land inside the script's window. `DemoSection.gate.test.tsx` asserts the gated pull → home → intent-graph run; `deviceFlight.test.ts` covers the scroll-driven device flight (band continuity, docked stillness, dock-marker alignment).
 
 ## Environment Variables
 
@@ -47,7 +47,9 @@ app/
 ├── components/
 │   ├── BackgroundSync.tsx  # Mounted in layout: warms /api/health, hourly cookie-throttled waitlist sync
 │   ├── ContactForm.tsx     # Contact form (Individual + Team tabs, 6-digit email code verify step)
-│   ├── DemoSection.tsx     # Scroll-locked demo section on a 3D scroll runway (see below)
+│   ├── DemoSection.tsx     # STORED, UNMOUNTED — interactive mock-app demo on a 3D scroll runway (see below)
+│   ├── DemoShowcase.tsx    # `#live-demo` — two overlapping app recordings, hover-focus on desktop (see below)
+│   ├── GitTree.tsx         # Hero SVG git tree — blue neutral main + parallel per-tool branches
 │   ├── DeviceShell.tsx     # MacBook / phone chrome around the demo window; all geometry is CSS,
 │                           # driven by the single `--chrome` custom property
 │   ├── DevBanner.tsx       # Fixed top bar "This project is currently in development"
@@ -84,7 +86,7 @@ The old `/overview` page was removed.
 
 ## Home page (`/`)
 
-Section order: **hero fold → demo video (scroll-locked) → platform tree → CTA band → Partners → footer**.
+Section order: **hero fold (git tree) → app showcase (`#live-demo`) → platform tree → CTA band → Partners → footer**.
 
 - `sessionStorage("introPlayed")` gates the intro animation (plays once per session); `mounted` state prevents hydration mismatch
 - All "Join the Waitlist" triggers (header, hero, CTA band, footer link) open **SignupModal** via shared state in `page.tsx`; standalone pages fall back to `/signup`
@@ -94,23 +96,26 @@ Section order: **hero fold → demo video (scroll-locked) → platform tree → 
 
 ### Hero (`Hero.tsx`)
 
-**Zone 1 — hero fold**: the hero used to alternate on a 6.5s timer between a text-to-CAD pitch and an Inter-CAD pitch; that alternation is **gone** — the hero is now fixed on Inter-CAD transfer. Eyebrow "Parametra · v1.0 · Releasing Soon"; h1 "Inter-Software Git for CAD" (`text-4xl sm:text-5xl lg:text-6xl font-black`); "Inter-CAD transfer" step chips (`INTER_CAD_STEPS`); blue waitlist button + "See a transfer →" button that scrolls to `#live-demo`. Right column: description + `/node-demo-video.mov` (looping, force-played on pause/visibilitychange) with a scroll-down prompt bar. Scroll nudge (`fixed bottom-8` chevron) appears after 4s idle, hides at `scrollY > 60`.
+**Zone 1 — hero fold**: eyebrow "Parametra · v1.0 · Releasing Soon"; h1 "Inter-Software Git for CAD" (`text-4xl sm:text-5xl lg:text-6xl font-black`); the "Your model shouldn't be trapped…" description; blue waitlist button + "See the app →" button that scrolls to `#live-demo`. Right column: `GitTree` + a bold "Own. Your. Workflow." caption (blue "Workflow."). The tree is the app's loading-screen subway-map style: blue software-neutral main line, Onshape/SolidWorks/Fusion 360/CATIA branches that fork off main and run **parallel forever — branches deliberately never merge back** (persistence, not PRs); every line fades off the right edge via an SVG mask, and `.tree-draw` draws the lines in on mount. Scroll nudge (`fixed bottom-8` chevron) appears after 4s idle, hides at `scrollY > 60`.
 
-**Zone 2 — DemoSection** (imported into Hero, wrapped in `relative z-10`): see below.
+**Zone 2 — DemoShowcase** (`#live-demo`): two app recordings in dark macOS-style window chrome — Home (`/homepage_recording.mov`) upper-left, Intent graph (`/graph_recording.mov`) lower-right. On lg+ the panes overlap diagonally (container `lg:aspect-[1.5]`, panes absolute `lg:w-[58%]`); hovering focuses a pane (z-raise, `scale-[1.03]`, blue-tinted border, caption slides up over the video) and dims the other to 55%. Below lg they stack with captions always visible as card footers, each fading up once via IntersectionObserver. One `<video>` per pane serves both layouts; both are force-played GIF-style (pause/visibilitychange listeners).
 
 **Zone 3 — platform tree** (`treeRef`, `min-h-[300vh]`, sticky inner): 6 `platformStages` driven by scroll progress — Onshape root card → Fusion 360 + SolidWorks branch cards → per-branch `LeafList` capability leaves → "One prompt. Every tool." finale. Invisible-copy + `absolute inset-0` overlay pattern prevents reflow as the tree builds. Header h2/p use the invisible-spacer pattern.
 
 > The old Zone-2 pinned terminal simulation ("How it generates", `TerminalAccumulator`/`TerminalSwap`, `#generation-demo`) was **removed** — redundant with the real demo video and `/how-it-works`.
 
-### DemoSection (`DemoSection.tsx`)
+### DemoSection (`DemoSection.tsx`) — STORED, currently unmounted
 
-Scripted mock-app demo (fake Parametra desktop window: sidebar, breakdown panel, chat + logs tabs). The one run is the **Inter-CAD transfer** — the product's focus, so it leads everywhere on the site. Driven entirely by exported constants (`TRANSFER_MESSAGES`/`TRANSFER_SCRIPT`/`TRANSFER_LOG_LINES`; the `MESSAGES`/`SCRIPT`/`FEATURES`/`LOG_LINES`/`VAR_GROUPS` text-to-CAD set is still exported and covered by tests but no longer rendered) — covered by invariant tests, run `npm test` after editing them.
+**Not rendered anywhere** — replaced on the homepage by DemoShowcase, but kept in the repo (with its tests, which still run and pass) for reuse. Note its dock-marker anchor (`DOCK_ANCHOR_ID`) is therefore absent from the DOM; Hero scrolls to `#live-demo` directly.
 
-- **Gated start (all breakpoints)**: the demo never auto-plays. A `!started` overlay ("▶ Start mock application") covers the window; clicking `startDemo()` snaps to the dock marker (`behavior: "instant"` — smooth would strand mid-scroll under the lock), locks body scroll via shared `lockScroll()`, runs the transfer conversation (~9.5s) with `TRANSFER_LOG_LINES` streaming into the Logs tab, then unlocks and sets `sessionStorage("demoAnimPlayed")`.
-- Already played this session → mount effect fast-forwards the transfer to its complete state, no gate, no lock.
-- `InterCadPanel` takes a `stage` prop mirroring `statusLineCount`, so the breakdown builds in step with the conversation.
-- After completion: desktop-only fake-cursor hint tour (once per session, `cursorHintPlayed`) — it opens the "Derived / Non-Direct Map" accordion (via a real DOM click on `[data-intercad-btn="derived"]`, since that state lives inside `InterCadPanel`), switches to the transfer log, and hovers the intent web (`[data-intercad-web]`).
-- Mobile (<sm): sidebar/panel live in a hamburger slide-in shelf; chat pane is the main view.
+Scripted mock-app demo replicating the **real Parametra desktop app** (dark theme, macOS titlebar, app header with capture badges, sidebar, dashboard views). The one run is **Pull from Onshape → Home dashboard → Intent graph**, driven entirely by exported constants (`APP_SCRIPT` reveals `DOCUMENTS`/`PART_STUDIOS`/`SESSION_CHIPS`/`GRAPH_NODES` by count while `HISTORY_EVENTS` stream into the History tab) — covered by invariant tests, run `npm test` after editing them.
+
+- **Views** (`view` state): `pulling` (logo + subway-map branch lines + status line), `home` (hero banner, stat cards, Documents list, capture details with Part Studios, fetch-activity heatmap), `graph` (stat cards, Example Workflow panel, "Read this session" chips, 27-node/28-edge SVG intent graph with legend + help card), `history` (session event feed). Header flips "No capture open" → "Part Studio 1" + amber partial/2-warnings badges mid-run.
+- **Sidebar**: Home, **History** (with live event-count chip), Inter-op group (only "Intent graph" navigates; the rest are inert set dressing), and an **account/login chip pinned bottom-left** — clicking toggles Guest "Sign in →" ↔ "Sandeep S. · Onshape connected" (pure mock, no real auth). Nav is inert until the run completes (`done`).
+- **Gated start (all breakpoints)**: the demo never auto-plays. A `!started` overlay ("▶ Start mock application") covers the window; clicking `startDemo()` snaps to the dock marker (`behavior: "instant"` — smooth would strand mid-scroll under the lock), locks body scroll via shared `lockScroll()`, plays `APP_SCRIPT` (~9.5s), then unlocks and sets `sessionStorage("demoAnimPlayed")`.
+- Already played this session → mount effect fast-forwards to the completed intent-graph state, no gate, no lock.
+- After completion: desktop-only fake-cursor hint tour (once per session, `cursorHintPlayed`) — clicks the History tab, hovers the login chip (never clicks it), then returns to the Intent graph. The tour holds the scroll lock until it finishes.
+- Mobile (<sm): the sidebar (including the login chip) lives in a hamburger slide-in shelf; the main view fills the window. Content grids need explicit `grid-cols-1` (Tailwind's `minmax(0,1fr)`) — an implicit `auto` track sizes to card min-content and overflows the phone window.
 
 #### Device flight (`lib/deviceFlight.ts` + `DeviceShell.tsx`)
 
@@ -125,7 +130,7 @@ The section is a **`RUNWAY_SVH` (170svh) scroll runway** with a `sticky top-0`, 
 
 ### scrollLock (`lib/scrollLock.ts`)
 
-Reference-counted `document.body.style.overflow` lock shared by IntroAnimation, SignupModal, and DemoSection — prevents one consumer's unlock from clobbering another's lock. Always pair lock/unlock and release on unmount.
+Reference-counted `document.body.style.overflow` lock shared by NodeIntro, SignupModal, and DemoSection — prevents one consumer's unlock from clobbering another's lock. Always pair lock/unlock and release on unmount.
 
 ## Forms
 
