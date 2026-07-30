@@ -114,7 +114,7 @@ export default function DemoShowcase() {
                 onMouseLeave={() => setFocus(f => (f === pane.id ? null : f))}
                 className={`transition-all duration-700 ease-out lg:absolute lg:w-[58%] ${
                   i === 0 ? "mb-8 lg:left-0 lg:top-0 lg:mb-0" : "lg:bottom-0 lg:right-0"
-                } ${focused ? "lg:z-30" : i === 0 ? "lg:z-10" : "lg:z-20"}`}
+                } ${focused ? "lg:z-30" : i === 0 ? "lg:z-20" : "lg:z-10"}`}
                 style={{
                   opacity: !visible ? 0 : dimmed ? 0.55 : 1,
                   transform: visible ? "translateY(0)" : "translateY(24px)",
