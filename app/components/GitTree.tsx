@@ -133,7 +133,8 @@ export default function GitTree({ className }: { className?: string }) {
           fontWeight="600"
           fontFamily="var(--font-geist-mono), monospace"
         >
-          software-neutral main
+          <tspan x={16}>software-neutral</tspan>
+          <tspan x={16} dy={18}>main</tspan>
         </text>
       </g>
 
