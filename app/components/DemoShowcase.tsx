@@ -93,7 +93,7 @@ export default function DemoShowcase() {
 
   return (
     <section id="live-demo" className="relative z-10 border-t border-[#dbe6f5] bg-[#f8fafc] px-5 py-20 sm:px-6 sm:py-24 lg:px-8">
-      <div className="mx-auto w-full max-w-6xl">
+      <div className="mx-auto w-full max-w-6xl lg:max-w-[max(72rem,85vw)]">
         <p className="mb-10 font-mono text-xs uppercase tracking-[0.3em] text-[#3b82f6] sm:mb-12">
           Inside the application
         </p>

@@ -165,7 +165,7 @@ export default function PitchPage() {
 
       {/* ── Welcome Parametra ── */}
       <section className="relative border-t border-[#dbe6f5] bg-[#eef2f9] px-6 py-20 sm:py-32">
-        <div className="mx-auto flex max-w-5xl flex-col gap-10 sm:gap-14">
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 sm:gap-14 lg:max-w-[max(64rem,80vw)]">
           <div className="flex flex-col items-center gap-5 text-center">
             <Reveal>
               <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#3b82f6]">Welcome Parametra</p>
