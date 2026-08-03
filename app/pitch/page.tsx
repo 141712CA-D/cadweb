@@ -130,7 +130,7 @@ export default function PitchPage() {
         </StampWord>
 
         <p className="animate-fade-up delay-400 relative z-10 max-w-lg font-mono text-base text-[#475569] sm:text-lg">
-          Here&apos;s why we built Parametra — and why they never wanted you to have it.
+          Here&apos;s why we built Parametra, and why current CAD transfer still leaves your workflow trapped.
         </p>
 
         <div className="animate-fade-in delay-800 absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce text-[#94a3b8]">
@@ -212,7 +212,7 @@ export default function PitchPage() {
           </div>
 
           <Reveal className="flex justify-center pt-4" threshold={0.6}>
-            <StampWord size="md">F**K CAD ONBOARDING</StampWord>
+            <StampWord size="md">F**K REBUILDING MODELS</StampWord>
           </Reveal>
         </div>
       </section>
