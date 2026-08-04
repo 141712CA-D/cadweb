@@ -8,12 +8,12 @@ import { isPageTransitioning } from "@/lib/pageTransitionState";
 
 const platformStages = [
   {
-    title: "Generated in Onshape",
-    summary: "Every prompt produces a fully parametric Onshape part studio — sketches, constraints, and features, all editable.",
+    title: "You build it in Onshape",
+    summary: "Design it in Onshape exactly as you do today — sketches, constraints, and features, fully parametric and all yours.",
   },
   {
     title: "Persisted in Fusion 360",
-    summary: "The same model opens in Fusion 360, ready for CAM work, generative design, and simulation — none of which Onshape supports.",
+    summary: "Parametra carries the same model into Fusion 360 with its feature tree intact, ready for CAM work, generative design, and simulation — none of which Onshape supports.",
   },
   {
     title: "Persisted in SolidWorks",
@@ -21,17 +21,25 @@ const platformStages = [
   },
   {
     title: "Fusion 360 · Simulation",
-    summary: "Static stress, thermal analysis, and event simulation run directly on the generated geometry — no re-modeling required.",
+    summary: "Static stress, thermal analysis, and event simulation run directly on your model — no re-modeling required.",
   },
   {
     title: "SolidWorks · Simulation",
     summary: "Fatigue analysis, CFD flow simulation, drop test, and motion study run natively on the same exported model.",
   },
   {
-    title: "One prompt. Every tool.",
-    summary: "One prompt. Every tool. No rebuilding, no re-modeling, no starting over.",
+    title: "One model. Every tool.",
+    summary: "One model. Every tool. No rebuilding, no re-modeling, no starting over.",
   },
 ];
+
+// The platform tree is a fixed-size block inside a pinned stage, so the window
+// height — not the width — is what it has to fit into. Laptop and up, it gets
+// scaled to the room the stage actually has; phones and tablets are left alone
+// (there the section scrolls normally, so nothing can hide below the fold).
+const TREE_FIT_QUERY = "(min-width: 1024px)";
+const TREE_SCALE_MIN = 0.62;
+const TREE_SCALE_MAX = 1.25;
 
 function clamp(value: number, min = 0, max = 1) {
   return Math.min(max, Math.max(min, value));
@@ -156,6 +164,10 @@ interface HeroProps {
 
 export default function Hero({ onJoinWaitlist }: HeroProps) {
   const treeRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const stageHeaderRef = useRef<HTMLDivElement>(null);
+  const treeScaleRef = useRef<HTMLDivElement>(null);
+  const treeBoxRef = useRef<HTMLDivElement>(null);
   const [platformIndex, setPlatformIndex] = useState(0);
   const activePlatformStage = platformStages[platformIndex];
   const [showNudge, setShowNudge] = useState(false);
@@ -195,6 +207,67 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
     );
     obs.observe(el);
     return () => obs.disconnect();
+  }, []);
+
+  // Fit the tree to the pinned stage on laptop-and-up. Without this, a short
+  // window clips the lower leaves — and because the stage is sticky, there is
+  // no way to scroll down to them; a tall one leaves the tree stranded in dead
+  // space. Below the breakpoint the inline styles are cleared, so the phone and
+  // tablet layout is exactly what it was.
+  useEffect(() => {
+    const scaler = treeScaleRef.current;
+    const box = treeBoxRef.current;
+    const header = stageHeaderRef.current;
+    const stage = stageRef.current;
+    if (!scaler || !box || !header || !stage) return;
+
+    const laptop = window.matchMedia(TREE_FIT_QUERY);
+
+    const fit = () => {
+      scaler.style.transform = "";
+      scaler.style.height = "";
+      if (!laptop.matches) return;
+
+      const naturalHeight = box.offsetHeight;
+      const naturalWidth = box.offsetWidth;
+      if (!naturalHeight || !naturalWidth) return;
+
+      const stageStyle = getComputedStyle(stage);
+      // Everything the stage spends before the tree gets its turn: the sticky
+      // offset under the site header, the stage's own padding, and the heading.
+      const chrome =
+        parseFloat(stageStyle.top) +
+        parseFloat(stageStyle.paddingTop) +
+        parseFloat(stageStyle.paddingBottom) +
+        header.offsetHeight +
+        parseFloat(getComputedStyle(header).marginBottom);
+
+      const room = window.innerHeight - chrome;
+      const width = scaler.parentElement?.clientWidth ?? naturalWidth;
+      const scale = clamp(
+        Math.min(room / naturalHeight, width / naturalWidth),
+        TREE_SCALE_MIN,
+        TREE_SCALE_MAX,
+      );
+
+      scaler.style.transform = `scale(${scale})`;
+      // Transforms don't affect layout, so hand the stage the scaled height too.
+      scaler.style.height = `${naturalHeight * scale}px`;
+    };
+
+    fit();
+    // The heading rewraps (and the tree reflows) on width changes; both feed
+    // the scale, so watch the elements rather than only the window.
+    const observer = new ResizeObserver(fit);
+    observer.observe(header);
+    observer.observe(box);
+    window.addEventListener("resize", fit);
+    laptop.addEventListener("change", fit);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", fit);
+      laptop.removeEventListener("change", fit);
+    };
   }, []);
 
   useEffect(() => {
@@ -283,9 +356,12 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
 
       {/* ── Platform tree section ── */}
       <div ref={treeRef} className="relative z-10 min-h-[300vh] border-t border-[#dbe6f5]">
-        <div className="sticky top-20 flex min-h-[calc(100vh-5rem)] flex-col justify-start px-5 pt-8 pb-10 sm:px-6 lg:px-8">
+        <div
+          ref={stageRef}
+          className="tree-stage sticky top-20 flex min-h-[calc(100vh-5rem)] flex-col justify-start px-5 pt-8 pb-10 sm:px-6 lg:px-8"
+        >
           <div className="mx-auto w-full max-w-7xl">
-            <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+            <div ref={stageHeaderRef} className="tree-stage-header mb-10 flex flex-wrap items-end justify-between gap-4">
               <div>
                 <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#3b82f6]">Works where the job demands</p>
                 <h2 className="relative mt-2 text-3xl font-black leading-tight text-[#0f172a] sm:text-4xl lg:text-5xl">
@@ -307,12 +383,16 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
                 <span className="ml-1 font-mono text-[11px] text-[#64748b]">{platformIndex + 1}/{platformStages.length}</span>
               </div>
             </div>
-            <div className="relative">
-              <div className="invisible select-none" aria-hidden="true">
-                <PlatformTree activeIndex={platformStages.length - 1} />
-              </div>
-              <div className="absolute inset-0">
-                <PlatformTree activeIndex={platformIndex} />
+            {/* Scaled to fit the stage on laptop-and-up — kept at the tree's own
+                width so scaling up can never push past the viewport. */}
+            <div ref={treeScaleRef} className="mx-auto w-full max-w-2xl origin-top">
+              <div ref={treeBoxRef} className="relative">
+                <div className="invisible select-none" aria-hidden="true">
+                  <PlatformTree activeIndex={platformStages.length - 1} />
+                </div>
+                <div className="absolute inset-0">
+                  <PlatformTree activeIndex={platformIndex} />
+                </div>
               </div>
             </div>
           </div>

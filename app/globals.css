@@ -469,6 +469,21 @@ html {
 .form-field-enter.delay-400 { animation-delay: 200ms; }
 .form-field-enter.delay-500 { animation-delay: 250ms; }
 
+/* ── Platform-tree stage (Hero zone 3) ──
+   On a short laptop window, claw back the stage's own padding before the tree
+   itself has to shrink (Hero scales the tree to whatever room is left). Gated
+   on width too, so phones and tablets keep the untouched spacing. */
+@media (min-width: 1024px) and (max-height: 860px) {
+  .tree-stage {
+    padding-top: 1rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .tree-stage-header {
+    margin-bottom: 1.5rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
