@@ -66,14 +66,14 @@ export default function SignupModal({ isOpen, onClose }: SignupModalProps) {
 
       {/* Modal - overlays over DevBanner (z-60) */}
       <div
-        className="fixed right-0 top-0 h-full w-full max-w-2xl bg-[#f8fafc] border-l border-[#dbe6f5] overflow-y-auto transition-transform duration-500 ease-out"
+        className="fixed right-0 top-0 h-full w-full max-w-2xl bg-white border-l border-[#dbe6f5] overflow-y-auto transition-transform duration-500 ease-out"
         style={{
           zIndex: 70,
           transform: isOpen ? "translateX(0)" : "translateX(100%)",
         }}
       >
         {/* Close button - sticky so it stays visible */}
-        <div className="sticky top-0 flex items-center justify-end p-4 border-b border-[#dbe6f5] bg-[#f8fafc]/95 backdrop-blur-sm z-10">
+        <div className="sticky top-0 flex items-center justify-end p-4 border-b border-[#dbe6f5] bg-white/95 backdrop-blur-sm z-10">
           <button
             onClick={onClose}
             className="cursor-pointer p-2 text-[#64748b] hover:text-[#3b82f6] hover:bg-[#eef2f9] transition-all duration-150"

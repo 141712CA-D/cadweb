@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import DemoShowcase from "./DemoShowcase";
 import GitTree from "./GitTree";
+import PlatformGitTree from "./PlatformGitTree";
 import { isPageTransitioning } from "@/lib/pageTransitionState";
 
 const platformStages = [
@@ -33,129 +34,13 @@ const platformStages = [
   },
 ];
 
-// The platform tree is a fixed-size block inside a pinned stage, so the window
-// height — not the width — is what it has to fit into. Laptop and up, it gets
-// scaled to the room the stage actually has; phones and tablets are left alone
-// (there the section scrolls normally, so nothing can hide below the fold).
-const TREE_FIT_QUERY = "(min-width: 1024px)";
-const TREE_SCALE_MIN = 0.62;
-const TREE_SCALE_MAX = 1.25;
+// The caption swaps between stages, so both lines are sized to the longest
+// wording rather than to a hand-picked stage — a shorter pick silently clips.
+const LONGEST_TITLE = platformStages.reduce((a, b) => (b.title.length > a.title.length ? b : a)).title;
+const LONGEST_SUMMARY = platformStages.reduce((a, b) => (b.summary.length > a.summary.length ? b : a)).summary;
 
 function clamp(value: number, min = 0, max = 1) {
   return Math.min(max, Math.max(min, value));
-}
-
-function LeafList({
-  show,
-  leaves,
-  tagColor,
-}: {
-  show: boolean;
-  leaves: { tag: string; text: string }[];
-  tagColor: string;
-}) {
-  return (
-    <div className={`transition-all duration-700 ${show ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
-      <div className="flex justify-center">
-        <div className="h-5 w-px bg-[#dbe6f5]" />
-      </div>
-      <div className="relative ml-5 border-l border-[#dbe6f5] pl-4 space-y-2">
-        {leaves.map(({ tag, text }, i) => (
-          <div
-            key={tag}
-            className={`relative transition-all duration-500 ${show ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"}`}
-            style={{ transitionDelay: `${i * 55}ms` }}
-          >
-            <div className="absolute -left-4 top-1/2 w-3 h-px bg-[#dbe6f5]" />
-            <div className="rounded-md border border-[#dbe6f5] bg-[#eef2f9] px-3 py-1.5 font-mono text-[11px]">
-              <span className={tagColor}>{tag}</span>
-              <span className="ml-1.5 text-[#64748b]">{text}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function PlatformTree({ activeIndex }: { activeIndex: number }) {
-  return (
-    <div className="mx-auto max-w-2xl">
-      {/* Root: Onshape */}
-      <div className="flex justify-center">
-        <div className="w-72 rounded-lg border border-[#3b82f6]/40 bg-[#eef2f9] p-4">
-          <div className="mb-2.5 flex items-center gap-2">
-            <span className="h-2 w-2 bg-[#3b82f6]" />
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#64748b]">Source · Onshape</span>
-          </div>
-          <div className="space-y-1">
-            <p className="font-mono text-[11px] text-[#64748b]">[feature] base plate extruded: 8mm</p>
-            <p className="font-mono text-[11px] text-[#64748b]">[cut] 6 through holes + 4 M6 mounts</p>
-            <p className={`font-mono text-[11px] transition-all duration-500 ${activeIndex >= 5 ? "text-[#3b82f6]" : "text-[#64748b]"}`}>
-              [done] parametric tree committed
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Trunk + crossbar */}
-      <div className={`transition-opacity duration-700 ${activeIndex >= 1 ? "opacity-100" : "opacity-0"}`}>
-        <div className="flex justify-center"><div className="h-6 w-px bg-[#dbe6f5]" /></div>
-        <div className="relative mx-[25%] h-px bg-[#dbe6f5]">
-          <div className="absolute -left-px top-0 h-6 w-px bg-[#dbe6f5]" />
-          <div className="absolute -right-px top-0 h-6 w-px bg-[#dbe6f5]" />
-        </div>
-        <div className="h-6" />
-      </div>
-
-      {/* Platform branch cards */}
-      <div className="grid grid-cols-2 gap-5">
-        {/* Fusion 360 branch */}
-        <div className={`transition-all duration-700 ${activeIndex >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}>
-          <div className="rounded-lg border border-cyan-300 bg-[#eef2f9] p-4">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 bg-cyan-500" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#64748b]">Fusion 360</span>
-            </div>
-            <p className="mt-2 font-mono text-[11px] text-[#64748b]">[translate] model persisted</p>
-          </div>
-          <LeafList
-            show={activeIndex >= 3}
-            tagColor="text-cyan-600"
-            leaves={[
-              { tag: "[cam]",        text: "CAM toolpath generation"    },
-              { tag: "[gen-design]", text: "Generative topology design"  },
-              { tag: "[static-fea]", text: "Static stress / FEA"        },
-              { tag: "[thermal]",    text: "Thermal simulation"         },
-              { tag: "[event-sim]",  text: "Event simulation (dynamic)" },
-            ]}
-          />
-        </div>
-
-        {/* SolidWorks branch */}
-        <div className={`transition-all duration-700 ${activeIndex >= 2 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}>
-          <div className="rounded-lg border border-violet-300 bg-[#eef2f9] p-4">
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 bg-violet-500" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-[#64748b]">SolidWorks</span>
-            </div>
-            <p className="mt-2 font-mono text-[11px] text-[#64748b]">[translate] model persisted</p>
-          </div>
-          <LeafList
-            show={activeIndex >= 4}
-            tagColor="text-violet-500"
-            leaves={[
-              { tag: "[config]",     text: "Part configurations & variants" },
-              { tag: "[static-sim]", text: "Static & fatigue simulation"    },
-              { tag: "[flow-sim]",   text: "CFD flow simulation"            },
-              { tag: "[drop-test]",  text: "Drop test simulation"           },
-              { tag: "[motion]",     text: "Motion study & kinematics"      },
-            ]}
-          />
-        </div>
-      </div>
-    </div>
-  );
 }
 
 interface HeroProps {
@@ -164,10 +49,6 @@ interface HeroProps {
 
 export default function Hero({ onJoinWaitlist }: HeroProps) {
   const treeRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
-  const stageHeaderRef = useRef<HTMLDivElement>(null);
-  const treeScaleRef = useRef<HTMLDivElement>(null);
-  const treeBoxRef = useRef<HTMLDivElement>(null);
   const [platformIndex, setPlatformIndex] = useState(0);
   const activePlatformStage = platformStages[platformIndex];
   const [showNudge, setShowNudge] = useState(false);
@@ -209,69 +90,16 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
     return () => obs.disconnect();
   }, []);
 
-  // Fit the tree to the pinned stage on laptop-and-up. Without this, a short
-  // window clips the lower leaves — and because the stage is sticky, there is
-  // no way to scroll down to them; a tall one leaves the tree stranded in dead
-  // space. Below the breakpoint the inline styles are cleared, so the phone and
-  // tablet layout is exactly what it was.
-  useEffect(() => {
-    const scaler = treeScaleRef.current;
-    const box = treeBoxRef.current;
-    const header = stageHeaderRef.current;
-    const stage = stageRef.current;
-    if (!scaler || !box || !header || !stage) return;
-
-    const laptop = window.matchMedia(TREE_FIT_QUERY);
-
-    const fit = () => {
-      scaler.style.transform = "";
-      scaler.style.height = "";
-      if (!laptop.matches) return;
-
-      const naturalHeight = box.offsetHeight;
-      const naturalWidth = box.offsetWidth;
-      if (!naturalHeight || !naturalWidth) return;
-
-      const stageStyle = getComputedStyle(stage);
-      // Everything the stage spends before the tree gets its turn: the sticky
-      // offset under the site header, the stage's own padding, and the heading.
-      const chrome =
-        parseFloat(stageStyle.top) +
-        parseFloat(stageStyle.paddingTop) +
-        parseFloat(stageStyle.paddingBottom) +
-        header.offsetHeight +
-        parseFloat(getComputedStyle(header).marginBottom);
-
-      const room = window.innerHeight - chrome;
-      const width = scaler.parentElement?.clientWidth ?? naturalWidth;
-      const scale = clamp(
-        Math.min(room / naturalHeight, width / naturalWidth),
-        TREE_SCALE_MIN,
-        TREE_SCALE_MAX,
-      );
-
-      scaler.style.transform = `scale(${scale})`;
-      // Transforms don't affect layout, so hand the stage the scaled height too.
-      scaler.style.height = `${naturalHeight * scale}px`;
-    };
-
-    fit();
-    // The heading rewraps (and the tree reflows) on width changes; both feed
-    // the scale, so watch the elements rather than only the window.
-    const observer = new ResizeObserver(fit);
-    observer.observe(header);
-    observer.observe(box);
-    window.addEventListener("resize", fit);
-    laptop.addEventListener("change", fit);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", fit);
-      laptop.removeEventListener("change", fit);
-    };
-  }, []);
-
+  // Which stage is showing: scroll position inside the pinned section, at every
+  // breakpoint. The graph is a fixed-aspect SVG that scales itself into
+  // whatever the stage leaves it, so the phone can pin exactly like the desktop
+  // does — the reader builds the graph by scrolling instead of watching it play
+  // itself, and no lane can end up below the fold with the section pinned over
+  // it. (The previous split — pinned-and-scrolled up top, self-playing on a
+  // phone — is what made mobile feel like a different, broken component.)
   useEffect(() => {
     let frame = 0;
+
     const update = () => {
       if (!treeRef.current) return;
       const rect = treeRef.current.getBoundingClientRect();
@@ -280,14 +108,19 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
       setPlatformIndex(Math.min(platformStages.length - 1, Math.floor(clamp(raw) * platformStages.length)));
     };
     const onScroll = () => { cancelAnimationFrame(frame); frame = requestAnimationFrame(update); };
+
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
-    return () => { cancelAnimationFrame(frame); window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); };
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }, []);
 
   return (
-    <section className="relative bg-[#f8fafc] text-[#0f172a]">
+    <section className="relative bg-white text-[#0f172a]">
       <div className="absolute inset-0 pointer-events-none grid-bg" />
 
       {/* ── Initial hero: statement left, git tree right ── */}
@@ -355,47 +188,70 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
       </div>
 
       {/* ── Platform tree section ── */}
-      <div ref={treeRef} className="relative z-10 min-h-[300vh] border-t border-[#dbe6f5]">
-        <div
-          ref={stageRef}
-          className="tree-stage sticky top-20 flex min-h-[calc(100vh-5rem)] flex-col justify-start px-5 pt-8 pb-10 sm:px-6 lg:px-8"
-        >
+      {/* The scroll runway. Its height minus one viewport is the distance the six
+          stages are spread over, so 700svh gives each switch a full screen
+          (100svh) of scroll — it was 33svh at 300svh, which read as a flick
+          rather than a step. Keep this in step with platformStages: more stages
+          need more runway, or the graph starts skipping steps on a fast scroll. */}
+      <div ref={treeRef} className="relative z-10 min-h-[700svh] border-t border-[#dbe6f5]">
+        {/* Pinned at every breakpoint. The caption is deliberately compact on a
+            phone: what it does not spend, the graph gets, and the graph has to
+            fit one viewport whole while the section is pinned over it. */}
+        <div className="tree-stage sticky top-20 flex min-h-[calc(100svh-5rem)] flex-col justify-start px-5 pb-8 pt-6 sm:px-6 lg:min-h-[calc(100vh-5rem)] lg:px-8 lg:pb-10 lg:pt-8">
           <div className="mx-auto w-full max-w-7xl">
-            <div ref={stageHeaderRef} className="tree-stage-header mb-10 flex flex-wrap items-end justify-between gap-4">
+            <div className="tree-stage-header mb-4 flex flex-wrap items-end justify-between gap-3 sm:mb-6 lg:mb-10 lg:gap-4">
               <div>
-                <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#3b82f6]">Works where the job demands</p>
-                <h2 className="relative mt-2 text-3xl font-black leading-tight text-[#0f172a] sm:text-4xl lg:text-5xl">
-                  <span className="invisible select-none" aria-hidden="true">{platformStages[1].title}</span>
-                  <span className="absolute inset-0">{activePlatformStage.title}</span>
+                <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#3b82f6] sm:text-xs">Works where the job demands</p>
+                {/* The invisible copy reserves the tallest wrap so the graph
+                    below never jumps as the caption changes; the visible one is
+                    keyed on the stage, which replays its fade on every step. */}
+                <h2 className="relative mt-1.5 text-2xl font-black leading-tight text-[#0f172a] sm:mt-2 sm:text-4xl lg:text-5xl">
+                  <span className="invisible select-none" aria-hidden="true">{LONGEST_TITLE}</span>
+                  <span key={platformIndex} className="stage-swap absolute inset-0">{activePlatformStage.title}</span>
                 </h2>
-                <p className="relative mt-2 max-w-xl text-sm leading-6 text-[#475569] sm:text-base">
-                  <span className="invisible select-none" aria-hidden="true">{platformStages[1].summary}</span>
-                  <span className="absolute inset-0">{activePlatformStage.summary}</span>
+                <p className="relative mt-1.5 max-w-xl text-xs leading-5 text-[#475569] sm:mt-2 sm:text-base sm:leading-6">
+                  <span className="invisible select-none" aria-hidden="true">{LONGEST_SUMMARY}</span>
+                  <span key={platformIndex} className="stage-swap absolute inset-0" style={{ animationDelay: "60ms" }}>
+                    {activePlatformStage.summary}
+                  </span>
                 </p>
               </div>
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-1.5">
                 {platformStages.map((_, index) => (
                   <span
                     key={index}
-                    className={`h-2 w-2 transition-all duration-500 ${index <= platformIndex ? "bg-[#3b82f6]" : "bg-[#dbe6f5]"}`}
+                    className={`h-2 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                      index === platformIndex
+                        ? "w-7 bg-[#3b82f6]"
+                        : index < platformIndex
+                          ? "w-2 bg-[#3b82f6]/45"
+                          : "w-2 bg-[#dbe6f5]"
+                    }`}
                   />
                 ))}
-                <span className="ml-1 font-mono text-[11px] text-[#64748b]">{platformIndex + 1}/{platformStages.length}</span>
-              </div>
-            </div>
-            {/* Scaled to fit the stage on laptop-and-up — kept at the tree's own
-                width so scaling up can never push past the viewport. */}
-            <div ref={treeScaleRef} className="mx-auto w-full max-w-2xl origin-top">
-              <div ref={treeBoxRef} className="relative">
-                <div className="invisible select-none" aria-hidden="true">
-                  <PlatformTree activeIndex={platformStages.length - 1} />
-                </div>
-                <div className="absolute inset-0">
-                  <PlatformTree activeIndex={platformIndex} />
-                </div>
+                <span className="ml-1.5 font-mono text-[11px] tabular-nums text-[#64748b]">{platformIndex + 1}/{platformStages.length}</span>
               </div>
             </div>
           </div>
+
+          {/* One graph, two orientations. Both are rendered and swapped by CSS
+              rather than by a media-query hook, so the first paint is already
+              the right one. The horizontal graph is deliberately wider than the
+              7xl text column — fourteen columns of commit messages need the
+              room, and every unit of width is a legible unit of type. The
+              max-height keeps it inside a short laptop window; an SVG
+              letterboxes itself instead of needing the scale-to-fit measuring
+              this section used to do. */}
+          <PlatformGitTree
+            axis="h"
+            activeIndex={platformIndex}
+            className="mx-auto hidden h-auto w-full max-w-[1850px] lg:block lg:max-h-[calc(100vh-21rem)]"
+          />
+          <PlatformGitTree
+            axis="v"
+            activeIndex={platformIndex}
+            className="mx-auto block h-auto max-h-[calc(100svh-15rem)] w-full max-w-[30rem] lg:hidden"
+          />
         </div>
       </div>
     </section>

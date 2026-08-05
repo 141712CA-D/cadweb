@@ -47,7 +47,7 @@ const processingSteps = [
 
 export default function HowItWorksPage() {
   return (
-    <div className="relative min-h-screen bg-[#f8fafc] flex flex-col overflow-hidden">
+    <div className="relative min-h-screen bg-white flex flex-col overflow-hidden">
 
       <div className="grid-bg fixed inset-0 pointer-events-none z-0" />
       <DevBanner />
@@ -76,7 +76,7 @@ export default function HowItWorksPage() {
 
             {/* ASME Drawing Input */}
             <div className="rounded-lg flex flex-col items-center text-center gap-3 sm:gap-4 border border-[#dbe6f5] bg-[#eef2f9] p-4 sm:p-6">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md flex items-center justify-center border border-[#dbe6f5] bg-[#f8fafc] flex-shrink-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md flex items-center justify-center border border-[#dbe6f5] bg-white flex-shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 sm:w-6 sm:h-6 text-[#3b82f6]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                 </svg>
@@ -89,7 +89,7 @@ export default function HowItWorksPage() {
 
             {/* Direct Prompt Input */}
             <div className="rounded-lg flex flex-col items-center text-center gap-3 sm:gap-4 border border-[#dbe6f5] bg-[#eef2f9] p-4 sm:p-6">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md flex items-center justify-center border border-[#dbe6f5] bg-[#f8fafc] flex-shrink-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md flex items-center justify-center border border-[#dbe6f5] bg-white flex-shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 sm:w-6 sm:h-6 text-[#3b82f6]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
                 </svg>
@@ -152,7 +152,7 @@ export default function HowItWorksPage() {
 
           {/* ── Output ── */}
           <div className="rounded-lg w-full sm:w-2/3 border border-[#3b82f6]/30 bg-[#eef2f9] p-5 sm:p-7 flex flex-col items-center text-center gap-3">
-            <div className="w-12 h-12 rounded-md flex items-center justify-center border border-[#3b82f6]/30 bg-[#f8fafc]">
+            <div className="w-12 h-12 rounded-md flex items-center justify-center border border-[#3b82f6]/30 bg-white">
               <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-[#3b82f6]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
               </svg>
@@ -186,7 +186,7 @@ export default function HowItWorksPage() {
           {/* Translation card */}
           <div className="rounded-lg w-full border border-[#dbe6f5] bg-[#eef2f9] p-6 sm:p-8 mb-4">
             <div className="flex items-start gap-4 mb-5">
-              <div className="w-10 h-10 rounded-md flex items-center justify-center border border-[#dbe6f5] bg-[#f8fafc] flex-shrink-0">
+              <div className="w-10 h-10 rounded-md flex items-center justify-center border border-[#dbe6f5] bg-white flex-shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-[#3b82f6]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
                 </svg>
@@ -205,7 +205,7 @@ export default function HowItWorksPage() {
               {["SolidWorks", "Fusion 360", "CATIA", "FreeCAD"].map((sw) => (
                 <div
                   key={sw}
-                  className="rounded-md px-3 py-1.5 font-mono text-xs text-[#64748b] border border-[#dbe6f5] bg-[#f8fafc]"
+                  className="rounded-md px-3 py-1.5 font-mono text-xs text-[#64748b] border border-[#dbe6f5] bg-white"
                 >
                   {sw}
                 </div>
@@ -215,7 +215,7 @@ export default function HowItWorksPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                 </svg>
               </div>
-              <div className="rounded-md px-3 py-1.5 font-mono text-xs text-[#3b82f6] border border-[#3b82f6]/40 bg-[#f8fafc]">
+              <div className="rounded-md px-3 py-1.5 font-mono text-xs text-[#3b82f6] border border-[#3b82f6]/40 bg-white">
                 Any target platform
               </div>
             </div>
@@ -224,7 +224,7 @@ export default function HowItWorksPage() {
           {/* Onshape integration card */}
           <div className="rounded-lg w-full border border-[#dbe6f5] bg-[#eef2f9] p-6 sm:p-8">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-md flex items-center justify-center border border-[#dbe6f5] bg-[#f8fafc] flex-shrink-0">
+              <div className="w-10 h-10 rounded-md flex items-center justify-center border border-[#dbe6f5] bg-white flex-shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-[#3b82f6]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
                 </svg>

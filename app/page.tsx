@@ -16,11 +16,11 @@ export default function Home() {
     <>
       {/* <NodeIntro /> */}
       <DevBanner />
-      <main className="flex flex-col min-h-screen bg-[#f8fafc]">
+      <main className="flex flex-col min-h-screen bg-white">
         <Header onJoinWaitlist={() => setSignupModalOpen(true)} />
         <Hero onJoinWaitlist={() => setSignupModalOpen(true)} />
 
-        <section className="bg-[#f8fafc] border-t border-[#dbe6f5] py-24 px-6">
+        <section className="bg-white border-t border-[#dbe6f5] py-24 px-6">
           <div className="max-w-3xl mx-auto flex flex-col items-center text-center gap-6">
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#3b82f6]">Releasing Soon</p>
             <h2 className="text-3xl font-black leading-tight text-[#0f172a] sm:text-4xl lg:text-5xl">
@@ -39,7 +39,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="bg-[#f8fafc] border-t border-[#dbe6f5] py-16 px-6">
+        <section className="bg-white border-t border-[#dbe6f5] py-16 px-6">
           <div className="max-w-7xl mx-auto flex flex-col items-center gap-6">
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#64748b]">Partners</p>
             <a

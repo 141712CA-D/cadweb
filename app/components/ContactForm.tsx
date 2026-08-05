@@ -281,7 +281,7 @@ export default function ContactForm({ onSuccess, isModal = false }: ContactFormP
   };
 
   return (
-    <div className={isModal ? "" : "min-h-screen bg-[#f8fafc] grid-bg flex flex-col items-center justify-center px-4 py-12"}>
+    <div className={isModal ? "" : "min-h-screen bg-white grid-bg flex flex-col items-center justify-center px-4 py-12"}>
       <div className={isModal ? "w-full" : "w-full max-w-lg"}>
 
         {!isModal && (

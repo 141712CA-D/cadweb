@@ -5,7 +5,7 @@ import Footer from "../components/Footer";
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-[#0f172a] flex flex-col grid-bg">
+    <div className="min-h-screen bg-white text-[#0f172a] flex flex-col grid-bg">
       <DevBanner />
       <Header />
 

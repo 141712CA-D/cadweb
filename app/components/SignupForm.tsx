@@ -521,7 +521,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
   }
 
   return (
-    <div className={isModal ? "" : "min-h-screen bg-[#f8fafc] grid-bg flex flex-col items-center justify-center px-4 py-12"}>
+    <div className={isModal ? "" : "min-h-screen bg-white grid-bg flex flex-col items-center justify-center px-4 py-12"}>
       <div className={isModal ? "w-full" : "w-full max-w-lg"}>
 
         {!isModal && (
@@ -745,7 +745,7 @@ export default function SignupForm({ onSuccess, isModal = false }: SignupFormPro
                   className={`cursor-pointer flex-1 py-2 px-3 font-mono text-xs uppercase tracking-widest transition-all duration-150 ${
                     type === t
                       ? "bg-[#3b82f6] text-white"
-                      : "text-[#64748b] hover:text-[#0f172a] bg-[#f8fafc]"
+                      : "text-[#64748b] hover:text-[#0f172a] bg-white"
                   }`}
                 >
                   {t === "individual" ? "Individual" : "Team / Org"}

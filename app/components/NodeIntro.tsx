@@ -62,7 +62,7 @@ function FlowSteps() {
     <div className="mt-4 flex flex-col items-start gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
       {steps.map((step, i) => (
         <div key={step} className="flex items-center gap-2">
-          <span className="rounded-md border border-[#dbe6f5] bg-[#f8fafc] px-2.5 py-1 font-mono text-[10px] text-[#64748b]">
+          <span className="rounded-md border border-[#dbe6f5] bg-white px-2.5 py-1 font-mono text-[10px] text-[#64748b]">
             {step}
           </span>
           {i < steps.length - 1 && <span className="font-mono text-[10px] text-[#94a3b8]">→</span>}
@@ -147,9 +147,9 @@ function FinalSlide({ show }: { show: boolean }) {
             disablePictureInPicture
             controls={false}
             tabIndex={-1}
-            className="mt-4 hidden aspect-video w-full rounded-md border border-[#dbe6f5] bg-[#f8fafc] object-cover sm:block"
+            className="mt-4 hidden aspect-video w-full rounded-md border border-[#dbe6f5] bg-white object-cover sm:block"
           />
-          <div className="mt-4 rounded-md border border-[#dbe6f5] bg-[#f8fafc] p-3">
+          <div className="mt-4 rounded-md border border-[#dbe6f5] bg-white p-3">
             <p className="relative min-h-12 font-mono text-xs leading-6 text-[#0f172a]">
               <span className="invisible select-none" aria-hidden="true">{introTypingPrompts[0].text}</span>
               <span className="absolute inset-0">
@@ -180,7 +180,7 @@ function FinalSlide({ show }: { show: boolean }) {
             disablePictureInPicture
             controls={false}
             tabIndex={-1}
-            className="mt-4 hidden aspect-video w-full rounded-md border border-[#dbe6f5] bg-[#f8fafc] object-cover sm:block"
+            className="mt-4 hidden aspect-video w-full rounded-md border border-[#dbe6f5] bg-white object-cover sm:block"
           />
           <FlowSteps />
         </div>
@@ -402,7 +402,7 @@ export default function NodeIntro() {
 
   return (
     <div
-      className="fixed inset-0 z-[100] overflow-hidden bg-[#f8fafc]"
+      className="fixed inset-0 z-[100] overflow-hidden bg-white"
       style={{ transition: `opacity ${exitFast ? 200 : 400}ms ease`, opacity: stage === "exiting" ? 0 : 1 }}
     >
       {showSkip && stage !== "exiting" && (

@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
+  --background: #ffffff;
   --foreground: #0f172a;
   --surface: #eef2f9;
   --border: #dbe6f5;
@@ -100,6 +100,34 @@ html {
 
 .node-ripple {
   animation: node-ripple 1100ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── Stage swap: the platform-tree caption changes on every step, so its
+   entrance is short and shallow. The hero's 900ms/24px fade-up would still be
+   running when the next step arrives. ── */
+@keyframes stage-swap {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.stage-swap {
+  animation: stage-swap 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Commit pulse: the platform git graph rings the commits belonging to the
+   stage the reader is on, so there is exactly one thing asking to be looked at
+   as the graph builds. Scale rather than an animated `r` — `transform-box:
+   view-box` gives SVG geometry a transform origin in user units, and it is the
+   better-supported of the two. Origin is set per commit inline. ── */
+@keyframes commit-pulse {
+  0%   { transform: scale(1); opacity: 0.45; }
+  70%  { transform: scale(3); opacity: 0;    }
+  100% { transform: scale(3); opacity: 0;    }
+}
+
+.commit-pulse {
+  transform-box: view-box;
+  animation: commit-pulse 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
 /* ── Node float: gentle idle bob so the feature-node "sea" reads as alive
@@ -245,7 +273,7 @@ html {
 
 /* ── Header glass ── */
 .header-glass {
-  background: rgba(248,250,252,0.85);
+  background: rgba(255,255,255,0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
@@ -468,6 +496,31 @@ html {
 .form-field-enter.delay-300 { animation-delay: 150ms; }
 .form-field-enter.delay-400 { animation-delay: 200ms; }
 .form-field-enter.delay-500 { animation-delay: 250ms; }
+
+/* ── Demo showcase recordings (DemoShowcase) ──
+   The clips are MacBook mockups rendered on a near-white (#fefefe) card, so
+   dropped in as-is they read as a rectangle pasted onto the page. Multiply
+   sinks that background into the page's own white — white multiplies away to
+   whatever is behind it, while the machine is dark enough
+   to survive untouched — and the crossed masks feather all four edges so the
+   frame boundary never announces itself. Net effect: the Mac sits on the page
+   rather than inside a video. */
+.demo-reel {
+  /* The mockup's backdrop is #fefefe, one level off the page's white, which
+     multiply would leave as a faintly visible rectangle. Nudging brightness
+     clips it to pure white (255 × 255 = 255, i.e. invisible) and leaves the
+     machine itself imperceptibly brighter. */
+  filter: brightness(1.012);
+  mix-blend-mode: multiply;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  mask-composite: intersect;
+}
 
 /* ── Platform-tree stage (Hero zone 3) ──
    On a short laptop window, claw back the stage's own padding before the tree

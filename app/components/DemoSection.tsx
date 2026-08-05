@@ -518,7 +518,7 @@ export default function DemoSection() {
     <section
       id="live-demo"
       ref={sectionRef}
-      className="relative bg-[#f8fafc] border-t border-[#dbe6f5]"
+      className="relative bg-white border-t border-[#dbe6f5]"
       style={{ height: `${RUNWAY_SVH}svh` }}
     >
       {/* Scroll target for startDemo and for anything linking to the demo.

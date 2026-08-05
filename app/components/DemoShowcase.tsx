@@ -4,32 +4,32 @@ import { useEffect, useRef, useState } from "react";
 
 /**
  * Two-pane product showcase that replaced the interactive mock-app demo
- * (DemoSection.tsx — kept in the repo, no longer mounted). Two app recordings
- * in dark window chrome:
+ * (DemoSection.tsx — kept in the repo, no longer mounted).
  *
- * - Desktop (lg+): panes overlap on a diagonal — Home upper-left, Intent graph
- *   lower-right. Hovering a pane focuses it (raised, scaled, caption slides up)
- *   while the other recedes.
- * - Mobile/tablet: stacked, captions always visible, each pane fades up as it
- *   scrolls into view.
+ * The recordings are MacBook mockups rendered on a near-white background, so
+ * they carry their own device shell — there is deliberately no card, border or
+ * fake window chrome around them. `.demo-reel` (globals.css) multiplies the
+ * clip into the page's white and feathers its edges, so each machine reads as
+ * an object sitting on the page rather than a video in a box.
  *
- * One video element per pane serves both layouts — only positioning and the
- * caption presentation are responsive.
+ * - Desktop (lg+): the two reels sit side by side, same size, no hover state.
+ * - Mobile/tablet: one above the other, in the same order.
+ *
+ * Each caption sits directly under its own recording at every breakpoint, and
+ * each pane fades up the first time it scrolls into view.
  */
 
 const PANES = [
   {
     id: "home",
-    src: "/homepage_recording.mov",
-    windowTitle: "Parametra — Home",
+    src: "/HomepageDemoVideo.mov",
     eyebrow: "01 · Application home",
     caption:
       "Application home — maintain your pulls, version history, and persisting.",
   },
   {
     id: "graph",
-    src: "/graph_recording.mov",
-    windowTitle: "Parametra — Intent graph",
+    src: "/GraphDemoVideo.mov",
     eyebrow: "02 · Intent graph",
     caption:
       "View how intent is distributed in your project, with each node opening up different parts of the project.",
@@ -39,9 +39,8 @@ const PANES = [
 type PaneId = (typeof PANES)[number]["id"];
 
 export default function DemoShowcase() {
-  const [focus, setFocus] = useState<PaneId | null>(null);
   const [inView, setInView] = useState<Record<PaneId, boolean>>({ home: false, graph: false });
-  const paneRefs = useRef<Partial<Record<PaneId, HTMLDivElement | null>>>({});
+  const paneRefs = useRef<Partial<Record<PaneId, HTMLElement | null>>>({});
   const videoRefs = useRef<HTMLVideoElement[]>([]);
 
   // Fade each pane up the first time it scrolls into view.
@@ -92,84 +91,52 @@ export default function DemoShowcase() {
   }, []);
 
   return (
-    <section id="live-demo" className="relative z-10 border-t border-[#dbe6f5] bg-[#f8fafc] px-5 py-20 sm:px-6 sm:py-24 lg:px-8">
-      <div className="mx-auto w-full max-w-6xl lg:max-w-[max(72rem,85vw)]">
-        <p className="mb-10 font-mono text-xs uppercase tracking-[0.3em] text-[#3b82f6] sm:mb-12">
+    <section id="live-demo" className="relative z-10 border-t border-[#dbe6f5] bg-white px-3 py-20 sm:px-4 sm:py-24 lg:px-4">
+      <div className="mx-auto w-full max-w-[96vw] lg:max-w-[max(80rem,96vw)]">
+        <p className="mb-6 px-2 font-mono text-xs uppercase tracking-[0.3em] text-[#3b82f6] sm:mb-8">
           Inside the application
         </p>
 
-        {/* One pane per recording; absolute diagonal overlap on lg+ */}
-        <div className="relative lg:aspect-[1.5]">
-          {PANES.map((pane, i) => {
-            const other = PANES[1 - i].id;
+        {/* Side by side on lg+, stacked in the same order below it.
+            The gap is deliberately tight: `.demo-reel`'s mask already fades out
+            the outer 10% of each clip, so two panes carry ~20% of their own
+            whitespace between them — a Tailwind gap on top of that reads as a
+            gulf, and the machines stop looking like one exhibit. */}
+        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2 lg:gap-2">
+          {PANES.map(pane => {
             const visible = inView[pane.id];
-            const dimmed = focus === other;
-            const focused = focus === pane.id;
 
             return (
-              <div
+              <figure
                 key={pane.id}
                 ref={el => { paneRefs.current[pane.id] = el; }}
-                onMouseEnter={() => setFocus(pane.id)}
-                onMouseLeave={() => setFocus(f => (f === pane.id ? null : f))}
-                className={`transition-all duration-700 ease-out lg:absolute lg:w-[58%] ${
-                  i === 0 ? "mb-8 lg:left-0 lg:top-0 lg:mb-0" : "lg:bottom-0 lg:right-0"
-                } ${focused ? "lg:z-30" : i === 0 ? "lg:z-20" : "lg:z-10"}`}
+                className="m-0 transition-all duration-700 ease-out"
                 style={{
-                  opacity: !visible ? 0 : dimmed ? 0.55 : 1,
+                  opacity: visible ? 1 : 0,
                   transform: visible ? "translateY(0)" : "translateY(24px)",
                 }}
               >
-                <div
-                  className={`overflow-hidden rounded-xl border bg-[#0e1014] transition-all duration-500 ${
-                    focused
-                      ? "scale-[1.03] border-[#3b82f6]/50 shadow-2xl shadow-[#3b82f6]/10"
-                      : "border-[#23262e] shadow-xl"
-                  }`}
-                >
-                  {/* Window chrome */}
-                  <div className="flex items-center gap-4 border-b border-[#1c2027] bg-[#0e1014] px-4 py-2.5">
-                    <div className="flex items-center gap-1.5">
-                      <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
-                      <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
-                      <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
-                    </div>
-                    <span className="font-mono text-[11px] text-[#8a94a6]">{pane.windowTitle}</span>
-                  </div>
+                <video
+                  ref={el => { if (el && !videoRefs.current.includes(el)) videoRefs.current.push(el); }}
+                  src={pane.src}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="auto"
+                  disablePictureInPicture
+                  controls={false}
+                  tabIndex={-1}
+                  className="demo-reel block aspect-video w-full object-cover"
+                />
 
-                  <div className="relative">
-                    <video
-                      ref={el => { if (el && !videoRefs.current.includes(el)) videoRefs.current.push(el); }}
-                      src={pane.src}
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      preload="auto"
-                      disablePictureInPicture
-                      controls={false}
-                      tabIndex={-1}
-                      className="block h-auto w-full"
-                    />
-
-                    {/* Desktop caption — slides up over the video on focus */}
-                    <div
-                      className={`pointer-events-none absolute inset-x-0 bottom-0 hidden bg-gradient-to-t from-[#05070a]/95 via-[#05070a]/70 to-transparent px-5 pb-4 pt-12 transition-all duration-500 lg:block ${
-                        focused ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
-                      }`}
-                    >
-                      <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#60a5fa]">{pane.eyebrow}</p>
-                      <p className="mt-1.5 max-w-lg text-sm leading-6 text-[#e2e8f0]">{pane.caption}</p>
-                    </div>
-                  </div>
-
-                  {/* Mobile caption — always visible under the video */}
-                  <div className="border-t border-[#1c2027] px-4 py-3.5 lg:hidden">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#60a5fa]">{pane.eyebrow}</p>
-                    <p className="mt-1 text-sm leading-6 text-[#cbd5e1]">{pane.caption}</p>
-                  </div>
-                </div>
-              </div>
+                {/* Clear of the frame — the mockup carries its own drop shadow
+                    below the machine, so the caption starts under all of it. */}
+                <figcaption className="mt-2 px-2 text-center sm:mt-3">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3b82f6]">{pane.eyebrow}</p>
+                  <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#475569]">{pane.caption}</p>
+                </figcaption>
+              </figure>
             );
           })}
         </div>

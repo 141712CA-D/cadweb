@@ -11,7 +11,7 @@
  */
 
 const MAIN = "#3b82f6";
-const NODE_FILL = "#f8fafc";
+const NODE_FILL = "#ffffff";
 
 interface Branch {
   color: string;

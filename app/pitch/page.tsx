@@ -108,7 +108,7 @@ export default function PitchPage() {
   const [signupModalOpen, setSignupModalOpen] = useState(false);
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[#f8fafc]">
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-white">
       <DevBanner />
       <Header onJoinWaitlist={() => setSignupModalOpen(true)} />
 
@@ -141,7 +141,7 @@ export default function PitchPage() {
       </section>
 
       {/* ── The problem: CAD lock-in ── */}
-      <section className="relative border-t border-[#dbe6f5] bg-[#f8fafc] px-6 py-20 sm:py-32">
+      <section className="relative border-t border-[#dbe6f5] bg-white px-6 py-20 sm:py-32">
         <div className="mx-auto flex max-w-4xl flex-col items-center gap-6 text-center sm:gap-8">
           <Reveal>
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#94a3b8]">The Problem</p>
@@ -176,7 +176,7 @@ export default function PitchPage() {
               </h2>
             </Reveal>
             <Reveal className="delay-200">
-              <p className="rounded-full border border-[#dbe6f5] bg-[#f8fafc] px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] text-[#3b82f6] sm:text-sm">
+              <p className="rounded-full border border-[#dbe6f5] bg-white px-4 py-2 font-mono text-xs uppercase tracking-[0.2em] text-[#3b82f6] sm:text-sm">
                 The Git for CAD
               </p>
             </Reveal>
@@ -191,7 +191,7 @@ export default function PitchPage() {
               <p className="font-mono text-sm text-[#64748b]">Design and collaborate without preferences.</p>
             </Reveal>
 
-            <Reveal className="rounded-lg border border-[#dbe6f5] bg-[#f8fafc] p-5" threshold={0.2}>
+            <Reveal className="rounded-lg border border-[#dbe6f5] bg-white p-5" threshold={0.2}>
               <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#3b82f6]">Live Transfer</p>
               <video
                 src="/graph_recording.mov"
@@ -242,7 +242,7 @@ export default function PitchPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="border-t border-[#dbe6f5] bg-[#f8fafc] px-6 py-16 sm:py-24">
+      <section className="border-t border-[#dbe6f5] bg-white px-6 py-16 sm:py-24">
         <div className="mx-auto flex max-w-3xl flex-col items-center gap-6 text-center">
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#3b82f6]">Releasing Soon</p>
           <h2 className="text-[clamp(2rem,9vw,2.5rem)] font-black leading-tight text-[#0f172a] sm:text-4xl lg:text-5xl">

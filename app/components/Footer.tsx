@@ -43,7 +43,7 @@ export default function Footer({ currentPage = "home", onJoinWaitlist }: FooterP
   );
 
   return (
-    <footer className="relative z-10 bg-[#f8fafc] border-t border-[#dbe6f5] px-6 py-8 sm:py-10">
+    <footer className="relative z-10 bg-white border-t border-[#dbe6f5] px-6 py-8 sm:py-10">
       <div className="max-w-7xl mx-auto">
         {/* Mobile layout — unchanged from before, with the disclaimer flowing in beneath */}
         <div className="flex flex-col items-center gap-6 sm:hidden">
