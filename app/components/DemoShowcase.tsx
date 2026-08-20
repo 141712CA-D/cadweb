@@ -3,36 +3,40 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Two-pane product showcase that replaced the interactive mock-app demo
+ * Two-row product showcase that replaced the interactive mock-app demo
  * (DemoSection.tsx — kept in the repo, no longer mounted).
  *
- * The recordings are MacBook mockups rendered on a near-white background, so
- * they carry their own device shell — there is deliberately no card, border or
- * fake window chrome around them. `.demo-reel` (globals.css) multiplies the
- * clip into the page's white and feathers its edges, so each machine reads as
- * an object sitting on the page rather than a video in a box.
+ * Each row pairs copy with a screen-only app recording on lg+, alternating
+ * sides (video left for Application Home, video right for Interoperability
+ * Layer). Below lg the rows stack in the same visual order: video above the
+ * copy for Application Home, copy above the video for Interoperability
+ * Layer. The recordings are raw screen
+ * captures — no device mockup baked in — so each one is framed in a dark
+ * macOS-style window chrome, matching the real-app dark palette the site's
+ * design language reserves for app surfaces.
  *
- * - Desktop (lg+): the two reels sit side by side, same size, no hover state.
- * - Mobile/tablet: one above the other, in the same order.
- *
- * Each caption sits directly under its own recording at every breakpoint, and
- * each pane fades up the first time it scrolls into view.
+ * Scroll behavior: each row is a near-viewport-height scene that fades/slides
+ * in when it enters the viewport and fades back out when it leaves.
  */
 
 const PANES = [
   {
     id: "home",
-    src: "/HomepageDemoVideo.mov",
-    eyebrow: "01 · Application home",
+    src: "/HomepageDemoVideoScreenOnly.mov",
+    videoSide: "left",
+    eyebrow: "01",
+    title: "Application Home",
     caption:
-      "Application home — maintain your pulls, version history, and persisting.",
+      "Maintain your pulls, version history, and persisting — every capture of your model, in one place.",
   },
   {
     id: "graph",
-    src: "/GraphDemoVideo.mov",
-    eyebrow: "02 · Intent graph",
+    src: "/ApplicationDemoVideoScreenOnly.mov",
+    videoSide: "right",
+    eyebrow: "02",
+    title: "Interoperability Layer",
     caption:
-      "View how intent is distributed in your project, with each node opening up different parts of the project.",
+      "Manage your design intent and prepare to stage commits that update your CAD designs as you transfer between softwares.",
   },
 ] as const;
 
@@ -43,19 +47,20 @@ export default function DemoShowcase() {
   const paneRefs = useRef<Partial<Record<PaneId, HTMLElement | null>>>({});
   const videoRefs = useRef<HTMLVideoElement[]>([]);
 
-  // Fade each pane up the first time it scrolls into view.
+  // Fade each row in when it enters the viewport and back out when it leaves.
   useEffect(() => {
     const observers = PANES.map(pane => {
       const el = paneRefs.current[pane.id];
       if (!el) return null;
       const obs = new IntersectionObserver(
         ([entry]) => {
-          if (entry.isIntersecting) {
-            setInView(prev => (prev[pane.id] ? prev : { ...prev, [pane.id]: true }));
-            obs.disconnect();
-          }
+          setInView(prev =>
+            prev[pane.id] === entry.isIntersecting
+              ? prev
+              : { ...prev, [pane.id]: entry.isIntersecting },
+          );
         },
-        { threshold: 0.2 },
+        { threshold: 0.35 },
       );
       obs.observe(el);
       return obs;
@@ -91,31 +96,49 @@ export default function DemoShowcase() {
   }, []);
 
   return (
-    <section id="live-demo" className="relative z-10 border-t border-[#dbe6f5] bg-white px-3 py-20 sm:px-4 sm:py-24 lg:px-4">
-      <div className="mx-auto w-full max-w-[96vw] lg:max-w-[max(80rem,96vw)]">
-        <p className="mb-6 px-2 font-mono text-xs uppercase tracking-[0.3em] text-[#3b82f6] sm:mb-8">
+    <section id="live-demo" className="relative z-10 border-t border-[#dbe6f5] bg-white px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
+      <div className="mx-auto w-full max-w-7xl">
+        <p className="mb-4 font-mono text-xs uppercase tracking-[0.3em] text-[#3b82f6]">
           Inside the application
         </p>
 
-        {/* Side by side on lg+, stacked in the same order below it.
-            The gap is deliberately tight: `.demo-reel`'s mask already fades out
-            the outer 10% of each clip, so two panes carry ~20% of their own
-            whitespace between them — a Tailwind gap on top of that reads as a
-            gulf, and the machines stop looking like one exhibit. */}
-        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-2 lg:gap-2">
-          {PANES.map(pane => {
-            const visible = inView[pane.id];
+        {PANES.map(pane => {
+          const visible = inView[pane.id];
+          const videoLeft = pane.videoSide === "left";
 
-            return (
-              <figure
-                key={pane.id}
-                ref={el => { paneRefs.current[pane.id] = el; }}
-                className="m-0 transition-all duration-700 ease-out"
-                style={{
-                  opacity: visible ? 1 : 0,
-                  transform: visible ? "translateY(0)" : "translateY(24px)",
-                }}
-              >
+          return (
+            <div
+              key={pane.id}
+              ref={el => { paneRefs.current[pane.id] = el; }}
+              className={`grid min-h-[80svh] grid-cols-1 content-center items-center gap-8 py-10 transition-all duration-700 ease-out lg:gap-14 ${
+                videoLeft
+                  ? "lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]"
+                  : "lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]"
+              }`}
+              style={{
+                opacity: visible ? 1 : 0,
+                transform: visible ? "translateY(0)" : "translateY(32px)",
+              }}
+            >
+              {/* Copy — sits opposite the video on lg+ (order flips per row).
+                  Stacked below lg, the same order carries over: video-left
+                  rows put the video on top, video-right rows the text. */}
+              <div className={videoLeft ? "order-2" : undefined}>
+                <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#94a3b8]">{pane.eyebrow}</p>
+                <h3 className="mt-3 text-2xl font-black tracking-tight text-[#0f172a] sm:text-3xl lg:text-4xl">
+                  {pane.title}
+                </h3>
+                <p className="mt-4 max-w-md text-base leading-7 text-[#475569]">{pane.caption}</p>
+              </div>
+
+              {/* Screen-only recording in dark macOS-style window chrome —
+                  the app-surface exception to the light site shell. */}
+              <div className={`overflow-hidden rounded-xl border border-[#1c2027] bg-[#0b0d11] shadow-[0_24px_60px_-20px_rgba(15,23,42,0.35)] ${videoLeft ? "order-1" : ""}`}>
+                <div className="flex items-center gap-1.5 border-b border-[#1c2027] bg-[#12151b] px-3.5 py-2.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
+                </div>
                 <video
                   ref={el => { if (el && !videoRefs.current.includes(el)) videoRefs.current.push(el); }}
                   src={pane.src}
@@ -127,19 +150,12 @@ export default function DemoShowcase() {
                   disablePictureInPicture
                   controls={false}
                   tabIndex={-1}
-                  className="demo-reel block aspect-video w-full object-cover"
+                  className="block aspect-[3456/2234] w-full object-cover"
                 />
-
-                {/* Clear of the frame — the mockup carries its own drop shadow
-                    below the machine, so the caption starts under all of it. */}
-                <figcaption className="mt-2 px-2 text-center sm:mt-3">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-[#3b82f6]">{pane.eyebrow}</p>
-                  <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#475569]">{pane.caption}</p>
-                </figcaption>
-              </figure>
-            );
-          })}
-        </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

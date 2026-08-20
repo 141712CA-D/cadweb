@@ -84,7 +84,7 @@ const LAYOUT = {
     viewBox: "0 0 1850 560",
     lane: { onshape: 90, main: 220, fusion: 350, solidworks: 470 } as Record<LaneId, number>,
     /** Lane names live in a gutter, clear of every line — nothing crosses text. */
-    nameEdge: 250,
+    nameEdge: 238,
     root: 290,
     /** Where the fan out of the root settles onto each lane. */
     settle: { onshape: 410, main: 410, fusion: 410, solidworks: 440 } as Record<LaneId, number>,
@@ -131,8 +131,10 @@ function lanePath(axis: Axis, lane: LaneId) {
   const at = L.lane[lane];
 
   if (lane === "main") {
-    // A short lead-in before the root node, clear of the lane names above it.
-    const from = L.root - (axis === "h" ? 40 : 26);
+    // A short lead-in before the root node — kept clear of the lane names
+    // (horizontal names end at nameEdge=238, so starting at root-20=270
+    // leaves a 32-unit gap between "software-neutral" and the line).
+    const from = L.root - (axis === "h" ? 20 : 26);
     return axis === "h" ? `M${from} ${at} H${L.end}` : `M${at} ${from} V${L.end}`;
   }
 
