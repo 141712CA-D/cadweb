@@ -5,7 +5,7 @@ import DevBanner from "@/app/components/DevBanner";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
 import SignupModal from "@/app/components/SignupModal";
-//katie was here
+//katie was here x2
 // Fires once an element scrolls into view, then disconnects — drives every
 // scroll-triggered reveal on this page.
 function useReveal<T extends HTMLElement>(threshold = 0.3) {
