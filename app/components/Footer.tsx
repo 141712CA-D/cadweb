@@ -16,6 +16,17 @@ const iconLinkClass =
 // the page still exists (hidden from nav, reachable by direct URL) and passes it.
 type FooterPage = "home" | "how-it-works" | "pitch" | "contact" | "signup" | "terms" | "privacy";
 
+// Updated manually on each release; shown in the footer's title-block strip.
+const VERSION = "v1.5.1.1";
+
+// Mini drawing title block — REV number over the standard drawing note.
+const titleBlock = (
+  <div className="flex flex-col items-center gap-0.5 font-mono text-[#94a3b8]">
+    <p className="text-xs">REV {VERSION}</p>
+    <p className="text-[10px] uppercase tracking-widest">Do not scale drawing</p>
+  </div>
+);
+
 interface FooterProps {
   currentPage?: FooterPage;
   onJoinWaitlist?: () => void;
@@ -51,7 +62,7 @@ export default function Footer({ currentPage = "home", onJoinWaitlist }: FooterP
             <p className="font-mono text-xs text-[#64748b]">© {year} Parametra</p>
             <SocialLinks />
           </div>
-          <p className="font-mono text-xs text-[#94a3b8]">v1.5.1.1</p>
+          {titleBlock}
           <div className="grid grid-cols-3 justify-items-center gap-x-6 gap-y-3">
             {currentPage !== "pitch" && (
               <Link href="/pitch" className={linkClass}>
@@ -83,8 +94,10 @@ export default function Footer({ currentPage = "home", onJoinWaitlist }: FooterP
           </p>
         </div>
 
-        {/* Desktop layout — copyright next to the link columns, centered version, and a left-aligned disclaimer on the right */}
-        <div className="relative hidden sm:flex sm:items-start sm:justify-between sm:gap-10">
+        {/* Desktop layout — copyright next to the link columns, the title block
+            between them in flow (absolute centering collided with the columns
+            below ~1000px), and a left-aligned disclaimer on the right */}
+        <div className="hidden sm:flex sm:items-start sm:justify-between sm:gap-10">
           <div className="flex gap-12 lg:gap-16">
             <p className="font-mono text-xs text-[#64748b] transition-colors hover:text-[#3b82f6]">
               © {year} Parametra
@@ -150,9 +163,7 @@ export default function Footer({ currentPage = "home", onJoinWaitlist }: FooterP
             </div>
           </div>
 
-          <p className="absolute left-1/2 top-0 -translate-x-1/2 font-mono text-xs text-[#94a3b8]">
-            v1.5.1.1
-          </p>
+          <div className="shrink-0">{titleBlock}</div>
 
           <div className="flex max-w-md flex-1 flex-col items-start gap-2 text-left">
             <p className="mb-1 font-mono text-[10px] uppercase tracking-widest text-[#94a3b8]">

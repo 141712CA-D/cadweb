@@ -13,11 +13,11 @@ const platformStages = [
     summary: "Design it in Onshape exactly as you do today — sketches, constraints, and features, fully parametric and all yours.",
   },
   {
-    title: "Persisted in Fusion 360",
-    summary: "Parametra carries the same model into Fusion 360 with its feature tree intact, ready for CAM work, generative design, and simulation — none of which Onshape supports.",
+    title: "The same model in Fusion 360",
+    summary: "Parametra carries it into Fusion 360 with the feature tree intact, ready for CAM work, generative design, and simulation — none of which Onshape supports.",
   },
   {
-    title: "Persisted in SolidWorks",
+    title: "The same model in SolidWorks",
     summary: "Or open it in SolidWorks for configurations, PDM, and a full simulation suite that goes beyond what Onshape offers.",
   },
   {
@@ -30,7 +30,7 @@ const platformStages = [
   },
   {
     title: "One model. Every tool.",
-    summary: "One model. Every tool. No rebuilding, no re-modeling, no starting over.",
+    summary: "No rebuilding, no re-modeling, no starting over.",
   },
 ];
 
@@ -165,9 +165,29 @@ export default function Hero({ onJoinWaitlist }: HeroProps) {
 
         <div className="flex flex-col gap-4">
           <GitTree className="w-full" />
-          <p className="text-center text-2xl font-black tracking-tight text-[#0f172a] sm:text-3xl">
-            Own. Your. <span className="text-[#3b82f6]">Workflow.</span>
-          </p>
+          <div className="flex flex-col items-center gap-2.5">
+            <p className="text-center text-2xl font-black tracking-tight text-[#0f172a] sm:text-3xl">
+              Own your <span className="text-[#3b82f6]">workflow.</span>
+            </p>
+            {/* Dimension callout under the caption — extension ticks, inward
+                arrows, mono label — like a measured dimension on a drawing. */}
+            <svg viewBox="0 0 340 22" className="w-72 text-[#94a3b8] sm:w-80" aria-hidden="true">
+              <path d="M1 3 V19 M339 3 V19" stroke="currentColor" strokeWidth="1.2" />
+              <path d="M1 11 H72 M268 11 H339" stroke="currentColor" strokeWidth="1" />
+              <path d="M1 11 l9 -3.6 v7.2 Z M339 11 l-9 -3.6 v7.2 Z" fill="currentColor" />
+              <text
+                x="170"
+                y="14.5"
+                textAnchor="middle"
+                fill="#64748b"
+                fontSize="11"
+                letterSpacing="0.2em"
+                fontFamily="var(--font-geist-mono), monospace"
+              >
+                FEATURE TREE INTACT
+              </text>
+            </svg>
+          </div>
         </div>
       </div>
 
